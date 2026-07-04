@@ -71,10 +71,10 @@ XQ_API xq_status xq_generate(xq_session* session,
 XQ_API xq_status xq_reset(xq_session* session);
 XQ_API xq_status xq_get_last_metrics(xq_session* session, xq_metrics* out_metrics);
 XQ_API xq_status xq_get_backend_info(xq_session* session, char* json_out, size_t json_capacity);
+XQ_API xq_status xq_get_kernel_trace_json(xq_session* session, char* json_out, size_t json_capacity);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif  // XQWEN35_H_
-

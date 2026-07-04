@@ -1,6 +1,6 @@
 # Connector Walkthrough
 
-The custom library uses MNN as the runtime substrate and keeps stock MNN unmodified for the baseline.
+The custom library keeps stock MNN unmodified for the baseline. The measured v14 custom path uses `customlib/runtime/CustomModel` for decode hotpath execution with `use_mnn_fallback = 0`; MNN is not the main custom generation path.
 
 ## MNN Version
 
@@ -22,23 +22,20 @@ MNN's exporter emits LLM custom op semantics such as:
 - `LlmExporter::FusedAttention`
 - `LlmExporter::FusedLinearAttention`
 
-## Rewrite Plan
+## Custom Runtime Connector
 
-`customlib/mnn_bridge/graph_rewrite.cpp` declares replacements:
+The public ABI in `customlib/include/xqwen35.h` is implemented by `customlib/runtime/session.cpp`.
 
-- Quantized Linear -> `xqwen_linear_execution`
-- RMSNorm -> `xqwen_rmsnorm_execution`
-- RoPE -> `xqwen_rope_execution`
-- GQA attention decode -> `xqwen_attention_execution`
-- Gated Delta / Linear Attention -> `xqwen_delta_execution`
-- FFN gate/up/SILU/mul/down -> `xqwen_ffn_execution`
+- `xq_create` loads either MNN fallback mode or `CustomModel`.
+- The v14 Android custom benchmark sets `xq_options.use_mnn_fallback = 0`.
+- `xq_generate` dispatches to the custom prefill/decode loop when `CustomModel` is loaded.
+- `xq_get_kernel_trace_json` returns per-kernel wall-clock trace entries from the measured custom path.
 
-The bridge prefers MNN Extra/custom op semantics. Schema patches should only be added under `patches/mnn` if a future MNN revision cannot represent the needed op.
+The measured v14 custom decode loop replaces linear decode projections, RMSNorm, RoPE, and FFN gate math. Attention, linear-attention recurrent state, lm_head, sampling, and prefill KV build remain explicit fallbacks.
 
 ## Fallback Rules
 
-- Prefill may fall back to stock MNN when MNN is faster.
-- Decode hot paths are replaced first.
-- Any fallback must be logged in selected kernel metadata.
+- The stock baseline may use MNN end to end.
+- The custom v14 measured path must not call `MNN::Llm::response`.
+- Any fallback must be logged in selected kernel metadata and final reports.
 - The public ABI never exposes raw MNN objects.
-

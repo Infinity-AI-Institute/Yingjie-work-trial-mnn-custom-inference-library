@@ -19,6 +19,9 @@ class Llm;
 
 namespace xq {
 
+class CustomModel;
+class KernelTrace;
+
 struct ModelManifest {
     std::string model_dir;
     std::string hf_repo = "Qwen/Qwen3.5-9B";
@@ -58,6 +61,7 @@ public:
     xq_status reset();
     xq_status getLastMetrics(xq_metrics* out_metrics) const;
     xq_status getBackendInfo(char* json_out, size_t json_capacity) const;
+    xq_status getKernelTraceJson(char* json_out, size_t json_capacity) const;
 
 private:
     using Clock = std::chrono::steady_clock;
@@ -82,6 +86,8 @@ private:
     int32_t last_token_ = 0;
     size_t position_ = 0;
     std::vector<int32_t> prompt_cache_;
+    std::unique_ptr<CustomModel> custom_model_;
+    std::unique_ptr<KernelTrace> kernel_trace_;
 #if defined(XQ_ENABLE_MNN)
     MNN::Transformer::Llm* mnn_llm_ = nullptr;
 #endif

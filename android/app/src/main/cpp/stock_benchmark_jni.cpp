@@ -87,6 +87,10 @@ double tokensPerSecond(int tokens, int64_t usec) {
     return 1000000.0 * static_cast<double>(tokens) / static_cast<double>(usec);
 }
 
+double tpotMsFromTps(double tps) {
+    return tps > 0.0 ? 1000.0 / tps : 0.0;
+}
+
 struct Stats {
     double mean = 0.0;
     double median = 0.0;
@@ -125,6 +129,14 @@ void appendStats(std::ostringstream& oss, const Stats& stats) {
         << ",\"min\":" << stats.min
         << ",\"max\":" << stats.max
         << ",\"stdev\":" << stats.stdev
+        << "}";
+}
+
+void appendTpotStatsFromTps(std::ostringstream& oss, const Stats& tps_stats) {
+    oss << "{\"mean\":" << tpotMsFromTps(tps_stats.mean)
+        << ",\"median\":" << tpotMsFromTps(tps_stats.median)
+        << ",\"min\":" << tpotMsFromTps(tps_stats.max)
+        << ",\"max\":" << tpotMsFromTps(tps_stats.min)
         << "}";
 }
 
@@ -339,6 +351,8 @@ std::string runStockBenchmark(const std::string& model_dir, int prompt_tokens, i
     appendStats(oss, prefill_stats);
     oss << ",\"decode\":";
     appendStats(oss, decode_stats);
+    oss << "},\"time_per_output_token_ms\":{\"decode\":";
+    appendTpotStatsFromTps(oss, decode_stats);
     oss << "},\"runs\":[";
     for (size_t i = 0; i < iterations.size(); ++i) {
         const IterationResult& run = iterations[i];

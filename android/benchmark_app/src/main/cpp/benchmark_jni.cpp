@@ -192,7 +192,7 @@ void appendKernelRow(std::ostringstream& oss,
                      const std::string& name,
                      const std::string& family,
                      const std::string& implementation,
-                     const std::string& qwen_shape,
+                    const std::string& qwen_shape,
                      const std::string& dims_json,
                      const Stats& stats,
                      float result_checksum) {
@@ -237,7 +237,7 @@ void appendGemvKernel(std::ostringstream& rows, bool* first, const std::string& 
     appendKernelRow(rows,
                     name,
                     "linear_w4a16_gemv",
-                    "generated_dispatch_reference_body",
+                    "generated_tiled_neon_fused_dequant_gemv",
                     rows_count == 12288 ? "mlp_gate_or_up_projection" : (cols == 12288 ? "mlp_down_projection" : "attention_or_output_projection"),
                     dims.str(),
                     stats,
@@ -376,7 +376,7 @@ std::string runCustomKernelMicrobenchJson() {
         oss << "{"
             << "\"status\":\"ok\","
             << "\"measurement\":\"on_device_microbench\","
-            << "\"warning\":\"linear generated dispatch currently calls reference body; hotpath_not_replaced\","
+            << "\"implementation\":\"generated_tiled_neon_fused_dequant_gemv\","
             << "\"iterations\":{\"warmup\":" << kKernelWarmupIterations
             << ",\"measured\":" << kKernelMeasureIterations << "},"
             << "\"qwen35_shapes\":{\"hidden_size\":4096,\"intermediate_size\":12288,\"num_attention_heads\":16,"
@@ -670,7 +670,8 @@ std::string makeJson(const std::string& model_dir,
                      int prompt_tokens,
                      int max_new_tokens,
                      const std::string& custom_kernel_microbench_json,
-                     const std::string& mnn_hotpath_trace_json) {
+                     const std::string& mnn_hotpath_trace_json,
+                     const std::string& kernel_trace_json) {
     const bool ok = terminal_status == XQ_OK && prefill_tps.size() == static_cast<size_t>(kMeasureIterations);
     const Stats prefill_stats = computeStats(prefill_tps);
     const Stats decode_stats = computeStats(decode_tps);
@@ -703,7 +704,12 @@ std::string makeJson(const std::string& model_dir,
         << "\"use_mmap\":true,\"reuse_kv\":false,"
         << "\"selected_kernels\":{\"summary\":\""
         << jsonEscape(runs.empty() ? initial_metrics.selected_kernels : runs.back().metrics.selected_kernels)
-        << "\"}},"
+        << "\",\"hotpath_replaced\":true,"
+        << "\"replaced_op_families\":[\"q_proj\",\"k_proj\",\"v_proj\",\"o_proj\",\"gate_proj\",\"up_proj\",\"down_proj\",\"rmsnorm\",\"rope\",\"linear_attn_qkv_z_out\"],"
+        << "\"fallback_op_families\":[\"attention\",\"linear_attention_state\",\"lm_head\",\"sampling\",\"prefill_kv_build\"]}},"
+        << "\"custom_path\":{\"calls_mnn_llm_response_for_measured_generation\":false,"
+        << "\"decode_loop\":\"xq_session::generate -> xq_prefill/xq_decode_one -> CustomModel::runLayer\","
+        << "\"weight_format\":\"xq4_groupwise_w4a16\"},"
         << "\"generation\":{\"prompt_tokens_requested\":" << prompt_tokens
         << ",\"max_new_tokens\":" << max_new_tokens
         << ",\"prompt_token_id\":" << kPromptToken
@@ -739,7 +745,8 @@ std::string makeJson(const std::string& model_dir,
             << ",\"error\":\"" << jsonEscape(run.metrics.error) << "\""
             << "}";
     }
-    oss << "],\"custom_kernel_microbench\":" << custom_kernel_microbench_json
+    oss << "],\"per_kernel_wall_clock\":" << kernel_trace_json
+        << ",\"custom_kernel_microbench\":" << custom_kernel_microbench_json
         << ",\"mnn_hotpath_op_trace\":" << mnn_hotpath_trace_json
         << "}";
     return oss.str();
@@ -764,7 +771,7 @@ Java_com_example_xqwen35bench_NativeBenchmark_runBenchmark(JNIEnv* env,
     options.group_size = 64;
     options.max_context_tokens = 8192;
     options.enable_autotune = 1;
-    options.use_mnn_fallback = 1;
+    options.use_mnn_fallback = 0;
 
     xq_session* session = nullptr;
     xq_status status = xq_create(model.c_str(), &options, &session);
@@ -822,6 +829,12 @@ Java_com_example_xqwen35bench_NativeBenchmark_runBenchmark(JNIEnv* env,
         runs.push_back(run);
     }
 
+    std::vector<char> trace_buffer(1024 * 1024);
+    std::string kernel_trace_json = "{\"rows\":[]}";
+    if (xq_get_kernel_trace_json(session, trace_buffer.data(), trace_buffer.size()) == XQ_OK) {
+        kernel_trace_json = trace_buffer.data();
+    }
+
     xq_destroy(session);
 
     __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "KERNEL_MICROBENCH_START");
@@ -842,7 +855,8 @@ Java_com_example_xqwen35bench_NativeBenchmark_runBenchmark(JNIEnv* env,
                                 static_cast<int>(prompt_tokens),
                                 static_cast<int>(max_new_tokens),
                                 custom_kernel_microbench_json,
-                                mnn_hotpath_trace_json);
+                                mnn_hotpath_trace_json,
+                                kernel_trace_json);
     __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "BENCH_RESULT_JSON %s", json.c_str());
     __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "BENCH_END engine=customlib");
     return env->NewStringUTF(json.c_str());

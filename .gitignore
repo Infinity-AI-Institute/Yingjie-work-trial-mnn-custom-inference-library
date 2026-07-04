@@ -11,6 +11,8 @@ __pycache__/
 *.iml
 *.zip
 *.bin
+*.xq4
+*.f32
 *.so
 *.apk
 *.aab

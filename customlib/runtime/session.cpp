@@ -1,5 +1,6 @@
 #include "session.hpp"
 
+#include "custom_model.hpp"
 #include "../kernels/kernels.hpp"
 
 #include <algorithm>
@@ -191,6 +192,7 @@ void copyMetrics(const xq_metrics& src, xq_metrics* dst) {
 Session::Session(std::string model_dir, RuntimeOptions options)
     : model_dir_(std::move(model_dir)), options_(std::move(options)) {
     metrics_.struct_size = sizeof(xq_metrics);
+    kernel_trace_ = std::make_unique<KernelTrace>();
     copyString(metrics_.backend, sizeof(metrics_.backend), options_.backend);
     copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
 }
@@ -271,6 +273,22 @@ xq_status Session::load() {
     }
 #endif
 
+    if (!options_.use_mnn_fallback) {
+        custom_model_ = std::make_unique<CustomModel>();
+        std::string error;
+        if (!custom_model_->load(model_dir_, &error)) {
+            setError(error);
+            return XQ_ERR_MODEL;
+        }
+        loaded_ = true;
+        const auto t1 = Clock::now();
+        metrics_.load_ms = elapsedMs(t0, t1);
+        copyString(metrics_.backend, sizeof(metrics_.backend), "xq_custom_decode_cpu");
+        copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
+        copyString(metrics_.error, sizeof(metrics_.error), "");
+        return XQ_OK;
+    }
+
     loaded_ = true;
     const auto t1 = Clock::now();
     metrics_.load_ms = elapsedMs(t0, t1);
@@ -294,6 +312,14 @@ xq_status Session::prefill(const int32_t* token_ids, size_t n_tokens, xq_metrics
     prompt_cache_.assign(token_ids, token_ids + n_tokens);
     last_token_ = token_ids[n_tokens - 1];
     position_ = n_tokens;
+    if (custom_model_) {
+        std::string error;
+        if (!custom_model_->prefill(token_ids, n_tokens, kernel_trace_.get(), &error)) {
+            setError(error);
+            publishMetrics(out_metrics);
+            return XQ_ERR_MODEL;
+        }
+    }
     has_prefill_ = true;
     const auto t1 = Clock::now();
 
@@ -322,8 +348,17 @@ xq_status Session::decodeOne(int32_t* out_token_id, xq_metrics* out_metrics) {
     }
 
     const auto t0 = Clock::now();
-    last_token_ = static_cast<int32_t>((static_cast<int64_t>(last_token_) + 1 + static_cast<int64_t>(position_)) %
-                                      std::max(2, manifest_.vocab_size));
+    if (custom_model_) {
+        std::string error;
+        if (!custom_model_->decodeOne(&last_token_, position_, kernel_trace_.get(), &error)) {
+            setError(error);
+            publishMetrics(out_metrics);
+            return XQ_ERR_RUNTIME;
+        }
+    } else {
+        last_token_ = static_cast<int32_t>((static_cast<int64_t>(last_token_) + 1 + static_cast<int64_t>(position_)) %
+                                          std::max(2, manifest_.vocab_size));
+    }
     ++position_;
     *out_token_id = last_token_;
     const auto t1 = Clock::now();
@@ -466,6 +501,9 @@ xq_status Session::reset() {
     position_ = 0;
     metrics_ = {};
     metrics_.struct_size = sizeof(xq_metrics);
+    if (kernel_trace_) {
+        kernel_trace_->reset();
+    }
 #if defined(XQ_ENABLE_MNN)
     copyString(metrics_.backend, sizeof(metrics_.backend), mnn_llm_ ? "mnn_fallback_cpu" : options_.backend);
 #else
@@ -504,6 +542,18 @@ xq_status Session::getBackendInfo(char* json_out, size_t json_capacity) const {
     return XQ_OK;
 }
 
+xq_status Session::getKernelTraceJson(char* json_out, size_t json_capacity) const {
+    if (!json_out || json_capacity == 0) {
+        return XQ_ERR_INVALID_ARGUMENT;
+    }
+    const std::string json = kernel_trace_ ? kernel_trace_->toJson() : "{\"rows\":[]}";
+    if (json.size() + 1 > json_capacity) {
+        return XQ_ERR_BUFFER_TOO_SMALL;
+    }
+    std::memcpy(json_out, json.c_str(), json.size() + 1);
+    return XQ_OK;
+}
+
 void Session::setError(const std::string& message) {
     copyString(metrics_.error, sizeof(metrics_.error), message);
 }
@@ -527,6 +577,9 @@ std::string Session::selectedKernelSummary() const {
         return "customlib_api+mnn_llm_fallback; generated_arm64_kernels_present; hotpath_not_replaced";
     }
 #endif
+    if (custom_model_) {
+        return custom_model_->coverageSummary();
+    }
     return kernels::selectKernelSummary(options_.quant_bits);
 }
 
@@ -599,6 +652,13 @@ xq_status xq_get_backend_info(xq_session* session, char* json_out, size_t json_c
         return XQ_ERR_INVALID_ARGUMENT;
     }
     return reinterpret_cast<xq::Session*>(session)->getBackendInfo(json_out, json_capacity);
+}
+
+xq_status xq_get_kernel_trace_json(xq_session* session, char* json_out, size_t json_capacity) {
+    if (!session) {
+        return XQ_ERR_INVALID_ARGUMENT;
+    }
+    return reinterpret_cast<xq::Session*>(session)->getKernelTraceJson(json_out, json_capacity);
 }
 
 }  // extern "C"

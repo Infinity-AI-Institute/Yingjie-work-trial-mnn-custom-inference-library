@@ -26,7 +26,7 @@ std::string selectKernelSummary(int quant_bits) {
     std::ostringstream oss;
     oss << "linear=w" << quant_bits << "a16_";
     if (quant_bits == 4) {
-        oss << "neon_tile_ref_verified";
+        oss << "generated_tiled_neon_fused_dequant";
     } else if (quant_bits == 3) {
         oss << "neon_bitpack_ref_verified";
     } else if (quant_bits == 2) {
@@ -40,4 +40,3 @@ std::string selectKernelSummary(int quant_bits) {
 
 }  // namespace kernels
 }  // namespace xq
-

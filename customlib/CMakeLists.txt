@@ -4,6 +4,7 @@ set(XQWEN35_SOURCES
   runtime/sampler.cpp
   runtime/cache_manager.cpp
   runtime/telemetry.cpp
+  runtime/custom_model.cpp
   mnn_bridge/mnn_loader.cpp
   mnn_bridge/graph_rewrite.cpp
   mnn_bridge/custom_op_registry.cpp

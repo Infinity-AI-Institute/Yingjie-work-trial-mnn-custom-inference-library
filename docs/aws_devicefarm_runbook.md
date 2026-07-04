@@ -38,7 +38,7 @@ python scripts/aws/upload_artifact.py --project-arn PROJECT_ARN --path app.apk -
 python scripts/aws/upload_artifact.py --project-arn PROJECT_ARN --path app-androidTest.apk --type INSTRUMENTATION_TEST_PACKAGE
 ```
 
-If Qwen3.5-9B artifacts exceed Device Farm upload limits, use a private encrypted S3 object plus a short-lived presigned URL. Redact URL query strings from logs.
+If Qwen3.5-9B artifacts exceed the single Device Farm/S3 upload limit, split the zip into parts smaller than the observed 5,368,709,120 byte cap and upload each part as `EXTERNAL_DATA`. Pass the resulting upload URLs through a pushed `model_zip_part_urls_file`; Android `ModelBootstrap` streams the parts back into one zip and verifies the full zip sha256 before unzip. Redact URL query strings from logs.
 
 ## Run and Artifacts
 
@@ -50,4 +50,3 @@ python scripts/aws/make_report.py --raw-dir results/raw/RUN_DIR
 ```
 
 The instrumentation test prints `BENCH_RESULT_JSON` to logcat and writes JSON to app external files where possible.
-
