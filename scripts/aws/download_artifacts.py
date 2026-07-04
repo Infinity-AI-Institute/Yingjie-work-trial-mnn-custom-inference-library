@@ -11,6 +11,27 @@ def safe_name(value: str) -> str:
     return "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in value)[:180]
 
 
+def safe_extension(value: str) -> str:
+    if not value:
+        return ""
+    cleaned = safe_name(value).lower()
+    if not cleaned:
+        return ""
+    if cleaned.startswith("."):
+        return cleaned
+    if "." in cleaned:
+        return pathlib.Path(cleaned).suffix or ("." + cleaned.rsplit(".", 1)[-1])
+    return "." + cleaned
+
+
+def redact_artifact(artifact):
+    safe = dict(artifact)
+    url = safe.get("url")
+    if isinstance(url, str) and "?" in url:
+        safe["url"] = url.split("?", 1)[0] + "?REDACTED"
+    return safe
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     add_region_arg(parser)
@@ -21,19 +42,22 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     all_artifacts = []
+    index = 0
     for artifact_type in ("FILE", "LOG", "SCREENSHOT"):
         try:
             artifacts = aws(["devicefarm", "list-artifacts", "--arn", args.run_arn, "--type", artifact_type], region=args.region).get("artifacts", [])
         except Exception:
             artifacts = []
         for artifact in artifacts:
-            all_artifacts.append(artifact)
+            index += 1
+            all_artifacts.append(redact_artifact(artifact))
             url = artifact.get("url")
             if not url:
                 continue
             name = safe_name(artifact.get("name") or artifact.get("arn") or artifact_type)
-            suffix = pathlib.Path(artifact.get("extension") or "").suffix
-            target = out_dir / (name + (suffix if suffix else ""))
+            kind = safe_name(artifact.get("type") or artifact_type)
+            suffix = safe_extension(artifact.get("extension") or "")
+            target = out_dir / (f"{index:02d}_{name}_{kind}" + suffix)
             with urllib.request.urlopen(url, timeout=120) as resp:
                 target.write_bytes(resp.read())
     (out_dir / "artifacts.json").write_text(json.dumps(all_artifacts, indent=2), encoding="utf-8")
@@ -43,4 +67,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

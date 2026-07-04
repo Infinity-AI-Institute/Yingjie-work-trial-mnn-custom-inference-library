@@ -3,9 +3,20 @@
 #include "../kernels/kernels.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <fstream>
 #include <sstream>
+
+#if defined(_WIN32)
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
+#if defined(XQ_ENABLE_MNN)
+#include "llm/llm.hpp"
+#endif
 
 namespace xq {
 namespace {
@@ -30,6 +41,48 @@ std::string readSmallFile(const std::string& path) {
     }
     std::ostringstream oss;
     oss << in.rdbuf();
+    return oss.str();
+}
+
+bool fileExists(const std::string& path) {
+    std::ifstream in(path, std::ios::binary);
+    return in.good();
+}
+
+void ensureDir(const std::string& path) {
+    if (!path.empty()) {
+#if defined(_WIN32)
+        _mkdir(path.c_str());
+#else
+        mkdir(path.c_str(), 0775);
+#endif
+    }
+}
+
+std::string jsonEscape(const std::string& value) {
+    std::ostringstream oss;
+    for (char ch : value) {
+        switch (ch) {
+            case '\\':
+                oss << "\\\\";
+                break;
+            case '"':
+                oss << "\\\"";
+                break;
+            case '\n':
+                oss << "\\n";
+                break;
+            case '\r':
+                oss << "\\r";
+                break;
+            case '\t':
+                oss << "\\t";
+                break;
+            default:
+                oss << ch;
+                break;
+        }
+    }
     return oss.str();
 }
 
@@ -79,6 +132,21 @@ std::string findJsonString(const std::string& json, const std::string& key, cons
     return json.substr(quote + 1, end - quote - 1);
 }
 
+#if defined(XQ_ENABLE_MNN)
+bool setLlmConfig(MNN::Transformer::Llm* llm, const std::string& json, const char* label, std::string* error) {
+    if (!llm->set_config(json)) {
+        *error = std::string("set_config failed: ") + label + " payload=" + json;
+        return false;
+    }
+    return true;
+}
+
+bool terminalStatusOk(MNN::Transformer::LlmStatus status) {
+    using MNN::Transformer::LlmStatus;
+    return status == LlmStatus::NORMAL_FINISHED || status == LlmStatus::MAX_TOKENS_FINISHED;
+}
+#endif
+
 }  // namespace
 
 RuntimeOptions normalizeOptions(const xq_options* options) {
@@ -127,7 +195,14 @@ Session::Session(std::string model_dir, RuntimeOptions options)
     copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
 }
 
-Session::~Session() = default;
+Session::~Session() {
+#if defined(XQ_ENABLE_MNN)
+    if (mnn_llm_) {
+        MNN::Transformer::Llm::destroy(mnn_llm_);
+        mnn_llm_ = nullptr;
+    }
+#endif
+}
 
 xq_status Session::load() {
     const auto t0 = Clock::now();
@@ -143,6 +218,58 @@ xq_status Session::load() {
         manifest_.layers = findJsonInt(manifest_json, "num_hidden_layers", manifest_.layers);
         manifest_.vocab_size = findJsonInt(manifest_json, "vocab_size", manifest_.vocab_size);
     }
+
+#if defined(XQ_ENABLE_MNN)
+    if (options_.use_mnn_fallback) {
+        const std::string config_path = model_dir_ + "/llm_config.json";
+        if (!fileExists(config_path)) {
+            setError("missing llm_config.json for MNN fallback");
+            return XQ_ERR_MODEL;
+        }
+        const std::string tmp_path = model_dir_ + "/tmp_customlib";
+        ensureDir(tmp_path);
+
+        mnn_llm_ = MNN::Transformer::Llm::createLLM(config_path);
+        if (!mnn_llm_) {
+            setError("MNN Llm::createLLM returned null");
+            return XQ_ERR_MODEL;
+        }
+
+        std::string error;
+        const int threads = options_.threads > 0 ? options_.threads : 8;
+        if (!setLlmConfig(mnn_llm_, "{\"tokenizer_file\":\"tokenizer.mtok\"}", "tokenizer_file", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"async\":false}", "async", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"reuse_kv\":false}", "reuse_kv", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"precision\":\"low\"}", "precision", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"memory\":\"low\"}", "memory", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"power\":\"normal\"}", "power", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"backend_type\":\"cpu\"}", "backend_type", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"thread_num\":" + std::to_string(threads) + "}", "thread_num", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"dynamic_option\":8}", "dynamic_option", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"attention_mode\":8}", "attention_mode", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"use_mmap\":true}", "use_mmap", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"tmp_path\":\"" + jsonEscape(tmp_path) + "\"}", "tmp_path", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"cpu_sme2_neon_division_ratio\":41}", "cpu_sme2_neon_division_ratio", &error) ||
+            !setLlmConfig(mnn_llm_, "{\"cpu_sme_core_num\":2}", "cpu_sme_core_num", &error)) {
+            setError(error);
+            return XQ_ERR_RUNTIME;
+        }
+
+        if (!mnn_llm_->load()) {
+            setError("MNN Llm::load failed");
+            return XQ_ERR_MODEL;
+        }
+        const auto* context = mnn_llm_->getContext();
+        metrics_.load_ms = context ? static_cast<double>(context->load_us) / 1000.0 : elapsedMs(t0, Clock::now());
+        copyString(metrics_.backend, sizeof(metrics_.backend), "mnn_fallback_cpu");
+        copyString(metrics_.selected_kernels,
+                   sizeof(metrics_.selected_kernels),
+                   "customlib_api+mnn_llm_fallback; generated_arm64_kernels_present; hotpath_not_replaced");
+        copyString(metrics_.error, sizeof(metrics_.error), "");
+        loaded_ = true;
+        return XQ_OK;
+    }
+#endif
 
     loaded_ = true;
     const auto t1 = Clock::now();
@@ -219,6 +346,11 @@ xq_status Session::generate(const int32_t* token_ids,
                             int32_t* output_buffer,
                             size_t output_capacity,
                             xq_metrics* out_metrics) {
+#if defined(XQ_ENABLE_MNN)
+    if (mnn_llm_) {
+        return generateWithMnn(token_ids, n_tokens, max_new_tokens, output_buffer, output_capacity, out_metrics);
+    }
+#endif
     if (!output_buffer || output_capacity < max_new_tokens) {
         setError("output buffer is too small");
         publishMetrics(out_metrics);
@@ -245,6 +377,88 @@ xq_status Session::generate(const int32_t* token_ids,
     return XQ_OK;
 }
 
+xq_status Session::generateWithMnn(const int32_t* token_ids,
+                                   size_t n_tokens,
+                                   size_t max_new_tokens,
+                                   int32_t* output_buffer,
+                                   size_t output_capacity,
+                                   xq_metrics* out_metrics) {
+#if defined(XQ_ENABLE_MNN)
+    if (!loaded_ || !mnn_llm_) {
+        setError("MNN fallback session is not loaded");
+        publishMetrics(out_metrics);
+        return XQ_ERR_NOT_READY;
+    }
+    if (!token_ids || n_tokens == 0) {
+        setError("generate requires at least one token");
+        publishMetrics(out_metrics);
+        return XQ_ERR_INVALID_ARGUMENT;
+    }
+    if (!output_buffer || output_capacity < max_new_tokens) {
+        setError("output buffer is too small");
+        publishMetrics(out_metrics);
+        return XQ_ERR_BUFFER_TOO_SMALL;
+    }
+
+    std::vector<int> prompt;
+    prompt.reserve(n_tokens);
+    for (size_t i = 0; i < n_tokens; ++i) {
+        prompt.push_back(static_cast<int>(token_ids[i]));
+    }
+
+    mnn_llm_->reset();
+    const auto t0 = Clock::now();
+    mnn_llm_->response(prompt, nullptr, nullptr, static_cast<int>(max_new_tokens));
+    const auto t1 = Clock::now();
+
+    const auto* context = mnn_llm_->getContext();
+    if (!context) {
+        setError("MNN fallback returned null context");
+        publishMetrics(out_metrics);
+        return XQ_ERR_RUNTIME;
+    }
+
+    const size_t generated = std::min(output_capacity, context->output_tokens.size());
+    for (size_t i = 0; i < generated; ++i) {
+        output_buffer[i] = static_cast<int32_t>(context->output_tokens[i]);
+    }
+    for (size_t i = generated; i < std::min(output_capacity, static_cast<size_t>(context->gen_seq_len)); ++i) {
+        output_buffer[i] = 0;
+    }
+
+    metrics_.prompt_tokens = static_cast<uint64_t>(context->prompt_len);
+    metrics_.generated_tokens = static_cast<uint64_t>(context->gen_seq_len);
+    metrics_.prefill_ms = static_cast<double>(context->prefill_us) / 1000.0;
+    metrics_.first_token_ms = static_cast<double>(context->ttfa_us) / 1000.0;
+    metrics_.decode_total_ms = static_cast<double>(context->decode_us) / 1000.0;
+    metrics_.total_generate_ms = elapsedMs(t0, t1);
+    copyString(metrics_.backend, sizeof(metrics_.backend), "mnn_fallback_cpu");
+    copyString(metrics_.selected_kernels,
+               sizeof(metrics_.selected_kernels),
+               "customlib_api+mnn_llm_fallback; generated_arm64_kernels_present; hotpath_not_replaced");
+    updateRates();
+
+    if (!terminalStatusOk(context->status)) {
+        setError("MNN fallback generation ended with non-terminal-success status");
+        publishMetrics(out_metrics);
+        return XQ_ERR_RUNTIME;
+    }
+
+    copyString(metrics_.error, sizeof(metrics_.error), "");
+    publishMetrics(out_metrics);
+    return XQ_OK;
+#else
+    (void)token_ids;
+    (void)n_tokens;
+    (void)max_new_tokens;
+    (void)output_buffer;
+    (void)output_capacity;
+    setError("MNN fallback was not compiled");
+    publishMetrics(out_metrics);
+    return XQ_ERR_RUNTIME;
+#endif
+}
+
 xq_status Session::reset() {
     prompt_cache_.clear();
     has_prefill_ = false;
@@ -252,7 +466,11 @@ xq_status Session::reset() {
     position_ = 0;
     metrics_ = {};
     metrics_.struct_size = sizeof(xq_metrics);
+#if defined(XQ_ENABLE_MNN)
+    copyString(metrics_.backend, sizeof(metrics_.backend), mnn_llm_ ? "mnn_fallback_cpu" : options_.backend);
+#else
     copyString(metrics_.backend, sizeof(metrics_.backend), options_.backend);
+#endif
     copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
     return XQ_OK;
 }
@@ -304,6 +522,11 @@ void Session::updateRates() {
 }
 
 std::string Session::selectedKernelSummary() const {
+#if defined(XQ_ENABLE_MNN)
+    if (mnn_llm_) {
+        return "customlib_api+mnn_llm_fallback; generated_arm64_kernels_present; hotpath_not_replaced";
+    }
+#endif
     return kernels::selectKernelSummary(options_.quant_bits);
 }
 

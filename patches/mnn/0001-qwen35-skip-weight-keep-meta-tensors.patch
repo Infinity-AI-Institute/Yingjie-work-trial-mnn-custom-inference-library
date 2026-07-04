@@ -1,0 +1,45 @@
+diff --git a/transformers/llm/export/utils/model.py b/transformers/llm/export/utils/model.py
+--- a/transformers/llm/export/utils/model.py
++++ b/transformers/llm/export/utils/model.py
+@@
+         # Check if skip_weight mode is enabled (load structure only, no weights)
+         skip_weight = args is not None and hasattr(args, 'skip_weight') and args.skip_weight
++        config.skip_weight = skip_weight
+@@
+-                original_model.to_empty(device="cpu")
++                # Keep parameters on meta tensors in skip-weight mode. On Windows
++                # torch 2.12 CPU builds, to_empty() can crash while materializing
++                # a Qwen3.5 skeleton; the exporter only needs module topology and
++                # tensor shapes before safetensors2mnn streams real weights.
+diff --git a/transformers/llm/export/utils/transformers.py b/transformers/llm/export/utils/transformers.py
+--- a/transformers/llm/export/utils/transformers.py
++++ b/transformers/llm/export/utils/transformers.py
+@@
+         original_norm = self.norm
+         self.norm = RMSNorm(self.head_v_dim, eps=config.rms_norm_eps)
+-        self.norm.weight.data = original_norm.weight.data
++        if not getattr(config, 'skip_weight', False):
++            self.norm.weight.data = original_norm.weight.data
+diff --git a/transformers/llm/export/utils/model.py b/transformers/llm/export/utils/model.py
+--- a/transformers/llm/export/utils/model.py
++++ b/transformers/llm/export/utils/model.py
+@@
+         if 'gemma' in model_type and hasattr(model.embed, 'embed_scale'):
+             model.scale_emb = model.embed.embed_scale
+ 
+         # Multi-modal parts
++        if skip_weight:
++            model.visual = None
++            model.audio = None
++            model.talker = None
+         if model.visual is not None:
+diff --git a/transformers/llm/export/llmexport.py b/transformers/llm/export/llmexport.py
+--- a/transformers/llm/export/llmexport.py
++++ b/transformers/llm/export/llmexport.py
+@@
+         # tie word embeddings
+-        self.args.tie_word_embeddings = not self.args.seperate_embed and self.model.lm.lm.weight.equal(self.model.embed.embed.weight)
++        if self.args.skip_weight:
++            self.args.tie_word_embeddings = False
++        else:
++            self.args.tie_word_embeddings = not self.args.seperate_embed and self.model.lm.lm.weight.equal(self.model.embed.embed.weight)

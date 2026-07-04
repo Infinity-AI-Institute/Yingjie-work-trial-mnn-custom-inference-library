@@ -2,6 +2,8 @@ plugins {
     id "com.android.application"
 }
 
+def mnnAndroidBuildDir = file("../../third_party/MNN/build_android_arm64_llm_sep").absolutePath.replace("\\", "/")
+
 android {
     namespace "com.example.xqwen35stock"
     compileSdk 35
@@ -18,9 +20,20 @@ android {
         }
         externalNativeBuild {
             cmake {
-                arguments "-DXQ_BUILD_TESTS=OFF", "-DXQ_ENABLE_MNN=OFF"
+                arguments "-DXQ_BUILD_TESTS=OFF", "-DXQ_ENABLE_MNN=ON", "-DMNN_ANDROID_BUILD_DIR=${mnnAndroidBuildDir}"
                 targets "xqstock_jni"
             }
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = [
+                    "${mnnAndroidBuildDir}/OFF",
+                    "${mnnAndroidBuildDir}/express/OFF",
+                    "${mnnAndroidBuildDir}/source/backend/opencl/OFF",
+                    "${mnnAndroidBuildDir}/source/backend/vulkan/OFF"
+            ]
         }
     }
 
@@ -36,4 +49,3 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.2.1"
     androidTestImplementation "androidx.test:runner:1.6.2"
 }
-

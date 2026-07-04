@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 
 def collect(path: pathlib.Path) -> List[Dict[str, Any]]:
     rows = []
+    seen = set()
     for f in path.rglob("*"):
         if not f.is_file():
             continue
@@ -16,7 +17,10 @@ def collect(path: pathlib.Path) -> List[Dict[str, Any]]:
             try:
                 data = json.loads(text)
                 if isinstance(data, dict) and "engine" in data:
-                    rows.append(data)
+                    key = json.dumps(data, sort_keys=True)
+                    if key not in seen:
+                        seen.add(key)
+                        rows.append(data)
             except json.JSONDecodeError:
                 pass
         marker = "BENCH_RESULT_JSON "
@@ -24,7 +28,11 @@ def collect(path: pathlib.Path) -> List[Dict[str, Any]]:
             idx = line.find(marker)
             if idx >= 0:
                 try:
-                    rows.append(json.loads(line[idx + len(marker):]))
+                    data = json.loads(line[idx + len(marker):])
+                    key = json.dumps(data, sort_keys=True)
+                    if key not in seen:
+                        seen.add(key)
+                        rows.append(data)
                 except json.JSONDecodeError:
                     pass
     return rows
@@ -42,6 +50,15 @@ def stats(values: List[float]) -> Dict[str, float]:
     }
 
 
+def decode_median(row: Dict[str, Any]) -> float:
+    decode = row.get("tokens_per_second", {}).get("decode")
+    if isinstance(decode, (int, float)):
+        return float(decode)
+    if isinstance(decode, dict) and isinstance(decode.get("median"), (int, float)):
+        return float(decode["median"])
+    return 0.0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw-dir", required=True)
@@ -51,9 +68,11 @@ def main() -> int:
     rows = collect(pathlib.Path(args.raw_dir))
     by_engine: Dict[str, List[float]] = {}
     for row in rows:
-        decode = row.get("tokens_per_second", {}).get("decode")
-        if isinstance(decode, (int, float)):
-            by_engine.setdefault(row.get("engine", "unknown"), []).append(float(decode))
+        if row.get("status") != "ok":
+            continue
+        decode = decode_median(row)
+        if decode > 0.0:
+            by_engine.setdefault(row.get("engine", "unknown"), []).append(decode)
     stock = stats(by_engine.get("mnn_stock", []))
     custom = stats(by_engine.get("customlib", []))
     speedup = custom["median"] / stock["median"] if stock["median"] > 0 else 0.0
@@ -92,4 +111,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

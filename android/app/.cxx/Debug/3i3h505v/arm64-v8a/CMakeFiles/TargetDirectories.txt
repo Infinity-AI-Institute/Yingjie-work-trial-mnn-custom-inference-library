@@ -1,7 +1,0 @@
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/CMakeFiles/xqbench_jni.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/CMakeFiles/xqstock_jni.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/CMakeFiles/rebuild_cache.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/customlib/CMakeFiles/xqwen35.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/customlib/CMakeFiles/edit_cache.dir
-C:/Users/Yingjie Huang/Downloads/mnn-custom-inference-lib/android/app/.cxx/Debug/3i3h505v/arm64-v8a/customlib/CMakeFiles/rebuild_cache.dir

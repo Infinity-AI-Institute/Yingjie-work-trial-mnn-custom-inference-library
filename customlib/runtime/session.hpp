@@ -9,6 +9,14 @@
 #include <string>
 #include <vector>
 
+#if defined(XQ_ENABLE_MNN)
+namespace MNN {
+namespace Transformer {
+class Llm;
+}
+}
+#endif
+
 namespace xq {
 
 struct ModelManifest {
@@ -58,6 +66,12 @@ private:
     void publishMetrics(xq_metrics* out_metrics) const;
     void updateRates();
     std::string selectedKernelSummary() const;
+    xq_status generateWithMnn(const int32_t* token_ids,
+                              size_t n_tokens,
+                              size_t max_new_tokens,
+                              int32_t* output_buffer,
+                              size_t output_capacity,
+                              xq_metrics* out_metrics);
 
     std::string model_dir_;
     RuntimeOptions options_;
@@ -68,6 +82,9 @@ private:
     int32_t last_token_ = 0;
     size_t position_ = 0;
     std::vector<int32_t> prompt_cache_;
+#if defined(XQ_ENABLE_MNN)
+    MNN::Transformer::Llm* mnn_llm_ = nullptr;
+#endif
 };
 
 RuntimeOptions normalizeOptions(const xq_options* options);
@@ -76,4 +93,3 @@ void copyMetrics(const xq_metrics& src, xq_metrics* dst);
 }  // namespace xq
 
 #endif  // XQWEN35_RUNTIME_SESSION_HPP_
-
