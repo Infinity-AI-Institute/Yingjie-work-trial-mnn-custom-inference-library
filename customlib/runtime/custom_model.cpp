@@ -1,4 +1,5 @@
 #include "custom_model.hpp"
+#include "vulkan_backend.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -370,13 +371,21 @@ void applyRopeVector(float* x, int heads, int head_dim, int rotary_dim, int posi
 }  // namespace
 
 void KernelTrace::add(const std::string& name, double ms) {
+    add(name, ms, "cpu");
+}
+
+void KernelTrace::add(const std::string& name, double ms, const std::string& backend) {
     KernelStat& stat = stats_[name];
     if (stat.calls == 0) {
         stat.min_ms = ms;
         stat.max_ms = ms;
+        stat.backend = backend;
     } else {
         stat.min_ms = std::min(stat.min_ms, ms);
         stat.max_ms = std::max(stat.max_ms, ms);
+        if (stat.backend != backend) {
+            stat.backend = "mixed";
+        }
     }
     stat.calls += 1;
     stat.total_ms += ms;
@@ -398,7 +407,7 @@ std::string KernelTrace::toJson() const {
         const KernelStat& s = item.second;
         oss << "{\"name\":\"" << jsonEscape(item.first)
             << "\",\"op_family\":\"" << traceOpFamily(item.first)
-            << "\",\"backend\":\"cpu\",\"calls\":" << s.calls << ",\"total_ms\":"
+            << "\",\"backend\":\"" << jsonEscape(s.backend) << "\",\"calls\":" << s.calls << ",\"total_ms\":"
             << s.total_ms << ",\"mean_ms\":" << (s.calls ? s.total_ms / static_cast<double>(s.calls) : 0.0)
             << ",\"min_ms\":" << s.min_ms << ",\"max_ms\":" << s.max_ms << "}";
     }
@@ -407,6 +416,14 @@ std::string KernelTrace::toJson() const {
 }
 
 bool CustomModel::load(const std::string& model_dir, std::string* error) {
+    return load(model_dir, "cpu", error);
+}
+
+bool CustomModel::load(const std::string& model_dir, const std::string& backend, std::string* error) {
+    backend_ = backend.empty() ? "cpu" : backend;
+    vulkan_linear_calls_ = 0;
+    vulkan_linear_failures_ = 0;
+    vulkan_backend_.reset();
     model_dir_ = model_dir;
     const std::string manifest = readSmallFile(model_dir + "/xqwen35_manifest.json");
     hidden_size_ = findJsonInt(manifest, "hidden_size", hidden_size_);
@@ -477,6 +494,18 @@ bool CustomModel::load(const std::string& model_dir, std::string* error) {
     logits_.clear();
     embedding_row_bf16_.assign(static_cast<size_t>(hidden_size_), 0);
     resetState();
+    if (backend_ == "vulkan" || backend_ == "cpu_vulkan_hybrid") {
+        vulkan_backend_ = std::make_unique<kernels::VulkanBackend>();
+        std::string vk_error;
+        if (!vulkan_backend_->initialize(&vk_error)) {
+            vulkan_backend_.reset();
+            if (backend_ == "vulkan") {
+                *error = "requested Vulkan backend but initialization failed: " + vk_error;
+                return false;
+            }
+            backend_ = "cpu";
+        }
+    }
     return true;
 }
 
@@ -614,6 +643,22 @@ void CustomModel::runLinear(const std::string& name,
         output->resize(static_cast<size_t>(matrix.rows));
     }
     const auto t0 = Clock::now();
+    if (vulkan_backend_ && vulkan_backend_->isInitialized() && matrix.bits == 4 &&
+        input.size() >= static_cast<size_t>(matrix.cols)) {
+        kernels::VulkanGemvTiming vk_timing;
+        std::string vk_error;
+        if (vulkan_backend_->gemvW4A16(matrix, input.data(), output->data(), &vk_timing, &vk_error)) {
+            ++vulkan_linear_calls_;
+            if (trace) {
+                trace->add(name, elapsedMs(t0, Clock::now()), "vulkan");
+            }
+            return;
+        }
+        ++vulkan_linear_failures_;
+        if (trace) {
+            trace->add(name + "_vulkan_failed", elapsedMs(t0, Clock::now()), "vulkan");
+        }
+    }
     kernels::gemvW4A16Neon(matrix, input.data(), output->data());
     if (trace) {
         trace->add(name, elapsedMs(t0, Clock::now()));
@@ -947,10 +992,18 @@ bool CustomModel::decodeOne(int32_t* token_id, size_t position, KernelTrace* tra
 }
 
 std::string CustomModel::coverageSummary() const {
-    return "custom_decode_loop;hotpath_replaced=true;full_custom_decode=true;"
-           "linear=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,linear_attn_qkv_a_b_z_out,lm_head;"
-           "rmsnorm=custom;rope=custom;attention=custom_gqa_decode;linear_attention_state=custom_gated_delta;"
-           "sampling=custom_greedy;prefill_kv_build=custom;fallback_ops=none";
+    std::ostringstream oss;
+    const bool vk_enabled = vulkan_backend_ && vulkan_backend_->isInitialized();
+    oss << "custom_decode_loop;hotpath_replaced=true;full_custom_decode=true;"
+        << "backend_request=" << backend_ << ";"
+        << "linear_backend=" << (vk_enabled ? "vulkan_attempt_unresident_w4a16_gemv" : "cpu") << ";"
+        << "vulkan_linear_calls=" << vulkan_linear_calls_ << ";"
+        << "vulkan_linear_failures=" << vulkan_linear_failures_ << ";"
+        << "linear=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,linear_attn_qkv_a_b_z_out,lm_head;"
+        << "rmsnorm=custom_cpu;rope=custom_cpu;attention=custom_gqa_decode_cpu;"
+        << "linear_attention_state=custom_gated_delta_cpu;sampling=custom_greedy_cpu;"
+        << "prefill_kv_build=custom_cpu;fallback_ops=none";
+    return oss.str();
 }
 
 std::string CustomModel::debugJson(int top_k) const {

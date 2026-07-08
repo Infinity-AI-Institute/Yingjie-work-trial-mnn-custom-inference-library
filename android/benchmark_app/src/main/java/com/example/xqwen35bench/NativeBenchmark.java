@@ -19,4 +19,6 @@ public final class NativeBenchmark {
             String modelDir,
             String customBackend,
             int maxNewTokens);
+
+    public static native String runVulkanSelfTest();
 }

@@ -74,6 +74,7 @@ XQ_API xq_status xq_get_backend_info(xq_session* session, char* json_out, size_t
 XQ_API xq_status xq_get_kernel_trace_json(xq_session* session, char* json_out, size_t json_capacity);
 XQ_API xq_status xq_get_debug_json(xq_session* session, char* json_out, size_t json_capacity);
 XQ_API xq_status xq_get_hidden_state(xq_session* session, float* out_values, size_t value_capacity, size_t* out_size);
+XQ_API xq_status xq_run_vulkan_w4a16_selftest(char* json_out, size_t json_capacity);
 
 #ifdef __cplusplus
 }

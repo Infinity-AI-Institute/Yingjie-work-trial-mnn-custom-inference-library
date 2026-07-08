@@ -1,6 +1,7 @@
 #include "session.hpp"
 
 #include "custom_model.hpp"
+#include "vulkan_backend.hpp"
 #include "../kernels/kernels.hpp"
 
 #include <algorithm>
@@ -276,14 +277,18 @@ xq_status Session::load() {
     if (!options_.use_mnn_fallback) {
         custom_model_ = std::make_unique<CustomModel>();
         std::string error;
-        if (!custom_model_->load(model_dir_, &error)) {
+        if (!custom_model_->load(model_dir_, options_.backend, &error)) {
             setError(error);
             return XQ_ERR_MODEL;
         }
         loaded_ = true;
         const auto t1 = Clock::now();
         metrics_.load_ms = elapsedMs(t0, t1);
-        copyString(metrics_.backend, sizeof(metrics_.backend), "xq_custom_decode_cpu");
+        copyString(metrics_.backend,
+                   sizeof(metrics_.backend),
+                   options_.backend == "vulkan" || options_.backend == "cpu_vulkan_hybrid"
+                       ? "xq_custom_decode_cpu_vulkan_hybrid"
+                       : "xq_custom_decode_cpu");
         copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
         copyString(metrics_.error, sizeof(metrics_.error), "");
         return XQ_OK;
@@ -330,6 +335,7 @@ xq_status Session::prefill(const int32_t* token_ids, size_t n_tokens, xq_metrics
     metrics_.decode_total_ms = 0.0;
     metrics_.total_generate_ms = metrics_.prefill_ms;
     updateRates();
+    copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
     copyString(metrics_.error, sizeof(metrics_.error), "");
     publishMetrics(out_metrics);
     return XQ_OK;
@@ -370,6 +376,7 @@ xq_status Session::decodeOne(int32_t* out_token_id, xq_metrics* out_metrics) {
     metrics_.decode_total_ms += elapsedMs(t0, t1);
     metrics_.total_generate_ms = metrics_.prefill_ms + metrics_.decode_total_ms;
     updateRates();
+    copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
     copyString(metrics_.error, sizeof(metrics_.error), "");
     publishMetrics(out_metrics);
     return XQ_OK;
@@ -408,6 +415,7 @@ xq_status Session::generate(const int32_t* token_ids,
     }
     metrics_.total_generate_ms = elapsedMs(t0, Clock::now());
     updateRates();
+    copyString(metrics_.selected_kernels, sizeof(metrics_.selected_kernels), selectedKernelSummary());
     publishMetrics(out_metrics);
     return XQ_OK;
 }
@@ -695,6 +703,10 @@ xq_status xq_get_hidden_state(xq_session* session, float* out_values, size_t val
         return XQ_ERR_INVALID_ARGUMENT;
     }
     return reinterpret_cast<xq::Session*>(session)->getHiddenState(out_values, value_capacity, out_size);
+}
+
+xq_status xq_run_vulkan_w4a16_selftest(char* json_out, size_t json_capacity) {
+    return xq::kernels::runVulkanW4A16SelfTestJson(json_out, json_capacity);
 }
 
 }  // extern "C"

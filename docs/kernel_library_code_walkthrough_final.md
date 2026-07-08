@@ -6,6 +6,8 @@ This document describes the accepted v27 custom inference library used for the Q
 
 The final custom Android benchmark sets `xq_options.use_mnn_fallback = 0` in `android/benchmark_app/src/main/cpp/benchmark_jni.cpp` and enters the public ABI in `customlib/include/xqwen35.h`. The final run requested `cpu_vulkan_hybrid`, but the benchmark JSON reports `custom_backend_actual = cpu`; no custom Vulkan kernel is claimed.
 
+Post-v27 note: a later Vulkan attempt added `customlib/runtime/vulkan_backend.*` and `customlib/kernels/generated/vulkan/w4a16_gemv.comp`, then validated a real W4A16 GEMV shader on Device Farm. A short full-model integration routed projection-family W4A16 rows to Vulkan, but the actual measured backend was `cpu_vulkan_hybrid` and major op families remained CPU. That attempt is documented in `results/reports/final_vulkan_blocker_report.md`; it does not replace the accepted v27 CPU final.
+
 Measured generation path:
 
 ```text

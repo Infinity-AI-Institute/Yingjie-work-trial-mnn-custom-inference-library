@@ -22,9 +22,32 @@ public final class BenchmarkInstrumentationTest {
         int warmupIterations = parseInt(args.getString("warmup_iterations", ""), 1);
         int measuredIterations = parseInt(args.getString("measured_iterations", ""), 5);
         int validationMaxNewTokens = parseInt(args.getString("validation_max_new_tokens", ""), 32);
+        boolean runVulkanSelfTest = parseBoolean(args.getString("run_vulkan_selftest", "false"));
         boolean runQualityValidation = parseBoolean(args.getString("run_quality_validation", "false"));
         String customBackend = sanitizeBackend(args.getString("custom_backend", args.getString("backend", "cpu")));
         File root = context.getExternalFilesDir(null);
+        if (runVulkanSelfTest) {
+            String json = NativeBenchmark.runVulkanSelfTest();
+            Log.i("XQBENCH", "BENCH_VULKAN_SELFTEST_JSON " + json);
+            if (root != null) {
+                File artifactDir = new File(root, "bench_artifacts");
+                if (!artifactDir.mkdirs() && !artifactDir.isDirectory()) {
+                    throw new IllegalStateException("failed to create " + artifactDir.getAbsolutePath());
+                }
+                try (FileOutputStream out = new FileOutputStream(
+                        new File(artifactDir, "vulkan_w4a16_selftest.json"))) {
+                    out.write(json.getBytes(StandardCharsets.UTF_8));
+                }
+            }
+            if (!json.contains("\"status\":\"ok\"") || !json.contains("\"pass\":true")) {
+                throw new AssertionError("Vulkan W4A16 selftest failed: " + json);
+            }
+            if (!json.contains("\"custom_backend_actual\":\"vulkan\"")
+                    || !json.contains("\"vulkan_runtime_initialized\":true")) {
+                throw new AssertionError("Vulkan runtime evidence missing: " + json);
+            }
+            return;
+        }
         File dir = ModelBootstrap.resolveModelDir(context);
         if (runQualityValidation) {
             String json = NativeBenchmark.runQualityValidation(

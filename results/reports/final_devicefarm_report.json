@@ -18,6 +18,45 @@
     "custom_vulkan_used_in_measured_generation": false,
     "vulkan_attempted": true
   },
+  "post_v27_vulkan_attempt": {
+    "official_final_replaced": false,
+    "outcome": "blocked_after_real_implementation_attempts",
+    "implemented": [
+      "custom Vulkan runtime",
+      "custom W4A16 GEMV compute shader",
+      "Device Farm Vulkan W4A16 correctness selftest",
+      "short full-model cpu_vulkan_hybrid integration for W4A16 projection families"
+    ],
+    "selftest_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/da6dfbc9-27eb-4a42-9202-bffda6b6bbe6",
+    "short_integration_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd",
+    "short_integration_backend_requested": "vulkan",
+    "short_integration_backend_actual": "cpu_vulkan_hybrid",
+    "vulkan_generation_kernels_used": true,
+    "vulkan_op_families": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj",
+      "linear_attention_projections"
+    ],
+    "cpu_op_families_remaining": [
+      "rmsnorm",
+      "rope",
+      "attention",
+      "linear_attention_state",
+      "lm_head",
+      "sampling",
+      "prefill_kv_build"
+    ],
+    "quality_validation_status": "not_completed_for_vulkan_attempt",
+    "ten_tps_claimed": false,
+    "speedup_claimed": false,
+    "report": "results/reports/final_vulkan_blocker_report.md",
+    "iteration_log": "results/reports/vulkan_iteration_log.md"
+  },
   "model": {
     "hf_repo": "Qwen/Qwen3.5-9B",
     "hf_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",

@@ -1,0 +1,1036 @@
+bash.exe : From https://github.com/alibaba/MNN
+At line:2 char:362
++ ... .10909125'; & 'C:\msys64\usr\bin\bash.exe' scripts/build_mnn_android. ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (From https://github.com/alibaba/MNN:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+ * branch            0bff03cbef43c783f44e41484b9f8a0b28bd758d -> FETCH_HEAD
+HEAD is now at 0bff03c Merge pull request #4570 from LudovicoYIN/llm-qnn-raise-stack
+-- The C compiler identification is Clang 17.0.2
+-- The CXX compiler identification is Clang 17.0.2
+-- The ASM compiler identification is Clang with GNU-like command-line
+-- Found assembler: C:/Users/Yingjie Huang/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Users/Yingjie Huang/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Users/Yingjie Huang/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Use Threadpool, forbid openmp
+-- >>>>>>>>>>>>>
+-- MNN BUILD INFO:
+-- 	System: Android
+-- 	Processor: aarch64
+-- 	Version: 3.6.0
+-- 	Metal: OFF
+-- 	OpenCL: ON
+-- 	OpenGL: OFF
+-- 	Vulkan: ON
+-- 	ARM82: ON
+-- 	KleidiAI: ON
+-- 	oneDNN: OFF
+-- 	TensorRT: OFF
+-- 	CoreML: OFF
+-- 	NNAPI: OFF
+-- 	QNN: OFF
+-- 	CUDA: OFF
+-- 	MUSA: OFF
+-- 	OpenMP: OFF
+-- 	BF16: OFF
+-- 	ThreadPool: ON
+-- 	Hidden: TRUE
+-- 	Build Path: C:/xqvk2/third_party/MNN/build_android_arm64_llm_sep
+-- 	CUDA PROFILE: OFF
+-- WIN_USE_ASM:
+-- Enabling AArch64 Assemblies
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/xqvk2/third_party/MNN/build_android_arm64_llm_sep
+[1/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryOPRegister.cpp.o
+[2/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryPermute.cpp.o
+[3/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryDepthToSpace.cpp.o
+[4/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryReshape.cpp.o
+[5/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryDet.cpp.o
+[6/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometrySelect.cpp.o
+[7/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryReverseSequence.cpp.o
+[8/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryDilation2D.cpp.o
+[9/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryInnerProduct.cpp.o
+[10/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryELU.cpp.o
+[11/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryPooling3D.cpp.o
+[12/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryReduce.cpp.o
+[13/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryLayernorm.cpp.o
+[14/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryCrop.cpp.o
+[15/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryCumSum.cpp.o
+[16/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryLRN.cpp.o
+[17/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryScatter.cpp.o
+[18/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometrySpaceToBatchND.cpp.o
+[19/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometrySlice.cpp.o
+[20/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryUnary.cpp.o
+[21/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryTile.cpp.o
+[22/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeCast.cpp.o
+[23/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeBinaryOp.cpp.o
+[24/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryTopK.cpp.o
+[25/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometrySpatialProduct.cpp.o
+[26/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryStridedSlice.cpp.o
+[27/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeBroadcastTo.cpp.o
+[28/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeBatchToSpaceND.cpp.o
+[29/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryThreshold.cpp.o
+[30/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeAttention.cpp.o
+[31/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeArgMax.cpp.o
+[32/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryTensorArray.cpp.o
+[33/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryShape.cpp.o
+[34/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeConcat.cpp.o
+[35/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeConvTranspose3D.cpp.o
+[36/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeCropAndResize.cpp.o
+[37/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeCrop.cpp.o
+[38/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeConvolution3D.cpp.o
+[39/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDequantize.cpp.o
+[40/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeCosineSimilarity.cpp.o
+[41/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDet.cpp.o
+[42/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeConvolution.cpp.o
+[43/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDeconvolution.cpp.o
+[44/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDepthToSpace.cpp.o
+[45/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDetectionPostProcess.cpp.o
+[46/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDetectionOutput.cpp.o
+[47/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeDynamicQuant.cpp.o
+[48/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeGatherV2.cpp.o
+[49/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryLSTM.cpp.o
+[50/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeGridSample.cpp.o
+[51/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeFill.cpp.o
+[52/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeLSTM.cpp.o
+[53/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeGatherND.cpp.o
+[54/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeExpandDims.cpp.o
+[55/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeLinSpace.cpp.o
+[56/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeHistogram.cpp.o
+[57/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeInterp.cpp.o
+[58/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeMoments.cpp.o
+[59/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeInnerProduct.cpp.o
+[60/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePermute.cpp.o
+[61/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePack.cpp.o
+[62/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeMatMul.cpp.o
+[63/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeNonMaxSuppressionV2.cpp.o
+[64/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryPoolGrad.cpp.o
+[65/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePadding.cpp.o
+[66/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeRegister.cpp.o
+[67/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeOneHot.cpp.o
+[68/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeProposal.cpp.o
+[69/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePool.cpp.o
+[70/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePool3D.cpp.o
+[71/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePriorbox.cpp.o
+[72/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapePlugin.cpp.o
+[73/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeROIPooling.cpp.o
+[74/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeQuantizedAvgPool.cpp.o
+[75/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeRNNSequenceGRU.cpp.o
+[76/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeQuantizedMaxPool.cpp.o
+[77/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeRange.cpp.o
+[78/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeROIAlign.cpp.o
+[79/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeReduction.cpp.o
+[80/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeReshape.cpp.o
+[81/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeRandomUniform.cpp.o
+[82/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeScatterNd.cpp.o
+[83/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeResize.cpp.o
+[84/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSelect.cpp.o
+[85/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeUnpack.cpp.o
+[86/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSegmentMean.cpp.o
+[87/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeTensorConvert.cpp.o
+[88/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeTile.cpp.o
+[89/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeTopKV2.cpp.o
+[90/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeTranspose.cpp.o
+[91/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeUnique.cpp.o
+[92/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeWhere.cpp.o
+[93/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeUnravelIndex.cpp.o
+[94/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/render/ShapeRasterAndInterpolate.cpp.o
+[95/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSize.cpp.o
+[96/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/SizeComputer.cpp.o
+[97/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSetDiff1D.cpp.o
+[98/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeShape.cpp.o
+[99/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSliceTf.cpp.o
+[100/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSqueeze.cpp.o
+[101/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSlice.cpp.o
+[102/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSpaceToBatchND.cpp.o
+[103/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSpaceToDepth.cpp.o
+[104/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSplitGelu.cpp.o
+[105/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/AutoTime.cpp.o
+[106/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeStft.cpp.o
+[107/838] Building CXX object CMakeFiles/MNNUtils.dir/source/utils/JNIHelper.cpp.o
+[108/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeSvd.cpp.o
+[109/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeStridedSlice.cpp.o
+[110/838] Building CXX object CMakeFiles/MNNTransform.dir/source/shape/ShapeTensorArray.cpp.o
+[111/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Execution.cpp.o
+[112/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUCropAndResize.cpp.o
+[113/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUArgMax.cpp.o
+[114/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/FileLoader.cpp.o
+[115/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUConvolution.cpp.o
+[116/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUCast.cpp.o
+[117/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUConvolutionDepthwise.cpp.o
+[118/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/MNNMemoryUtils.cpp.o
+[119/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Backend.cpp.o
+[120/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/KVCacheManager.cpp.o
+[121/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUBinaryInt8.cpp.o
+[122/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/MNNFileUtils.cpp.o
+[123/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDeconvolution.cpp.o
+[124/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/BufferAllocator.cpp.o
+[125/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/RuntimeFactory.cpp.o
+[126/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUBackend.cpp.o
+[127/838] Building CXX object CMakeFiles/MNNUtils.dir/source/utils/InitNet.cpp.o
+[128/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/ConvolutionCommon.cpp.o
+[129/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUBinary.cpp.o
+[130/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryFill.cpp.o
+[131/838] Building CXX object CMakeFiles/MNNCV.dir/source/cv/ImageProcess.cpp.o
+[132/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryImageOp.cpp.o
+[133/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/WorkerThread.cpp.o
+[134/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Interpreter.cpp.o
+[135/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Tensor.cpp.o
+[136/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/TensorUtils.cpp.o
+[137/838] Building CXX object CMakeFiles/MNNCV.dir/source/cv/Matrix_CV.cpp.o
+[138/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUAttention.cpp.o
+[139/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/WrapExecution.cpp.o
+[140/838] Building CXX object CMakeFiles/MNNMath.dir/source/math/WingoradGenerater.cpp.o
+[141/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryGather.cpp.o
+[142/838] Building CXX object CMakeFiles/MNNCV.dir/source/cv/ImageProcessUtils.cpp.o
+[143/838] Building CXX object CMakeFiles/MNNMath.dir/source/math/Matrix.cpp.o
+[144/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/ConvertUtils.cpp.o
+[145/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Schedule.cpp.o
+[146/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConcat.cpp.o
+[147/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryBroadcastTo.cpp.o
+[148/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Session.cpp.o
+[149/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x4_qsi4cxp8x4_8x8x32_neon_dotprod.c.o
+[150/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x8_8x4x32_neon_i8mm.c.o
+[151/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp8x8_4x8x32_neon_i8mm.c.o
+[152/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x4_16x4x32_neon_dotprod.c.o
+[153/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x8_4x4x32_neon_i8mm.c.o
+[154/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm.c.o
+[155/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x8_qai4c32p4x8_1x4_neon_dotprod.c.o
+[156/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod.c.o
+[157/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x8_qai4c32p4x8_1x4_neon_dotprod_asm.S.o
+[158/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x4_qai4c32p4x4_1x4_neon_dotprod_asm.S.o
+[159/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x4_qai4c32p4x4_1x4_neon_dotprod.c.o
+[160/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p4x8_qai4c32p4x8_8x4_neon_i8mm_asm.S.o
+[161/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryComputer.cpp.o
+[162/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p4x4_qai4c32p4x4_8x4_neon_dotprod_asm.S.o
+[163/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x4_qai4c32p4x4_1x4_neon_dotprod.c.o
+[164/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p4x4_qai4c32p4x4_8x4_neon_dotprod.c.o
+[165/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p4x8_qai4c32p4x8_8x4_neon_i8mm.c.o
+[166/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p4x4_qai4c32p4x4_8x4_neon_dotprod.c.o
+[167/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p4x4_qai4c32p4x4_8x4_neon_dotprod_asm.S.o
+[168/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConv2DBackPropFilter.cpp.o
+[169/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x4_qai4c32p4x4_1x4_neon_dotprod_asm.S.o
+[170/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x8_qai4c32p4x8_1x4_neon_dotprod.c.o
+[171/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x8_qai4c32p4x8_1x4_neon_dotprod_asm.S.o
+[172/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p4x8_qai4c32p4x8_8x4_neon_i8mm_asm.S.o
+[173/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p4x8_qai4c32p4x8_8x4_neon_i8mm.c.o
+[174/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConvert.cpp.o
+[175/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/kai_common_sme_asm.S.o
+[176/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x16p2vlx2_x16p_sme_asm.S.o
+[177/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/Pipeline.cpp.o
+C:/xqvk2/third_party/MNN/source/core/Pipeline.cpp:947:51: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+    MNN_PRINT("Fix: %d - Total: %d, rate = %f\n", fixNumber, totalNumber, (float)fixNumber / (float)totalNumber);
+                    ~~                            ^~~~~~~~~
+                    %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/core/Pipeline.cpp:947:62: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+    MNN_PRINT("Fix: %d - Total: %d, rate = %f\n", fixNumber, totalNumber, (float)fixNumber / (float)totalNumber);
+                                ~~                           ^~~~~~~~~~~
+                                %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+2 warnings generated.
+[178/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x32p2vlx1_x32p_sme.c.o
+[179/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x16p2vlx2_x16p_sme.c.o
+[180/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryBinary.cpp.o
+[181/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x32p2vlx1_x32p_sme_asm.S.o
+[182/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x8p2vlx4_x8p_sme.c.o
+[183/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_imatmul_pack_x8p2vlx4_x8p_sme_asm.S.o
+[184/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme.c.o
+[185/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.c.o
+[186/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_bf16p2vlx2_f32_sme.c.o
+[187/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme_asm.S.o
+[188/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConv2D.cpp.o
+[189/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme.c.o
+[190/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConvUtils.cpp.o
+[191/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryComputerUtils.cpp.o
+[192/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_x8p2vlx4_x8_sme_asm.S.o
+[193/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_x16p2vlx2_x16_sme.c.o
+[194/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryConv3D.cpp.o
+[195/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme_asm.S.o
+[196/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_pack_x16p2vlx2_x16_sme_asm.S.o
+[197/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryBatchMatMul.cpp.o
+[198/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme_asm.S.o
+[199/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme_asm.S.o
+[200/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x32p2vlx1b_x32_x32_sme.c.o
+[201/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p16vlx1b_f32_f32_sme.c.o
+[202/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_imatmul_pack_kxn_x16p2vlx2b_x16_x16_sme.c.o
+[203/838] Building CXX object CMakeFiles/MNNTransform.dir/source/geometry/GeometryCosineSimilarity.cpp.o
+[204/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p16vlx1b_f32_f32_sme_asm.S.o
+[205/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme_asm.S.o
+[206/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme.c.o
+[207/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.c.o
+[208/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_x16p2vlx2b_x16_x16_sme.c.o
+[209/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_x16p2vlx2b_x16_x16_sme_asm.S.o
+[210/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme_asm.S.o
+[211/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme.c.o
+[212/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_qsi8cxp2vlx4sb_qs8cx_f32_i32_sme_asm.S.o
+[213/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme.c.o
+[214/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa.c.o
+[215/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qai4c32ps1s0nrx4_qau4c32s0s1_f32_f32_f32_neon.c.o
+[216/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme.c.o
+[217/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qai4c32ps1s0nrx4_qau4c32s1s0_f32_f32_f32_neon.c.o
+[218/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_x16p2vlx2b_x16_x16_sme_asm.S.o
+[219/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p16vlx1b_1x16vl_sme2_mla_asm.S.o
+[220/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa_asm.S.o
+[221/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa_asm.S.o
+[222/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p16vlx1b_1x16vl_sme2_mla.c.o
+[223/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.c.o
+[224/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.c.o
+[225/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla_asm.S.o
+[226/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_f32_f32p/kai_matmul_clamp_f32_f32_f32p2vlx1b_1x16vl_sme2_mla.c.o
+[227/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f32_f32p_f32p/kai_imatmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme2_mopa_asm.S.o
+[228/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa_asm.S.o
+[229/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2b_2vlx2vl_sme_mopa.c.o
+[230/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f32_f32p_f32p/kai_imatmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme2_mopa.c.o
+[231/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16p_f16p/kai_matmul_clamp_f16_f16p2vlx2_f16p2vlx2b_2vlx2vl_sme_mopa_asm.S.o
+[232/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f32_f32p_f32p/kai_imatmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa_asm.S.o
+[233/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1vlx4_qai4c32p4vlx4_1vlx4vl_sme2_mopa.c.o
+[234/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16_f16p/kai_matmul_clamp_f16_f16_f16p2vlx2b_1x16vl_sme2_dot.c.o
+[235/838] Building CXX object CMakeFiles/MNNCore.dir/source/core/OpCommonUtils.cpp.o
+[236/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa_asm.S.o
+[237/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_f16_f16p/kai_matmul_clamp_f16_f16_f16p2vlx2b_1x16vl_sme2_dot_asm.S.o
+[238/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2b_2vlx2vl_sme_mopa.c.o
+[239/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2b_2vlx2vl_sme_mopa_asm.S.o
+[240/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1vlx4_qai4c32p4vlx4_1vlx4vl_sme2_mopa_asm.S.o
+[241/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1vlx8_qsi4cxp4vlx8_1vlx4vl_sme2_mopa.c.o
+[242/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f16_f16p_f16p/kai_imatmul_clamp_f16_f16p2vlx2_f16p2vlx2_2vlx2vl_sme2_mopa.c.o
+[243/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x4_qai4c32p4vlx4_1x4vl_sme2_dot_asm.S.o
+[244/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/imatmul_clamp_f32_f32p_f32p/kai_imatmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa.c.o
+[245/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f16_qsi8d32p_qai4c32p/kai_matmul_clamp_f16_qsi8d32p1x4_qai4c32p4vlx4_1x4vl_sme2_dot.c.o
+[246/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4vlx4_1x4vl_sme2_sdot.c.o
+[247/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1vlx4_qai4c32p4vlx4_1vlx4vl_sme2_mopa_asm.S.o
+[248/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x4_qai4c32p4vlx4_1x4vl_sme2_dot.c.o
+[249/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1vlx4_qai4c32p4vlx4_1vlx4vl_sme2_mopa.c.o
+[250/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/dwconv/pack/kai_rhs_dwconv_pack_x32p1vlx1b_x32_x32_sme.c.o
+[251/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qsi8d32p_qai4c32p/kai_matmul_clamp_f32_qsi8d32p1x4_qai4c32p4vlx4_1x4vl_sme2_dot_asm.S.o
+[252/838] Building ASM object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla_asm.S.o
+[253/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/dwconv/dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla.c.o
+[254/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScale16x32_SME2_w4_Fp16.S.o
+[255/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScale16x32_SME2_w8_Fp16.S.o
+[256/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScale16x32_SME2_w4_Fp32.S.o
+[257/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUInstanceNorm.cpp.o
+[258/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPULinSpace.cpp.o
+[259/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUMatrixBandPart.cpp.o
+[260/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUInt8ToFloat.cpp.o
+[261/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDequantize.cpp.o
+C:/xqvk2/third_party/MNN/source/backend/cpu/CPUDequantize.cpp:109:81: warning: implicit conversion from 'type' (aka 'int') to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+                : std::max(minRange / std::numeric_limits<T>::min(), maxRange / std::numeric_limits<T>::max());
+                                                                              ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/cpu/CPUDequantize.hpp:20:5: note: in instantiation of member function 'MNN::CPUDequantize<int>::onExecute' requested here
+    CPUDequantize(Backend *backend, QuantizeMode mode, const Op *op);
+    ^
+C:/xqvk2/third_party/MNN/source/backend/cpu/CPUDequantize.cpp:132:28: note: in instantiation of member function 'MNN::CPUDequantize<int>::CPUDequantize' requested here
+                return new CPUDequantize<int32_t>(backend, dequantize->mode(), op);
+                           ^
+1 warning generated.
+[262/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDet.cpp.o
+[263/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPULayerNorm.cpp.o
+[264/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUKVCacheManager.cpp.o
+[265/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDetectionPostProcess.cpp.o
+[266/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUEltwise.cpp.o
+[267/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDepthwiseConvInt8.cpp.o
+[268/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDynamicQuant.cpp.o
+[269/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDetectionOutput.cpp.o
+[270/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUInterp3D.cpp.o
+[271/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUDeconvolutionDepthwise.cpp.o
+[272/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUMatMul.cpp.o
+[273/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUInterp.cpp.o
+[274/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUOPRegister.cpp.o
+[275/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPULinearAttention.cpp.o
+[276/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUEltwiseInt8.cpp.o
+[277/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUExternalConst.cpp.o
+[278/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUImageProcess.cpp.o
+[279/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUFloatToInt8.cpp.o
+[280/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUHistogram.cpp.o
+[281/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUResizeCache.cpp.o
+[282/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUOneHot.cpp.o
+[283/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURoPE.cpp.o
+[284/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUGridSample.cpp.o
+[285/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUPlugin.cpp.o
+[286/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUResize.cpp.o
+[287/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUMoments.cpp.o
+[288/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUReduction.cpp.o
+[289/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURelu.cpp.o
+[290/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUNonMaxSuppressionV2.cpp.o
+[291/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuantizedAdd.cpp.o
+[292/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUProposal.cpp.o
+[293/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuanConvolutionDepthwise.cpp.o
+[294/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuantizedAvgPool.cpp.o
+[295/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUPool.cpp.o
+[296/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuantizedSoftmax.cpp.o
+[297/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUPoolInt8.cpp.o
+[298/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/OptimizedComputer.cpp.o
+[299/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuantizedMaxPool.cpp.o
+[300/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUQuantizedLogistic.cpp.o
+[301/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNAvgPoolInt8.S.o
+[302/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNAddC4WithStride.S.o
+[303/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURange.cpp.o
+[304/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUROIPooling.cpp.o
+[305/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURNNSequenceGRU.cpp.o
+[306/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNAxByClampBroadcastC4.S.o
+[307/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUROIAlign.cpp.o
+[308/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURaster.cpp.o
+[309/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ImageProcessFunction.cpp.o
+[310/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURandomUniform.cpp.o
+[311/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ResizeFunction.cpp.o
+[312/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionWinogradImpl.cpp.o
+[313/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/IdstConvolutionInt8.cpp.o
+[314/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/Int8FunctionsOpt.cpp.o
+[315/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/SparseConvInt8TiledExecutor.cpp.o
+[316/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/SharedGather.cpp.o
+[317/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPURuntime.cpp.o
+C:/xqvk2/third_party/MNN/source/backend/cpu/CPURuntime.cpp:1146:9: warning: array designators are a C99 extension [-Wc99-designator]
+        [cpuinfo_android_chipset_property_proc_cpuinfo_hardware] =
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 warning generated.
+[318/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUSegmentMean.cpp.o
+[319/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUScale.cpp.o
+[320/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/OneDNNConvInt8.cpp.o
+[321/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/SparseConvolutionTiledExecutor.cpp.o
+[322/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/WinogradOptFunction.cpp.o
+[323/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUSelect.cpp.o
+[324/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUSetDiff1D.cpp.o
+[325/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUScaleInt8.cpp.o
+[326/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/OneDNNConvolution.cpp.o
+[327/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/DenseConvolutionTiledExecutor.cpp.o
+[328/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUSoftmax.cpp.o
+[329/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUTFQuantizedConv2D.cpp.o
+[330/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUSvd.cpp.o
+[331/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUWhere.cpp.o
+[332/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUTensorConvert.cpp.o
+[333/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvOpt.cpp.o
+[334/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUTopKV2.cpp.o
+[335/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUStft.cpp.o
+[336/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUUnique.cpp.o
+[337/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUUnravelIndex.cpp.o
+[338/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/ThreadPool.cpp.o
+[339/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/CPUUnary.cpp.o
+[340/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/StrassenMatmulComputor.cpp.o
+[341/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBGRToBGR555.S.o
+[342/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBGRAToGRAY.S.o
+[343/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBGRToGRAY.S.o
+[344/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBGRToBGR565.S.o
+[345/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBGRAToBGR.S.o
+[346/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinaryMinInt8.S.o
+[347/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBilinearLineC8.S.o
+[348/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinaryAddInt8.S.o
+[349/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinaryMaxInt8.S.o
+[350/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBilinearSampleC8.S.o
+[351/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBlitC3ToFloatRGBA.S.o
+[352/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinarySubInt8.S.o
+[353/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBlitC1ToFloatRGBA.S.o
+[354/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionGroup.cpp.o
+[355/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinarySqdInt8.S.o
+[356/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNC3ToC4Fast.S.o
+[357/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNBinaryMulInt8.S.o
+[358/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvDwF23MulTransUnit.S.o
+[359/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNC3ToXYZFast.S.o
+[360/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvDwF23SourceTransUnit.S.o
+[361/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNC3ToYUVFast.S.o
+[362/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvRunForUnitDepthWiseUint8.S.o
+[363/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvRunForLineDepthWiseInt8.S.o
+[364/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvRunForLineDepthWiseUint8.S.o
+[365/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNConvRunForLineDepthwise.S.o
+[366/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionIntFactory.cpp.o
+[367/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/Convolution1x1Strassen.cpp.o
+[368/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNFloat2Int8.S.o
+[369/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNCopyC4WithStride.S.o
+[370/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNCubicLineC16.S.o
+[371/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNDeconvRunForUnitDepthWise.S.o
+[372/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNDepthwiseConvFastKernel.S.o
+[373/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNCubicSampleC16.S.o
+[374/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGemmInt8AddBiasScale_16x4_Unit_FAST.S.o
+[375/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMatrixAdd.S.o
+[376/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGRAYToC3Fast.S.o
+[377/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGRAYToC4Fast.S.o
+[378/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGelu.S.o
+[379/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGemmInt8AddBiasScale_16x4_Unit.S.o
+[380/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionFloatFactory.cpp.o
+[381/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNInt8ScaleToFloat.S.o
+[382/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGemmint8to32_8x4_Unit.S.o
+[383/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGemmInt8AddBiasScale_ARMV82_Unit.S.o
+[384/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNGemmInt8AddBiasScale_ARMV86_Unit.S.o
+[385/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNLineDepthWiseInt8AddBiasScaleUnit.S.o
+[386/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNLocalMinMaxFP32_Pack8.S.o
+[387/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionTiledExecutor.cpp.o
+[388/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNLocalMinMaxFP32_Pack4.S.o
+[389/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNLoadU8AndSum.S.o
+[390/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMatrixMax.S.o
+[391/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMaxFloat.S.o
+[392/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNLineDepthWiseInt8AddBiasScale_ARMV82_Unit3X3.S.o
+[393/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMatrixSub.S.o
+[394/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMatrixProd.S.o
+[395/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMaxPoolInt8.S.o
+[396/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionWinogradBridge.cpp.o
+[397/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNNV21ToRGBAUnit.S.o
+[398/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNNV21ToRGBUnit.S.o
+[399/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNNV21ToBGRUnit.S.o
+[400/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNMinFloat.S.o
+[401/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedMatMul.S.o
+[402/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4.S.o
+[403/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4Int8ForMatMulA_SME2_Hp64.S.o
+[404/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNNV21ToBGRAUnit.S.o
+[405/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC2.S.o
+[406/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4ForMatMul_A.S.o
+[407/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4Int8ForMatMulA_SME2.S.o
+[408/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvInt8Winograd.cpp.o
+[409/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedMatMulRemain.S.o
+[410/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedSparseQuantMatMulEpx4.S.o
+[411/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4Int8ForMatMulA_ARM86.S.o
+[412/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC4Int8ForMatMulA_ARM82.S.o
+[413/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionPackWinograd.cpp.o
+[414/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedSparseMatMulEpx4.S.o
+[415/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackC8.S.o
+[416/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedSparseQuantMatMulEpx1.S.o
+[417/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPackedSparseMatMulEpx1.S.o
+[418/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPowC8.S.o
+[419/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPermuteSumWeightInt4Arm82.S.o
+[420/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNQuanToDestUint8.S.o
+[421/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNPermuteSumWeightInt4Arm86.S.o
+[422/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBAToBGRAFast.S.o
+[423/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBAToBGRFast.S.o
+[424/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBToBGR565.S.o
+[425/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBToBGR555.S.o
+[426/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBToBGR.S.o
+[427/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/CommonOptFunction.cpp.o
+[428/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBAToGRAYFast.S.o
+[429/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRGBToGRAYFast.S.o
+[430/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNRankOneUpdate.S.o
+[431/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNReluWithSlopeChannelInt8.S.o
+[432/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNReluWithSlopeChannel.S.o
+[433/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNReluInt8.S.o
+[434/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSamplerC3BilinearOpt.S.o
+[435/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSamplerC1NearestOpt.S.o
+[436/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSamplerC4BilinearOpt.S.o
+[437/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSamplerC1BilinearOpt.S.o
+[438/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSamplerC4NearestOpt.S.o
+[439/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvolutionPackFreeWinograd.cpp.o
+[440/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod.c.o
+[441/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/matmul_clamp_f32_qai8dxp_qsi4cxp/kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod.c.o
+[442/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_quant_pack_qsi8d32pscalef32_f32_neon.c.o
+[443/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_quant_pack_qsi8d32pscalef32_f16_neon.c.o
+[444/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_lhs_quant_pack_qai8dxp_f32.c.o
+[445/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qai4c32p_qau4c32s0s1_f32_f32_f32_neon.c.o
+[446/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxps1s0_qsu4cxs1s0_neon.c.o
+[447/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSumWeightInt8Arm82.S.o
+[448/838] Building C object CMakeFiles/MNNARM64.dir/_deps/kleidiai-1.16.0/kai/ukernels/matmul/pack/kai_rhs_pack_nxk_qsi4cxp_qs4cxs1s0.c.o
+[449/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNScaleAndAddBiasInt8.S.o
+[450/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNScaleAndAddBias.S.o
+[451/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNScaleAddInt8.S.o
+[452/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNStrassenMergeCFunction.S.o
+[453/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNTranspose16Bit8x8.S.o
+[454/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNUInt8ToInt16WithOffsetC4Common.S.o
+[455/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNTranspose32Bit4x4.S.o
+[456/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNSumWeightInt8Arm86.S.o
+[457/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNUnPackC4.S.o
+[458/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNUInt8ToInt16WithOffsetC4Fast.S.o
+[459/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNVectorTop1Int32.S.o
+[460/838] Building CXX object CMakeFiles/MNNCPU.dir/source/backend/cpu/compute/ConvInt8TiledExecutor.cpp.o
+[461/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNAbsMaxFP32_Pack4.S.o
+[462/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/mnn_kleidiai_util.cpp.o
+[463/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/MNNVectorTop1Float.S.o
+[464/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNAbsMaxFP32_Pack8.S.o
+[465/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_16x4_w4_Unit.S.o
+[466/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNDynamicQuantFP32_Pack8.S.o
+[467/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNDynamicQuantFP32_Pack4.S.o
+[468/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNDynamicUpdateConvBiasScale.S.o
+[469/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w3_Unit.S.o
+[470/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w2_Unit.S.o
+[471/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w4_Unit.S.o
+[472/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w2_Unit.S.o
+[473/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w4_Unit.S.o
+[474/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w3_Unit.S.o
+[475/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGeneralIm2col_Fp16Sme2.S.o
+[476/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGeneralIm2col_Fp32Arm86.S.o
+[477/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGeneralIm2col_Fp32Arm82.S.o
+[478/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNGeneralIm2col_Fp32Sme2.S.o
+[479/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/low_memory/MNNQuantScaleFP32.S.o
+[480/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScaleHp128_SME2_w4_Fp32.S.o
+[481/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScaleHp128_SME2_w4_Fp16.S.o
+[482/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScale16x32_SME2_w8_Fp32.S.o
+[483/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScaleHp128_SME2_w8_Fp32.S.o
+[484/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNPackedMatMulRemainFP32_SME2.S.o
+[485/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNGemmInt8AddBiasScaleHp128_SME2_w8_Fp16.S.o
+[486/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNSumWeightInt8Sme2_Hp32.S.o
+[487/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNPermuteSumWeightInt4Sme2_Hp128.S.o
+[488/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNSumWeightInt8Sme2_Hp128.S.o
+[489/838] Building ASM object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/arm64/sme2_asm/MNNPermuteSumWeightInt4Sme2_Hp32.S.o
+[490/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/CountMinMaxValue_FP16.S.o
+[491/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/Arm82MNNPackForMatMul_A.S.o
+[492/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/mnn_kleidiai.cpp.o
+[493/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/KleidiAIConvolutionDepthwise.cpp.o
+[494/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNExpFP16.S.o
+[495/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/arm/CommonOptFunctionNeon.cpp.o
+[496/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNConvWinoSourceTransformUnit6x6FP16.S.o
+[497/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/KleidiAIConvolution.cpp.o
+[498/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNConvRunForLineDepthwiseFP16.S.o
+[499/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNDepthwiseConvFastKernelFP16.S.o
+[500/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNLocalMinMaxFP16_Pack4.S.o
+[501/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/KleidiAIConvInt8.cpp.o
+[502/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNPackC8FP16.S.o
+[503/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNPackedMatMulFP16.S.o
+[504/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNLocalMinMaxFP16_Pack8.S.o
+[505/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNQuantizeFP16_UNIT4.S.o
+[506/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNGeluFP16.S.o
+[507/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNPackedMatMulRemainFP16.S.o
+[508/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNUnpackC8FP16.S.o
+[509/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNAbsMaxFP16_Pack4.S.o
+[510/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/MNNRankOneUpdateFp16.S.o
+[511/838] Building CXX object CMakeFiles/MNNARM64.dir/source/backend/cpu/kleidiai/KleidiAIDenseConvolution.cpp.o
+[512/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNDynamicQuantFP16_Pack4.S.o
+[513/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNDynamicQuanInput_ARM82.S.o
+[514/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNAbsMaxFP16_pack8.S.o
+[515/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNDynamicQuantFP16_Pack8.S.o
+[516/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNDynamicQuantAndReorder_ARM82.S.o
+[517/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w3_Unit_FP16.S.o
+[518/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_Unit_FP16.S.o
+[519/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_Unit_FP16.S.o
+[520/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w4_Unit_FP16.S.o
+[521/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV82_w2_Unit_FP16.S.o
+[522/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGeneralIm2col_Arm82.S.o
+[523/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w4_Unit_FP16.S.o
+[524/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w3_Unit_FP16.S.o
+[525/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGemmInt8AddBiasScale_ARMV86_w2_Unit_FP16.S.o
+[526/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNGeneralIm2col_Arm86.S.o
+[527/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/sme2_asm/MNNPackedMatMulRemainFP16_SME2.S.o
+[528/838] Building ASM object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/asm/arm64/low_memory/MNNQuantScaleFP16.S.o
+[529/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Backend.cpp.o
+[530/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Relu.cpp.o
+[531/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82OptFunc.cpp.o
+[532/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Interp.cpp.o
+[533/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Unary.cpp.o
+[534/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82WinogradOptFunc.cpp.o
+[535/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Binary.cpp.o
+[536/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/tokenizer/unicode_data.cpp.o
+[537/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/llmconfig.cpp.o
+[538/838] Building CXX object CMakeFiles/ppl_eval.dir/transformers/llm/engine/tools/ppl_eval.cpp.o
+C:/xqvk2/third_party/MNN/transformers/llm/engine/tools/ppl_eval.cpp:86:16: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+    FUNC_PRINT(contextLength);
+    ~~~~~~~~~~~^~~~~~~~~~~~~~
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:55:56: note: expanded from macro 'FUNC_PRINT'
+#define FUNC_PRINT(x) MNN_PRINT(#x "=%d in %s, %d \n", x, __func__, __LINE__);
+                                     ~~                ^
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/transformers/llm/engine/tools/ppl_eval.cpp:87:16: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+    FUNC_PRINT(stride);
+    ~~~~~~~~~~~^~~~~~~
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:55:56: note: expanded from macro 'FUNC_PRINT'
+#define FUNC_PRINT(x) MNN_PRINT(#x "=%d in %s, %d \n", x, __func__, __LINE__);
+                                     ~~                ^
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+2 warnings generated.
+[539/838] Building CXX object CMakeFiles/MNN_Arm82.dir/source/backend/arm82/Arm82Functions.cpp.o
+[540/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/diskembedding.cpp.o
+[541/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/speculative_decoding/dflash.cpp.o
+[542/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/speculative_decoding/generate.cpp.o
+[543/838] Building CXX object CMakeFiles/tokenizer_demo.dir/transformers/llm/engine/src/tokenizer/unicode_data.cpp.o
+[544/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/speculative_decoding/mtp.cpp.o
+[545/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/embedding.cpp.o
+[546/838] Building CXX object CMakeFiles/embedding_demo.dir/transformers/llm/engine/demo/embedding_demo.cpp.o
+[547/838] Building CXX object CMakeFiles/tokenizer_demo.dir/transformers/llm/engine/demo/tokenizer_demo.cpp.o
+[548/838] Building CXX object CMakeFiles/llm_demo.dir/transformers/llm/engine/demo/llm_demo.cpp.o
+[549/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/speculative_decoding/lookahead.cpp.o
+[550/838] Building CXX object CMakeFiles/rollback_demo.dir/transformers/llm/engine/demo/rollback_demo.cpp.o
+[551/838] Building CXX object CMakeFiles/MNN.dir/cmake/dummy.cpp.o
+[552/838] Building CXX object CMakeFiles/reranker_demo.dir/transformers/llm/engine/demo/reranker_demo.cpp.o
+[553/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/speculative_decoding/eagle.cpp.o
+[554/838] Building CXX object CMakeFiles/llm_bench.dir/tools/cpp/Profiler.cpp.o
+[555/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/sampler.cpp.o
+[556/838] Building CXX object CMakeFiles/generateLlmIO.dir/transformers/llm/engine/tools/generateLlmIO.cpp.o
+C:/xqvk2/third_party/MNN/transformers/llm/engine/tools/generateLlmIO.cpp:49:45: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+        inputIdxData[i] = (float)(rand()) / RAND_MAX;
+                                          ~ ^~~~~~~~
+C:/Users/Yingjie Huang/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/stdlib.h:132:18: note: expanded from macro 'RAND_MAX'
+#define RAND_MAX 0x7fffffff
+                 ^~~~~~~~~~
+C:/xqvk2/third_party/MNN/transformers/llm/engine/tools/generateLlmIO.cpp:80:48: warning: implicit conversion from 'int' to 'float' changes value from 2147483647 to 2147483648 [-Wimplicit-const-int-float-conversion]
+        inputEmbedsData[i] = (float)(rand()) / RAND_MAX;
+                                             ~ ^~~~~~~~
+C:/Users/Yingjie Huang/AppData/Local/Android/Sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/include/stdlib.h:132:18: note: expanded from macro 'RAND_MAX'
+#define RAND_MAX 0x7fffffff
+                 ^~~~~~~~~~
+2 warnings generated.
+[557/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanPool.cpp.o
+[558/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanMatrixMultier4x4.cpp.o
+[559/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/tokenizer/unicode.cpp.o
+[560/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/llm.cpp.o
+[561/838] Building CXX object CMakeFiles/GetMNNInfo.dir/tools/cpp/GetMNNInfo.cpp.o
+C:/xqvk2/third_party/MNN/tools/cpp/GetMNNInfo.cpp:134:34: warning: format specifies type 'int' but the argument has type 'size_type' (aka 'unsigned long') [-Wformat]
+    MNN_PRINT("Origin Op: %d\n", originTypes.size());
+                          ~~     ^~~~~~~~~~~~~~~~~~
+                          %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/tools/cpp/GetMNNInfo.cpp:155:35: warning: format specifies type 'int' but the argument has type 'size_type' (aka 'unsigned long') [-Wformat]
+    MNN_PRINT("Current Op: %d\n", originTypes.size());
+                           ~~     ^~~~~~~~~~~~~~~~~~
+                           %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:30:90: note: expanded from macro 'MNN_PRINT'
+#define MNN_PRINT(format, ...) __android_log_print(ANDROID_LOG_INFO, "MNNJNI", format, ##__VA_ARGS__)
+                                                                               ~~~~~~    ^~~~~~~~~~~
+2 warnings generated.
+[562/838] Building CXX object CMakeFiles/OpenCLProgramBuildTest.out.dir/tools/cpp/OpenCLProgramBuildTest.cpp.o
+[563/838] Building CXX object CMakeFiles/tokenizer_demo.dir/transformers/llm/engine/src/tokenizer/unicode.cpp.o
+[564/838] Building CXX object CMakeFiles/MNNV2Basic.out.dir/tools/cpp/MNNV2Basic.cpp.o
+[565/838] Building CXX object CMakeFiles/GpuInterTest.out.dir/tools/cpp/GpuInterTest.cpp.o
+[566/838] Building CXX object CMakeFiles/compilefornpu.dir/3rd_party/flatbuffers/src/util.cpp.o
+[567/838] Building CXX object CMakeFiles/modelCompare.out.dir/tools/cpp/modelCompare.cpp.o
+[568/838] Building CXX object CMakeFiles/testModel.out.dir/tools/cpp/testModel.cpp.o
+[569/838] Building CXX object CMakeFiles/llm_bench.dir/transformers/llm/engine/tools/llm_bench.cpp.o
+[570/838] Building CXX object CMakeFiles/apply_template.dir/transformers/llm/engine/demo/apply_template.cpp.o
+[571/838] Building CXX object CMakeFiles/ModuleBasic.out.dir/tools/cpp/ModuleBasic.cpp.o
+[572/838] Building CXX object CMakeFiles/checkInvalidValue.out.dir/tools/cpp/checkInvalidValue.cpp.o
+[573/838] Building CXX object CMakeFiles/testModelWithDescribe.out.dir/tools/cpp/testModelWithDescribe.cpp.o
+[574/838] Building CXX object CMakeFiles/quantize_llm.dir/transformers/llm/engine/tools/quantize_llm.cpp.o
+[575/838] Linking CXX shared library OFF\arm64-v8a\libMNN.so
+[576/838] Building CXX object CMakeFiles/getPerformance.out.dir/tools/cpp/getPerformance.cpp.o
+[577/838] Building CXX object CMakeFiles/testModel_expr.out.dir/tools/cpp/testModel_expr.cpp.o
+[578/838] Building CXX object CMakeFiles/mobilenetTest.out.dir/tools/cpp/mobilenetTest.cpp.o
+[579/838] Building CXX object CMakeFiles/backendTest.out.dir/tools/cpp/backendTest.cpp.o
+[580/838] Building CXX object CMakeFiles/winogradExample.out.dir/tools/cpp/winogradExample.cpp.o
+[581/838] Building CXX object CMakeFiles/testTrain.out.dir/tools/cpp/testTrain.cpp.o
+[582/838] Building CXX object CMakeFiles/checkDir.out.dir/tools/cpp/checkDir.cpp.o
+[583/838] Building CXX object CMakeFiles/SequenceModuleTest.out.dir/tools/cpp/SequenceModuleTest.cpp.o
+[584/838] Building CXX object CMakeFiles/timeProfile.out.dir/tools/cpp/timeProfile.cpp.o
+[585/838] Building CXX object CMakeFiles/checkFile.out.dir/tools/cpp/checkFile.cpp.o
+[586/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanCommandPool.cpp.o
+[587/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanBuffer.cpp.o
+[588/838] Linking CXX executable checkDir.out
+[589/838] Linking CXX executable checkFile.out
+[590/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanFramebuffer.cpp.o
+[591/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanFence.cpp.o
+[592/838] Building CXX object CMakeFiles/timeProfile.out.dir/tools/cpp/Profiler.cpp.o
+[593/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanImage.cpp.o
+[594/838] Building CXX object CMakeFiles/tokenizer_demo.dir/transformers/llm/engine/src/tokenizer/tokenizer.cpp.o
+[595/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanInstance.cpp.o
+[596/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanQueryPool.cpp.o
+[597/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanRenderPass.cpp.o
+[598/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanSemaphore.cpp.o
+[599/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanDevice.cpp.o
+[600/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanMemoryPool.cpp.o
+[601/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/compiler/AllShader.cpp.o
+[602/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/compiler/VulkanShaderMap.cpp.o
+[603/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/backend/VulkanTensor.cpp.o
+[604/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanTarget.cpp.o
+[605/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/component/VulkanPipeline.cpp.o
+[606/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanBasicExecution.cpp.o
+[607/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanArgMax.cpp.o
+[608/838] Building CXX object CMakeFiles/mergeInplaceForCPU.dir/tools/cpp/mergeInplaceForCPU.cpp.o
+[609/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanConvolution.cpp.o
+[610/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanConvolutionWinograd.cpp.o
+[611/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanConvolutionImpl.cpp.o
+[612/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/backend/VulkanBackend.cpp.o
+[613/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanDeconvolution.cpp.o
+[614/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanConvolution1x1.cpp.o
+[615/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanBinary.cpp.o
+[616/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanDeconvolutionDepthwise.cpp.o
+[617/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanGridSample.cpp.o
+[618/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanImageConverter.cpp.o
+[619/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanLoop.cpp.o
+[620/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/buffer_convert_subgroup_buf_mnn_cl.cpp.o
+[621/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/cast_mnn_cl.cpp.o
+[622/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/buffer_to_image_mnn_cl.cpp.o
+[623/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/cast_buf_mnn_cl.cpp.o
+[624/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_int_buf_mnn_cl.cpp.o
+[625/838] Building CXX object CMakeFiles/fuseTest.dir/tools/cpp/fuseTest.cpp.o
+[626/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_int_mnn_cl.cpp.o
+[627/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanInterp.cpp.o
+[628/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/tokenizer/tokenizer.cpp.o
+[629/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_c1_subgroup_buf_mnn_cl.cpp.o
+[630/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_c16_subgroup_buf_mnn_cl.cpp.o
+[631/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanMatMul.cpp.o
+[632/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_buf_mnn_cl.cpp.o
+[633/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/deconv_2d_mnn_cl.cpp.o
+[634/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/copy_buffer_to_image2d_mnn_cl.cpp.o
+[635/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/conv_2d_mnn_cl.cpp.o
+[636/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/depthwise_conv2d_buf_mnn_cl.cpp.o
+[637/838] Building CXX object CMakeFiles/timeProfile.out.dir/tools/cpp/revertMNNModel.cpp.o
+[638/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/depthwise_conv2d_subgroup_buf_mnn_cl.cpp.o
+[639/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanROIPooling.cpp.o
+[640/838] Building CXX object CMakeFiles/llm.dir/transformers/llm/engine/src/omni.cpp.o
+[641/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanRange.cpp.o
+[642/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanResize.cpp.o
+[643/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/runtime/vulkan_wrapper.cpp.o
+[644/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanScale.cpp.o
+[645/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/OpenCLOPRegister.cpp.o
+[646/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanReduce.cpp.o
+[647/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanTopKV2.cpp.o
+[648/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanRelu.cpp.o
+[649/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanRaster.cpp.o
+[650/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanSoftmax.cpp.o
+[651/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/image/execution/VulkanUnary.cpp.o
+[652/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/depthwise_conv2d_mnn_cl.cpp.o
+[653/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/BufferPool.cpp.o
+[654/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/ImagePool.cpp.o
+[655/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ConvSubgroupBufExecution.cpp.o
+[656/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/DepthwiseConvSubgroupBufExecution.cpp.o
+[657/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/runtime/OpenCLWrapper.cpp.o
+[658/838] Building CXX object source/backend/vulkan/CMakeFiles/MNN_Vulkan.dir/runtime/VulkanRuntime.cpp.o
+[659/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/MmapPool.cpp.o
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:131:48: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+            MNN_ERROR("map buffer %d error\n", node->size);
+                                  ~~           ^~~~~~~~~~
+                                  %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:170:60: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+        MNN_ERROR("Alloc Image %d x %d error, code:%d \n", w, h, ret);
+                               ~~                          ^
+                               %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:170:63: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+        MNN_ERROR("Alloc Image %d x %d error, code:%d \n", w, h, ret);
+                                    ~~                        ^
+                                    %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:175:48: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+        MNN_ERROR("map Image %d x %d error\n", w, h);
+                             ~~                ^
+                             %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:175:51: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+        MNN_ERROR("map Image %d x %d error\n", w, h);
+                                  ~~              ^
+                                  %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/MmapPool.cpp:265:52: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+                MNN_ERROR("map buffer %d error\n", node->size);
+                                      ~~           ^~~~~~~~~~
+                                      %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+6 warnings generated.
+[660/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/ImageBufferConvertor.cpp.o
+[661/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/BufferConvertor.cpp.o
+[662/838] Linking CXX shared library source\backend\vulkan\OFF\arm64-v8a\libMNN_Vulkan.so
+[663/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/OpenCLGemmTune.cpp.o
+[664/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/CastBufExecution.cpp.o
+[665/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/BinaryBufExecution.cpp.o
+[666/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ArgMaxBufExecution.cpp.o
+[667/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/OpenCLRunningUtils.cpp.o
+[668/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/GridSampleBufExecution.cpp.o
+[669/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/FuseBufExecution.cpp.o
+[670/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ConvBufWinograd.cpp.o
+[671/838] Building CXX object CMakeFiles/compilefornpu.dir/tools/cpp/compilefornpu.cpp.o
+[672/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/OpenCLBackend.cpp.o
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/OpenCLBackend.cpp:245:80: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+                    MNN_ERROR("Invalid file size %d, now need file size %d\n", oldMmapSize, mmapSize);
+                                                 ~~                            ^~~~~~~~~~~
+                                                 %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+C:/xqvk2/third_party/MNN/source/backend/opencl/core/OpenCLBackend.cpp:245:93: warning: format specifies type 'int' but the argument has type 'size_t' (aka 'unsigned long') [-Wformat]
+                    MNN_ERROR("Invalid file size %d, now need file size %d\n", oldMmapSize, mmapSize);
+                                                                        ~~                  ^~~~~~~~
+                                                                        %zu
+C:/xqvk2/third_party/MNN/include/MNN/MNNDefine.h:29:91: note: expanded from macro 'MNN_ERROR'
+#define MNN_ERROR(format, ...) __android_log_print(ANDROID_LOG_ERROR, "MNNJNI", format, ##__VA_ARGS__)
+                                                                                ~~~~~~    ^~~~~~~~~~~
+2 warnings generated.
+[673/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ConvBufExecution.cpp.o
+[674/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/DeconvBufExecution.cpp.o
+[675/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/LayerNormBufExecution.cpp.o
+[676/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/Interp3DBufExecution.cpp.o
+[677/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ConvBufLowMemoryExecution.cpp.o
+[678/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/DepthwiseConvBufExecution.cpp.o
+[679/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/InterpBufExecution.cpp.o
+[680/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/core/runtime/OpenCLRuntime.cpp.o
+[681/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/AttentionBufExecution.cpp.o
+[682/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/MatmulBufExecution.cpp.o
+[683/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/GroupNormBufExecution.cpp.o
+[684/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/PoolBufExecution.cpp.o
+[685/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/depthwise_deconv2d_mnn_cl.cpp.o
+[686/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/LinearAttentionBufExecution.cpp.o
+[687/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ReluBufExecution.cpp.o
+[688/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/RangeBufExecution.cpp.o
+[689/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ReductionBufExecution.cpp.o
+[690/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/LoopBufExecution.cpp.o
+[691/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/RasterBufExecution.cpp.o
+[692/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/binary_buf_mnn_cl.cpp.o
+[693/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/argmax_buf_mnn_cl.cpp.o
+[694/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/attention_buf_mnn_cl.cpp.o
+[695/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/RopeBufExecution.cpp.o
+[696/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/SelectBufExecution.cpp.o
+[697/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/ScaleBufExecution.cpp.o
+[698/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/TopKV2BufExecution.cpp.o
+[699/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/SelfAttentionBufExecution.cpp.o
+[700/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/SharedGatherBufExecution.cpp.o
+[701/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/buffer_convert_buf_mnn_cl.cpp.o
+[702/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/binary_subgroup_buf_mnn_cl.cpp.o
+[703/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/SplitGeluBufExecution.cpp.o
+[704/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/buffer_convert_quant_mnn_cl.cpp.o
+[705/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/gemm_conv1x1_buf_mnn_cl.cpp.o
+[706/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/binary_mnn_cl.cpp.o
+[707/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/gemm_buf_mnn_cl.cpp.o
+[708/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/gemm_int_mnn_cl.cpp.o
+[709/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/SoftmaxBufExecution.cpp.o
+[710/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/gemm_mnn_cl.cpp.o
+[711/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/grid_sample_buf_mnn_cl.cpp.o
+[712/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/gemv_conv1x1_buf_mnn_cl.cpp.o
+[713/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/StrassenMatmulOpenCLComputor.cpp.o
+[714/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/grid_sample_mnn_cl.cpp.o
+[715/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/groupnorm_buf_mnn_cl.cpp.o
+[716/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/glmem_convert_mnn_cl.cpp.o
+[717/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/interp_mnn_cl.cpp.o
+[718/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/buffer/UnaryBufExecution.cpp.o
+[719/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/interp_buf_mnn_cl.cpp.o
+[720/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/input_transe_buf_mnn_cl.cpp.o
+[721/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/layernorm_buf_mnn_cl.cpp.o
+[722/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/linear_attention_buf_mnn_cl.cpp.o
+[723/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/matmul_local_buf_mnn_cl.cpp.o
+[724/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/loop_mnn_cl.cpp.o
+[725/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/layernorm_mnn_cl.cpp.o
+[726/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/matmul_params_buf_mnn_cl.cpp.o
+[727/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/matmul_buf_mnn_cl.cpp.o
+[728/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/matmul_mnn_cl.cpp.o
+[729/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/nearest_mnn_cl.cpp.o
+[730/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/pooling_mnn_cl.cpp.o
+[731/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/pooling_buf_mnn_cl.cpp.o
+[732/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/raster_buf_mnn_cl.cpp.o
+[733/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/rope_buf_mnn_cl.cpp.o
+[734/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/range_mnn_cl.cpp.o
+[735/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/range_buf_mnn_cl.cpp.o
+[736/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/reduction_buf_mnn_cl.cpp.o
+[737/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/reduction_mnn_cl.cpp.o
+[738/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/raster_mnn_cl.cpp.o
+[739/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/pooling_subgroup_buf_mnn_cl.cpp.o
+[740/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/roi_pooling_mnn_cl.cpp.o
+[741/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/select_mnn_cl.cpp.o
+[742/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/select_buf_mnn_cl.cpp.o
+[743/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/scale_mnn_cl.cpp.o
+[744/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/scale_buf_mnn_cl.cpp.o
+[745/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/self_attention_buf_mnn_cl.cpp.o
+[746/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/softmax_buf_mnn_cl.cpp.o
+[747/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/softmax_mnn_cl.cpp.o
+[748/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/shared_gather_buf_mnn_cl.cpp.o
+[749/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/splitgelu_buf_mnn_cl.cpp.o
+[750/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/unary_buf_mnn_cl.cpp.o
+[751/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/topkv2_mnn_cl.cpp.o
+[752/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/strassen_binary_buf_mnn_cl.cpp.o
+[753/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/unary_mnn_cl.cpp.o
+[754/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/unary_subgroup_buf_mnn_cl.cpp.o
+[755/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransformSource2_5_1_mnn_cl.cpp.o
+[756/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransformDest2_3_1_mnn_cl.cpp.o
+[757/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/topkv2_buf_mnn_cl.cpp.o
+[758/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransformSource2_3_1_mnn_cl.cpp.o
+[759/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransformDest2_5_1_mnn_cl.cpp.o
+[760/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransform_buf_mnn_cl.cpp.o
+[761/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/cl/winogradTransform_subgroup_buf_mnn_cl.cpp.o
+[762/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/CommonExecution.cpp.o
+[763/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/FuseExecution.cpp.o
+[764/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/Interp3DExecution.cpp.o
+[765/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/CastExecution.cpp.o
+[766/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/EltwiseExecution.cpp.o
+[767/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/InterpExecution.cpp.o
+[768/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/DeconvExecution.cpp.o
+[769/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/LayerNormExecution.cpp.o
+[770/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ConvWinograd.cpp.o
+[771/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ConvExecution.cpp.o
+[772/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ConvLowMemoryExecution.cpp.o
+[773/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/GridSampleExecution.cpp.o
+[774/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/DepthwiseConvExecution.cpp.o
+[775/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/DepthwiseDeconvExecution.cpp.o
+[776/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/PoolExecution.cpp.o
+[777/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/MultiInputDWDeconvExecution.cpp.o
+[778/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/LoopExecution.cpp.o
+[779/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/MultiInputDWConvExecution.cpp.o
+[780/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/MatmulExecution.cpp.o
+[781/838] Building CXX object express/CMakeFiles/MNN_Express.dir/ExecutorScope.cpp.o
+[782/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/RangeExecution.cpp.o
+[783/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/RoiPoolingExecution.cpp.o
+[784/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/SoftmaxExecution.cpp.o
+[785/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ReluExecution.cpp.o
+[786/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/TopKV2Execution.cpp.o
+[787/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/RasterExecution.cpp.o
+[788/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/TrainableParamExecution.cpp.o
+[789/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/SelectExecution.cpp.o
+[790/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ReductionExecution.cpp.o
+[791/838] Building CXX object express/CMakeFiles/MNN_Express.dir/Optimizer.cpp.o
+[792/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/ScaleExecution.cpp.o
+[793/838] Building CXX object source/backend/opencl/CMakeFiles/MNN_CL.dir/execution/image/UnaryExecution.cpp.o
+[794/838] Linking CXX shared library source\backend\opencl\OFF\arm64-v8a\libMNN_CL.so
+[795/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/MoEModule.cpp.o
+[796/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/NMSModule.cpp.o
+[797/838] Building CXX object express/CMakeFiles/MNN_Express.dir/MathOp.cpp.o
+[798/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/IfModule.cpp.o
+[799/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/Module.cpp.o
+[800/838] Building CXX object express/CMakeFiles/MNN_Express.dir/Utils.cpp.o
+[801/838] Building CXX object express/CMakeFiles/MNN_Express.dir/NeuralNetWorkOp.cpp.o
+[802/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/WhileModule.cpp.o
+[803/838] Building CXX object express/CMakeFiles/MNN_Express.dir/Executor.cpp.o
+[804/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/StaticModule.cpp.o
+[805/838] Building CXX object express/CMakeFiles/MNN_Express.dir/Expr.cpp.o
+[806/838] Building CXX object express/CMakeFiles/MNN_Express.dir/module/PipelineModule.cpp.o
+[807/838] Linking CXX shared library express\OFF\arm64-v8a\libMNN_Express.so
+[808/838] Linking CXX executable GetMNNInfo
+[809/838] Linking CXX executable MNNV2Basic.out
+[810/838] Linking CXX executable GpuInterTest.out
+[811/838] Linking CXX executable ModuleBasic.out
+[812/838] Linking CXX executable OpenCLProgramBuildTest.out
+[813/838] Linking CXX executable SequenceModuleTest.out
+[814/838] Linking CXX executable modelCompare.out
+[815/838] Linking CXX executable mergeInplaceForCPU
+[816/838] Linking CXX executable mobilenetTest.out
+[817/838] Linking CXX executable backendTest.out
+[818/838] Linking CXX executable testModel.out
+[819/838] Linking CXX executable compilefornpu
+[820/838] Linking CXX shared library OFF\arm64-v8a\libllm.so
+[821/838] Linking CXX executable getPerformance.out
+[822/838] Linking CXX executable testModel_expr.out
+[823/838] Linking CXX executable checkInvalidValue.out
+[824/838] Linking CXX executable testModelWithDescribe.out
+[825/838] Linking CXX executable timeProfile.out
+[826/838] Linking CXX executable testTrain.out
+[827/838] Linking CXX executable winogradExample.out
+[828/838] Linking CXX executable fuseTest
+[829/838] Linking CXX executable ppl_eval
+[830/838] Linking CXX executable llm_bench
+[831/838] Linking CXX executable embedding_demo
+[832/838] Linking CXX executable quantize_llm
+[833/838] Linking CXX executable llm_demo
+[834/838] Linking CXX executable apply_template
+[835/838] Linking CXX executable rollback_demo
+[836/838] Linking CXX executable reranker_demo
+[837/838] Linking CXX executable tokenizer_demo
+[838/838] Linking CXX executable generateLlmIO

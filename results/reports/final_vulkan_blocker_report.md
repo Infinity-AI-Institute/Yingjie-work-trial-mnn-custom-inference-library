@@ -2,152 +2,282 @@
 
 ## Verdict
 
-Outcome B: Vulkan blocked. The repository can be restored from the remote, MNN can be rebuilt, Android APKs can be rebuilt, AWS Device Farm credentials work, and the exact Samsung Galaxy S26 Ultra pool is available. However, the checked-in custom inference library does not contain a real custom Vulkan backend for measured generation. The current custom benchmark still runs the full custom CPU path, and existing v27 evidence explicitly reports `custom_backend_actual = cpu` and `vulkan_generation_kernels_used = false`.
+Outcome B: Vulkan blocked after real implementation attempts.
 
-I did not schedule a new "custom_vulkan" final run because the current code would knowingly emit an invalid result for the requested acceptance criteria. A Device Farm run is technically schedulable once model artifacts are uploaded, but it would not be an accepted full-custom Vulkan result unless the missing Vulkan runtime and kernels are implemented first.
+This pass did not stop at auditing the empty Vulkan folder. It added a custom Vulkan runtime, implemented a real W4A16 GEMV compute shader, validated that shader on AWS Device Farm Samsung Galaxy S26 Ultra, and integrated the Vulkan GEMV path into measured custom Qwen3.5 generation for projection families.
 
-The previous official delivery remains the v27 quality-gated CPU customlib systems/kernel benchmark in `results/reports/final_devicefarm_report.md`.
+The result is not accepted as the requested final Vulkan delivery because it is not full Vulkan generation and it is not quality validated:
 
-## What Was Reconstructed From Fresh Repo
+- `custom_backend_requested = vulkan` was exercised in a full-model short integration run.
+- `custom_backend_actual = cpu_vulkan_hybrid`, not `vulkan`.
+- `vulkan_generation_kernels_used = true` for W4A16 projection GEMV rows.
+- Major op families still ran on CPU: RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV build.
+- No Vulkan `BENCH_QUALITY_JSON` was produced.
+- No full 512-token / 256-token final Vulkan benchmark was accepted.
+- No 10 tokens/sec claim is made.
 
-- Fresh clone source: `https://github.com/Infinity-AI-Institute/Yingjie-work-trial-mnn-custom-inference-library`
-- Fresh short working copy used for build: `C:\xqvk`
-- HEAD commit: `b22698cca0a5d7c1ce2120917b8af229630392df`
-- MNN pinned commit restored: `0bff03cbef43c783f44e41484b9f8a0b28bd758d`
-- MNN Android LLM/OpenCL/Vulkan build completed from source.
-- Android stock/custom APKs and androidTest APKs rebuilt successfully.
-- Host CMake correctness tests passed: 2 / 2.
+The previous official v27 CPU customlib result remains the official final systems/kernel and quality-gated benchmark result. The Vulkan work in this report is visible implementation evidence and a blocker record, not a final speedup claim.
 
-## Build Environment Fixes
+## Starting Point
 
-Two checked-in recovery issues were fixed:
+- Fresh working copy: `C:\xqvk2`
+- Starting commit: `7879066 Document full Vulkan backend blocker`
+- Remote: `https://github.com/Infinity-AI-Institute/Yingjie-work-trial-mnn-custom-inference-library`
+- MNN pinned commit: `0bff03cbef43c783f44e41484b9f8a0b28bd758d`
+- Device Farm project: `arn:aws:devicefarm:us-west-2:884244642857:project:64d2cc31-abd6-49f8-97da-162f82410bc0`
+- Device pool: `arn:aws:devicefarm:us-west-2:884244642857:devicepool:64d2cc31-abd6-49f8-97da-162f82410bc0/14d31c96-b8fc-4930-99c7-1a8948124213`
+- Target device observed by Vulkan selftest: `Adreno (TM) 840`
 
-- `scripts/fetch_mnn.ps1` now handles an existing empty `third_party/MNN` directory instead of accidentally running `git -C` against the parent repository.
-- `scripts/build_mnn_android.sh` now builds into `third_party/MNN/build_android_arm64_llm_sep`, matching the Gradle files and top-level CMake import path.
+AWS credentials were usable with profile `qpnpu-devicefarm`. The model package used the existing three-part EXTERNAL_DATA upload flow and verified the final model SHA:
 
-## Command Evidence
-
-```powershell
-git clone https://github.com/Infinity-AI-Institute/Yingjie-work-trial-mnn-custom-inference-library.git C:\xqvk
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\fetch_mnn.ps1
-bash scripts/build_mnn_android.sh
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build_android.ps1
-cmake -S . -B build-host-vulkan-attempt -G Ninja -DXQ_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build build-host-vulkan-attempt
-ctest --test-dir build-host-vulkan-attempt --output-on-failure
+```text
+9de692be1c1ef1002fac25bd8f93c76e1d31975caa234fe1725f9eb294bfaa34
 ```
 
-Host test result:
+## What Was Implemented
+
+### Vulkan Runtime And Connector
+
+New files:
+
+- `customlib/runtime/vulkan_backend.hpp`
+- `customlib/runtime/vulkan_backend.cpp`
+
+The runtime attempts to:
+
+- create a Vulkan instance
+- select a physical device
+- create a logical device and compute queue
+- allocate host-visible buffers
+- upload/download buffers
+- create descriptor layouts and a compute pipeline
+- dispatch a compute shader
+- measure upload, dispatch, download, and total CPU wall-clock time
+
+Android CMake now links Vulkan for the custom library:
+
+- `customlib/CMakeLists.txt`
+
+### Vulkan W4A16 GEMV Kernel
+
+New shader files:
+
+- `customlib/kernels/generated/vulkan/w4a16_gemv.comp`
+- `customlib/kernels/generated/vulkan/w4a16_gemv_spv.inc`
+
+The shader reads packed 4-bit weights, unpacks int4 codes, applies groupwise scale and zero-point values, and computes GEMV directly without materializing a dequantized matrix.
+
+It supports the dequantization formulas used by the custom package:
+
+```text
+code_dot = sum(code_i * activation_i)
+x_sum    = sum(activation_i)
+partial  = scale * (code_dot - zero * x_sum)
+partial  = scale * code_dot + zero * x_sum
+```
+
+### JNI / Instrumentation Hooks
+
+Updated files:
+
+- `customlib/include/xqwen35.h`
+- `customlib/runtime/session.cpp`
+- `android/benchmark_app/src/main/java/com/example/xqwen35bench/NativeBenchmark.java`
+- `android/benchmark_app/src/main/cpp/benchmark_jni.cpp`
+- `android/benchmark_app/src/androidTest/java/com/example/xqwen35bench/BenchmarkInstrumentationTest.java`
+
+The added C ABI/JNI selftest entry emits `BENCH_VULKAN_SELFTEST_JSON` and writes a Device Farm artifact:
+
+```text
+bench_artifacts/vulkan_w4a16_selftest.json
+```
+
+### Runtime Integration Attempt
+
+Updated files:
+
+- `customlib/runtime/custom_model.hpp`
+- `customlib/runtime/custom_model.cpp`
+- `customlib/runtime/session.cpp`
+
+The custom runtime attempts Vulkan W4A16 GEMV for packed W4 matrices when `backend = vulkan` or `backend = cpu_vulkan_hybrid`. Trace rows for projection families report `backend = vulkan` when the Vulkan GEMV path succeeds.
+
+This integration is intentionally reported as hybrid, not full Vulkan. It uploads weights per GEMV call, so it is correctness-oriented evidence, not a performance-quality implementation.
+
+## Build And Test Evidence
+
+Host build and tests:
+
+```text
+results/reports/evidence/vulkan_final_host_build.txt
+results/reports/evidence/vulkan_final_host_ctest.txt
+```
+
+Result:
 
 ```text
 100% tests passed, 0 tests failed out of 2
 ```
 
-Built APKs:
-
-| Artifact | Size |
-| --- | ---: |
-| `android/app/build/outputs/apk/debug/stock_mnn_benchmark-debug.apk` | 9,098,102 |
-| `android/app/build/outputs/apk/androidTest/debug/stock_mnn_benchmark-debug-androidTest.apk` | 4,479,729 |
-| `android/benchmark_app/build/outputs/apk/debug/customlib_benchmark-debug.apk` | 9,229,166 |
-| `android/benchmark_app/build/outputs/apk/androidTest/debug/customlib_benchmark-debug-androidTest.apk` | 4,481,349 |
-
-## AWS / Device Farm Status
-
-AWS access is available when using:
-
-- AWS shim: `C:\Users\Yingjie Huang\bin\aws.cmd`
-- Profile: `qpnpu-devicefarm`
-
-Verified identity:
-
-```json
-{
-  "Account": "884244642857",
-  "Arn": "arn:aws:iam::884244642857:user/qpnpu-devicefarm"
-}
-```
-
-Device Farm project:
+Android build:
 
 ```text
-arn:aws:devicefarm:us-west-2:884244642857:project:64d2cc31-abd6-49f8-97da-162f82410bc0
+results/reports/evidence/vulkan_final_android_build.txt
 ```
 
-Exact Samsung Galaxy S26 Ultra pool:
+Result:
 
 ```text
-arn:aws:devicefarm:us-west-2:884244642857:devicepool:64d2cc31-abd6-49f8-97da-162f82410bc0/14d31c96-b8fc-4930-99c7-1a8948124213
+BUILD SUCCESSFUL
 ```
 
-Device availability was reported as `HIGHLY_AVAILABLE`.
+## Device Farm Attempts
 
-## Why The Vulkan Final Is Blocked
+### Attempt 1: Vulkan W4A16 Selftest
 
-### 1. No custom Vulkan backend is checked in
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/ac30385c-0fbb-4a1d-a897-ac870a1d8efc`
+- Device Farm result: failed test-spec grep, because the first spec looked for the JSON in the wrong stream.
+- Kernel artifact result: Vulkan selftest JSON passed.
+- Evidence: `results/reports/evidence/vulkan_w4a16_selftest_attempt1.json`
 
-The only customlib path under `customlib/kernels/generated/vulkan` is:
+The failure was in the wrapper/spec, not the shader math. The spec was fixed to read the artifact JSON.
 
-```text
-customlib/kernels/generated/vulkan/.gitkeep
-```
+### Attempt 2: Vulkan W4A16 Selftest, Fixed Spec
 
-There are no checked-in custom Vulkan shader sources, SPIR-V blobs, Vulkan memory manager, custom Vulkan dispatch path, W4A16 Vulkan GEMV implementation, Vulkan attention kernels, Vulkan linear-attention kernels, or Vulkan lm_head/argmax kernels.
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/da6dfbc9-27eb-4a42-9202-bffda6b6bbe6`
+- Device Farm result: PASSED
+- Evidence: `results/reports/evidence/vulkan_w4a16_selftest_attempt2_passed.json`
 
-MNN's `libMNN_Vulkan.so` is built and packaged, but that is the stock MNN backend library. It is not a customlib Vulkan execution path.
+Key result from the passed selftest:
 
-### 2. Custom benchmark hard-codes CPU as the actual backend
+| Shape | CPU reference ms | Vulkan dispatch ms | Vulkan total ms | Max abs error |
+| --- | ---: | ---: | ---: | ---: |
+| 256 x 256 | 0.00787 | 0.46615 | 0.64829 | 4.17e-07 |
+| 4096 x 4096 | 1.04010 | 8.75693 | 12.74010 | 6.85e-06 |
 
-Evidence:
+This proves a real Vulkan W4A16 GEMV kernel executed correctly on the target phone, but also shows the naive upload-per-call path is much slower than the CPU reference.
 
-- `android/benchmark_app/src/main/cpp/benchmark_jni.cpp:432` reports `full_or_hybrid_kernel_status = not_enabled_in_this_build`.
-- `android/benchmark_app/src/main/cpp/benchmark_jni.cpp:433` reports that custom Vulkan W4A16/lm_head kernels were probed but not selected.
-- `android/benchmark_app/src/main/cpp/benchmark_jni.cpp:1224` sets benchmark `actual_backend = "cpu"`.
-- `android/benchmark_app/src/main/cpp/benchmark_jni.cpp:1347` sets quality validation `actual_backend = "cpu"`.
+### Attempt 3: Full-Model Short Integration
 
-### 3. Existing final evidence explicitly says CPU
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd`
+- Device Farm result: PASSED
+- Evidence:
+  - `results/reports/evidence/customlib_vulkan_integration_short_benchmark.json`
+  - `results/reports/evidence/customlib_vulkan_integration_short_summary.json`
+  - `results/reports/evidence/customlib_vulkan_integration_short_model_bootstrap.json`
+  - `results/reports/evidence/customlib_vulkan_integration_short_model_bootstrap_discovery.txt`
 
-Evidence:
+Note: this short run was produced before the benchmark probe wording was corrected. Its raw `vulkan_attempt` subobject still contains stale text saying the Vulkan kernel was not enabled. The same raw JSON also contains the authoritative fields `custom_backend_actual = cpu_vulkan_hybrid`, `custom_path.vulkan_generation_kernels_used = true`, and per-kernel trace rows with `backend = vulkan`. The current source updates the probe wording so future runs report this as W4A16-linear Vulkan hybrid rather than "not enabled".
 
-- `results/reports/evidence/customlib_cpu_vulkan_hybrid_benchmark_v27.json` reports:
-  - `backend_actual = cpu`
-  - `custom_backend_actual = cpu`
-  - `vulkan_generation_kernels_used = false`
-  - `op_family_backends` are CPU for all major measured op families.
-- `results/reports/final_devicefarm_report.md:10` says no custom Vulkan generation kernels were used.
-- `docs/kernel_library_code_walkthrough_final.md:161` says the v27 run probed Vulkan but used CPU.
+Run settings:
 
-## Missing Work Before A Valid Outcome A
+| Field | Value |
+| --- | --- |
+| Model | full Qwen3.5-9B package |
+| Model SHA | `9de692be1c1ef1002fac25bd8f93c76e1d31975caa234fe1725f9eb294bfaa34` |
+| Requested backend | `vulkan` |
+| Actual backend | `cpu_vulkan_hybrid` |
+| Prompt tokens | 1 |
+| max_new_tokens | 1 |
+| Warmup / measured | 0 / 1 |
 
-To honestly reach the requested final Vulkan acceptance criteria, the repository needs a real custom Vulkan backend implementing and validating at least:
+Important measured fields:
 
-- W4A16 GEMV Vulkan for q/k/v/o, gate/up/down, linear-attention projections, and lm_head.
-- Vulkan-resident weights and activation/state buffers.
-- RMSNorm Vulkan.
-- Qwen3.5 partial RoPE Vulkan.
-- GQA attention score, stable softmax, V reduce, and KV cache append/read on Vulkan.
-- Linear-attention recurrent state and gate semantics on Vulkan.
-- lm_head + greedy argmax from real logits on Vulkan.
-- Per-op trace rows with `backend = vulkan`.
-- Android/Device Farm correctness tests comparing Vulkan kernels against CPU/reference.
-- Device Farm full-model benchmark and quality validation producing `BENCH_RESULT_JSON` and `BENCH_QUALITY_JSON`.
+| Field | Value |
+| --- | --- |
+| `use_mnn_fallback` | `0` |
+| `calls_mnn_llm_response_for_measured_generation` | `false` |
+| `vulkan_generation_kernels_used` | `true` |
+| `fallback_op_families` | `[]` |
+| Decode TPS | `0.173017` |
+| Decode TPOT | `5779.77 ms` |
 
-## Requirement Status After This Attempt
+This short run is not a final benchmark. It exists to prove that the full-model measured path can enter Vulkan W4A16 projection kernels. It is not comparable to the official 512/256 v27 benchmark and it is far slower than stock MNN.
 
-| Requirement | Status | Evidence |
-| --- | --- | --- |
-| Requirement 1: custom kernel library + walkthrough | Still satisfied by v27 CPU final | `docs/kernel_library_code_walkthrough_final.md` |
-| Requirement 2: MNN comparison with per-kernel wall clock, TPOT, TPS | Still satisfied by v27 CPU final | `results/reports/final_devicefarm_report.md` |
-| Requirement 3: output quality guard | Still satisfied for v27 CPU final | `results/reports/quality_validation_report.md` |
-| Requirement 4: full custom Vulkan, target ~10 TPS | Not met | No custom Vulkan backend exists; current measured custom backend is CPU |
+## What Actually Ran On Vulkan
 
-## Final Decision
+In the short integration evidence, these op families were routed to Vulkan:
 
-No accepted custom Vulkan final result was produced in this pass. I did not overwrite the v27 final report because doing so would either degrade the official accepted result or falsely claim Vulkan execution.
+- `q_proj`
+- `k_proj`
+- `v_proj`
+- `o_proj`
+- `gate_proj`
+- `up_proj`
+- `down_proj`
+- `linear_attention_projections`
 
-Previous official result preserved:
+Representative Vulkan trace rows:
 
-- Final report: `results/reports/final_devicefarm_report.md`
-- Code walkthrough: `docs/kernel_library_code_walkthrough_final.md`
-- Quality report: `results/reports/quality_validation_report.md`
+| Kernel | Backend | Calls | Total ms | Mean ms |
+| --- | --- | ---: | ---: | ---: |
+| `linear_attn_in_proj_qkv_w4a16` | vulkan | 48 | 1322.33 | 27.5486 |
+| `linear_down_proj_w4a16` | vulkan | 64 | 2270.69 | 35.4796 |
+| `linear_gate_proj_w4a16` | vulkan | 64 | 2509.98 | 39.2184 |
+| `linear_q_proj_w4a16` | vulkan | 16 | 438.759 | 27.4225 |
 
+## What Stayed On CPU
+
+The following major measured op families stayed on CPU:
+
+- RMSNorm
+- RoPE
+- grouped-query attention score/softmax/V-reduce
+- KV append/read
+- linear-attention recurrent state
+- lm_head
+- greedy sampling
+- prefill KV build
+
+Therefore this is not a full Vulkan generation path and cannot satisfy the requested `custom_backend_actual = vulkan` acceptance criteria.
+
+## Quality Status
+
+No accepted Vulkan quality validation exists for this attempt.
+
+The short integration run emitted `BENCH_RESULT_JSON`, not `BENCH_QUALITY_JSON`. It used only one prompt token and one generated token, so it cannot prove output quality, exact-token match, repeated-token safety, or semantic plausibility.
+
+The official quality-passing result remains the v27 CPU customlib result in:
+
+- `results/reports/quality_validation_report.md`
+- `results/reports/evidence/quality_validation_v27_english_comparison.json`
+
+## Exact Blocker
+
+The blocker is not Device Farm scheduling. Device Farm scheduling works. The blocker is implementation completeness and performance:
+
+1. The current Vulkan implementation only covers W4A16 GEMV projection families.
+2. Full generation still needs Vulkan implementations for RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV build.
+3. The current Vulkan GEMV uploads weights/scales/zeros for every call instead of keeping the Qwen3.5 weights resident on GPU.
+4. The selftest shows 4096 x 4096 W4A16 Vulkan total time `12.74010 ms` versus CPU reference `1.04010 ms`.
+5. The short full-model hybrid run was much slower than CPU final numbers.
+6. No Vulkan quality validation was completed.
+
+## Final Claim Status
+
+Allowed claims:
+
+- A real custom Vulkan runtime was implemented.
+- A real W4A16 GEMV Vulkan compute shader was implemented.
+- The W4A16 Vulkan shader passed Device Farm correctness on Samsung Galaxy S26 Ultra.
+- A full-model short custom generation run used Vulkan for W4A16 projection families.
+- The measured custom generation path still did not call `MNN::Transformer::Llm::response`.
+
+Non-claims:
+
+- No full Vulkan custom generation claim.
+- No custom Vulkan quality pass.
+- No 10 TPS claim.
+- No speedup over stock MNN.
+- No production-quality Vulkan output claim.
+
+## Next Required Work For Outcome A
+
+To turn this into an accepted Vulkan final, the next implementation must:
+
+- make Qwen3.5 W4A16 weights GPU-resident across decode
+- add Vulkan RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV kernels
+- remove CPU backends from major measured op families
+- run Device Farm quality validation and emit `BENCH_QUALITY_JSON`
+- run the full 512 prompt-token / 256 decode-token benchmark and emit `BENCH_RESULT_JSON`
+- compare against stock MNN with same model/device/settings

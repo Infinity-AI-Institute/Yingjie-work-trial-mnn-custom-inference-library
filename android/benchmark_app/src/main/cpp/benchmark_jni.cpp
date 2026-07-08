@@ -429,8 +429,10 @@ std::string runVulkanProbeJson(const std::string& requested_backend) {
             << jsonEscape(load_error ? load_error : "libvulkan loaded but vkGetInstanceProcAddr was not found")
             << "\",";
     }
-    oss << "\"full_or_hybrid_kernel_status\":\"not_enabled_in_this_build\","
-        << "\"failure_reason\":\"custom Vulkan W4A16/lm_head kernels were probed but not selected; measured generation used the full custom CPU path\""
+    oss << "\"full_or_hybrid_kernel_status\":\"w4a16_linear_kernels_enabled\","
+        << "\"scope\":\"custom Vulkan W4A16 GEMV is attempted for projection families; RMSNorm/RoPE/attention/linear_attention_state/lm_head/sampling/prefill KV remain CPU in this integration\","
+        << "\"full_vulkan_generation\":false,"
+        << "\"failure_reason\":\"full Vulkan generation is not accepted because major non-linear op families and lm_head/sampling are still CPU and W4A16 weights are uploaded per GEMV call\""
         << "}";
     return oss.str();
 }
@@ -966,6 +968,9 @@ std::string makeJson(const std::string& model_dir,
             << "\"error\":\"" << jsonEscape(terminal_error.empty() ? "not all measurement iterations completed" : terminal_error)
             << "\",";
     }
+    const bool vulkan_linear_attempt =
+        custom_backend_actual == "cpu_vulkan_hybrid" || custom_backend_actual == "vulkan";
+    const char* linear_backend = vulkan_linear_attempt ? "vulkan" : "cpu";
     oss << "\"model\":{\"hf_repo\":\"Qwen/Qwen3.5-9B\","
         << "\"hf_revision\":\"c202236235762e1c871ad0ccb60c8ee5ba337b9a\","
         << "\"format\":\"xqwen35_custom_w4a16\","
@@ -981,13 +986,16 @@ std::string makeJson(const std::string& model_dir,
         << "\"full_custom_decode\":true,"
         << "\"replaced_op_families\":[\"q_proj\",\"k_proj\",\"v_proj\",\"o_proj\",\"gate_proj\",\"up_proj\",\"down_proj\",\"rmsnorm\",\"rope\",\"attention\",\"linear_attention_state\",\"lm_head\",\"sampling\",\"prefill_kv_build\"],"
         << "\"fallback_op_families\":[],"
-        << "\"op_family_backends\":{\"q_proj\":\"cpu\",\"k_proj\":\"cpu\",\"v_proj\":\"cpu\",\"o_proj\":\"cpu\","
-        << "\"gate_proj\":\"cpu\",\"up_proj\":\"cpu\",\"down_proj\":\"cpu\",\"rmsnorm\":\"cpu\",\"rope\":\"cpu\","
+        << "\"op_family_backends\":{\"q_proj\":\"" << linear_backend << "\",\"k_proj\":\"" << linear_backend
+        << "\",\"v_proj\":\"" << linear_backend << "\",\"o_proj\":\"" << linear_backend << "\","
+        << "\"gate_proj\":\"" << linear_backend << "\",\"up_proj\":\"" << linear_backend
+        << "\",\"down_proj\":\"" << linear_backend << "\",\"linear_attention_projections\":\""
+        << linear_backend << "\",\"rmsnorm\":\"cpu\",\"rope\":\"cpu\","
         << "\"attention\":\"cpu\",\"linear_attention_state\":\"cpu\",\"lm_head\":\"cpu\",\"sampling\":\"cpu\","
         << "\"prefill_kv_build\":\"cpu\"}}},"
         << "\"custom_path\":{\"calls_mnn_llm_response_for_measured_generation\":false,"
         << "\"use_mnn_fallback\":0,"
-        << "\"vulkan_generation_kernels_used\":" << (custom_backend_actual == "vulkan" || custom_backend_actual == "cpu_vulkan_hybrid" ? "true" : "false") << ","
+        << "\"vulkan_generation_kernels_used\":" << (vulkan_linear_attempt ? "true" : "false") << ","
         << "\"decode_loop\":\"xq_session::generate -> xq_prefill/xq_decode_one -> CustomModel::prefill/runLayer/sampleGreedy\","
         << "\"weight_format\":\"xq4_groupwise_w4a16\"},"
         << "\"vulkan_attempt\":" << vulkan_probe_json << ","
@@ -1221,7 +1229,8 @@ Java_com_example_xqwen35bench_NativeBenchmark_runBenchmark(JNIEnv* env,
                                                            jint measure_iterations) {
     const std::string model = jstringToString(env, model_dir);
     const std::string requested_backend = normalizeCustomBackend(jstringToString(env, custom_backend));
-    const std::string actual_backend = "cpu";
+    const std::string actual_backend =
+        (requested_backend == "vulkan" || requested_backend == "cpu_vulkan_hybrid") ? "cpu_vulkan_hybrid" : "cpu";
     const std::string vulkan_probe_json = runVulkanProbeJson(requested_backend);
     __android_log_print(ANDROID_LOG_INFO,
                         "XQBENCH",
@@ -1344,7 +1353,8 @@ Java_com_example_xqwen35bench_NativeBenchmark_runQualityValidation(JNIEnv* env,
                                                                    jint max_new_tokens) {
     const std::string model = jstringToString(env, model_dir);
     const std::string requested_backend = normalizeCustomBackend(jstringToString(env, custom_backend));
-    const std::string actual_backend = "cpu";
+    const std::string actual_backend =
+        (requested_backend == "vulkan" || requested_backend == "cpu_vulkan_hybrid") ? "cpu_vulkan_hybrid" : "cpu";
     __android_log_print(ANDROID_LOG_INFO,
                         "XQBENCH",
                         "QUALITY_START engine=customlib model_dir=%s requested_backend=%s actual_backend=%s",
@@ -1357,5 +1367,19 @@ Java_com_example_xqwen35bench_NativeBenchmark_runQualityValidation(JNIEnv* env,
                                                       static_cast<int>(max_new_tokens));
     __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "BENCH_QUALITY_JSON %s", json.c_str());
     __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "QUALITY_END engine=customlib");
+    return env->NewStringUTF(json.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_example_xqwen35bench_NativeBenchmark_runVulkanSelfTest(JNIEnv* env, jclass) {
+    std::vector<char> buffer(1024 * 1024);
+    const xq_status status = xq_run_vulkan_w4a16_selftest(buffer.data(), buffer.size());
+    std::string json = buffer.data();
+    if (json.empty()) {
+        json = "{\"engine\":\"customlib\",\"test\":\"vulkan_w4a16_gemv_correctness\","
+               "\"status\":\"error\",\"pass\":false,\"error\":\"empty selftest JSON\"}";
+    }
+    __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "BENCH_VULKAN_SELFTEST_STATUS %d", static_cast<int>(status));
+    __android_log_print(ANDROID_LOG_INFO, "XQBENCH", "BENCH_VULKAN_SELFTEST_JSON %s", json.c_str());
     return env->NewStringUTF(json.c_str());
 }

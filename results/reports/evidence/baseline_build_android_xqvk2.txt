@@ -1,0 +1,298 @@
+> Task :stock_mnn_benchmark:preBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:preDebugBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :stock_mnn_benchmark:javaPreCompileDebug
+> Task :stock_mnn_benchmark:checkDebugAarMetadata
+> Task :stock_mnn_benchmark:generateDebugResValues
+> Task :stock_mnn_benchmark:mapDebugSourceSetPaths
+> Task :stock_mnn_benchmark:generateDebugResources
+> Task :stock_mnn_benchmark:packageDebugResources
+> Task :stock_mnn_benchmark:mergeDebugResources
+> Task :stock_mnn_benchmark:parseDebugLocalResources
+> Task :stock_mnn_benchmark:createDebugCompatibleScreenManifests
+> Task :stock_mnn_benchmark:extractDeepLinksDebug
+> Task :stock_mnn_benchmark:processDebugMainManifest
+> Task :stock_mnn_benchmark:processDebugManifest
+> Task :stock_mnn_benchmark:mergeDebugShaders
+> Task :stock_mnn_benchmark:compileDebugShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateDebugAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAssets
+> Task :stock_mnn_benchmark:compressDebugAssets
+> Task :stock_mnn_benchmark:processDebugJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:checkDebugDuplicateClasses
+> Task :stock_mnn_benchmark:mergeDebugJavaResource
+> Task :stock_mnn_benchmark:desugarDebugFileDependencies
+> Task :stock_mnn_benchmark:mergeDebugStartupProfile
+> Task :stock_mnn_benchmark:mergeExtDexDebug
+> Task :stock_mnn_benchmark:mergeLibDexDebug
+> Task :stock_mnn_benchmark:configureCMakeDebug[arm64-v8a]
+
+> Task :stock_mnn_benchmark:buildCMakeDebug[arm64-v8a][xqstock_jni]
+C/C++: ninja: Entering directory `C:\xqvk2\android\app\.cxx\Debug\5d6f1l5e\arm64-v8a'
+C/C++: C:/xqvk2/customlib/kernels/generated/arm64_neon/xq_gemv_w4a16_neon.cpp:25:7: warning: unused function 'sumGroupScalar' [-Wunused-function]
+C/C++: float sumGroupScalar(const float* x, int count) {
+C/C++:       ^
+C/C++: 1 warning generated.
+
+> Task :stock_mnn_benchmark:mergeDebugJniLibFolders
+> Task :stock_mnn_benchmark:validateSigningDebug
+> Task :stock_mnn_benchmark:writeDebugAppMetadata
+> Task :stock_mnn_benchmark:writeDebugSigningConfigVersions
+> Task :stock_mnn_benchmark:preReleaseBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:javaPreCompileRelease
+> Task :stock_mnn_benchmark:checkReleaseAarMetadata
+> Task :stock_mnn_benchmark:generateReleaseResValues
+> Task :stock_mnn_benchmark:mapReleaseSourceSetPaths
+> Task :stock_mnn_benchmark:generateReleaseResources
+> Task :stock_mnn_benchmark:packageReleaseResources
+> Task :stock_mnn_benchmark:mergeReleaseResources
+> Task :stock_mnn_benchmark:createReleaseCompatibleScreenManifests
+> Task :stock_mnn_benchmark:parseReleaseLocalResources
+> Task :stock_mnn_benchmark:extractDeepLinksRelease
+> Task :stock_mnn_benchmark:processReleaseMainManifest
+> Task :stock_mnn_benchmark:processReleaseManifest
+> Task :stock_mnn_benchmark:processDebugManifestForPackage
+> Task :stock_mnn_benchmark:extractProguardFiles
+> Task :stock_mnn_benchmark:processDebugResources
+> Task :stock_mnn_benchmark:mergeDebugNativeLibs
+> Task :stock_mnn_benchmark:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :stock_mnn_benchmark:compileDebugJavaWithJavac
+> Task :stock_mnn_benchmark:dexBuilderDebug
+> Task :stock_mnn_benchmark:mergeProjectDexDebug
+> Task :stock_mnn_benchmark:stripDebugDebugSymbols
+
+> Task :stock_mnn_benchmark:buildCMakeRelWithDebInfo[arm64-v8a][xqstock_jni]
+C/C++: ninja: Entering directory `C:\xqvk2\android\app\.cxx\RelWithDebInfo\5p622o48\arm64-v8a'
+C/C++: C:/xqvk2/customlib/kernels/generated/arm64_neon/xq_gemv_w4a16_neon.cpp:25:7: warning: unused function 'sumGroupScalar' [-Wunused-function]
+C/C++: float sumGroupScalar(const float* x, int count) {
+C/C++:       ^
+C/C++: 1 warning generated.
+
+> Task :stock_mnn_benchmark:mergeReleaseJniLibFolders
+> Task :stock_mnn_benchmark:checkReleaseDuplicateClasses
+> Task :stock_mnn_benchmark:packageDebug
+> Task :stock_mnn_benchmark:createDebugApkListingFileRedirect
+> Task :stock_mnn_benchmark:assembleDebug
+> Task :stock_mnn_benchmark:desugarReleaseFileDependencies
+> Task :stock_mnn_benchmark:mergeReleaseStartupProfile
+> Task :stock_mnn_benchmark:mergeExtDexRelease
+> Task :stock_mnn_benchmark:mergeReleaseArtProfile
+> Task :stock_mnn_benchmark:mergeReleaseShaders
+> Task :stock_mnn_benchmark:compileReleaseShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateReleaseAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseAssets
+> Task :stock_mnn_benchmark:compressReleaseAssets
+> Task :stock_mnn_benchmark:extractReleaseVersionControlInfo
+> Task :stock_mnn_benchmark:processReleaseJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:processReleaseManifestForPackage
+> Task :stock_mnn_benchmark:mergeReleaseJavaResource
+> Task :stock_mnn_benchmark:collectReleaseDependencies
+> Task :stock_mnn_benchmark:sdkReleaseDependencyData
+> Task :stock_mnn_benchmark:writeReleaseAppMetadata
+> Task :stock_mnn_benchmark:writeReleaseSigningConfigVersions
+> Task :stock_mnn_benchmark:preDebugAndroidTestBuild SKIPPED
+> Task :stock_mnn_benchmark:javaPreCompileDebugAndroidTest
+> Task :stock_mnn_benchmark:bundleDebugClassesToCompileJar
+> Task :stock_mnn_benchmark:checkDebugAndroidTestAarMetadata
+> Task :stock_mnn_benchmark:generateDebugAndroidTestResValues
+> Task :stock_mnn_benchmark:mapDebugAndroidTestSourceSetPaths
+> Task :stock_mnn_benchmark:generateDebugAndroidTestResources
+> Task :stock_mnn_benchmark:processDebugAndroidTestManifest
+> Task :stock_mnn_benchmark:processReleaseResources
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestShaders
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestResources
+> Task :stock_mnn_benchmark:compileReleaseJavaWithJavac
+> Task :stock_mnn_benchmark:mergeReleaseNativeLibs
+> Task :stock_mnn_benchmark:generateReleaseLintVitalReportModel
+> Task :stock_mnn_benchmark:dexBuilderRelease
+> Task :stock_mnn_benchmark:mergeReleaseGlobalSynthetics
+> Task :stock_mnn_benchmark:mergeDexRelease
+> Task :stock_mnn_benchmark:compileReleaseArtProfile
+> Task :stock_mnn_benchmark:compileDebugAndroidTestShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:stripReleaseDebugSymbols
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestAssets
+> Task :stock_mnn_benchmark:compressDebugAndroidTestAssets
+> Task :stock_mnn_benchmark:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:desugarDebugAndroidTestFileDependencies
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestJniLibFolders
+> Task :stock_mnn_benchmark:checkDebugAndroidTestDuplicateClasses
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :stock_mnn_benchmark:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :stock_mnn_benchmark:validateSigningDebugAndroidTest
+> Task :stock_mnn_benchmark:writeDebugAndroidTestSigningConfigVersions
+> Task :stock_mnn_benchmark:mergeLibDexDebugAndroidTest
+> Task :customlib_benchmark:preBuild UP-TO-DATE
+> Task :customlib_benchmark:preDebugBuild UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :customlib_benchmark:javaPreCompileDebug
+> Task :customlib_benchmark:checkDebugAarMetadata
+> Task :customlib_benchmark:generateDebugResValues
+> Task :customlib_benchmark:mapDebugSourceSetPaths
+> Task :customlib_benchmark:generateDebugResources
+> Task :customlib_benchmark:packageDebugResources
+> Task :customlib_benchmark:mergeDebugResources
+> Task :customlib_benchmark:parseDebugLocalResources
+> Task :customlib_benchmark:createDebugCompatibleScreenManifests
+> Task :customlib_benchmark:extractDeepLinksDebug
+> Task :customlib_benchmark:processDebugMainManifest
+> Task :customlib_benchmark:processDebugManifest
+> Task :stock_mnn_benchmark:processDebugAndroidTestResources
+> Task :stock_mnn_benchmark:extractReleaseNativeSymbolTables
+> Task :stock_mnn_benchmark:compileDebugAndroidTestJavaWithJavac
+> Task :stock_mnn_benchmark:mergeExtDexDebugAndroidTest
+> Task :stock_mnn_benchmark:mergeReleaseNativeDebugMetadata
+> Task :stock_mnn_benchmark:lintVitalAnalyzeRelease
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestJavaResource
+> Task :stock_mnn_benchmark:dexBuilderDebugAndroidTest
+> Task :customlib_benchmark:mergeDebugShaders
+> Task :customlib_benchmark:compileDebugShaders NO-SOURCE
+> Task :customlib_benchmark:generateDebugAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAssets
+> Task :customlib_benchmark:compressDebugAssets
+> Task :customlib_benchmark:processDebugJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:optimizeReleaseResources
+> Task :stock_mnn_benchmark:mergeProjectDexDebugAndroidTest
+> Task :stock_mnn_benchmark:lintVitalReportRelease
+> Task :stock_mnn_benchmark:lintVitalRelease
+> Task :customlib_benchmark:checkDebugDuplicateClasses
+> Task :customlib_benchmark:mergeDebugJavaResource
+> Task :customlib_benchmark:desugarDebugFileDependencies
+> Task :customlib_benchmark:mergeDebugStartupProfile
+> Task :customlib_benchmark:mergeExtDexDebug
+> Task :customlib_benchmark:mergeLibDexDebug
+> Task :customlib_benchmark:configureCMakeDebug[arm64-v8a]
+
+> Task :customlib_benchmark:buildCMakeDebug[arm64-v8a][xqbench_jni]
+C/C++: ninja: Entering directory `C:\xqvk2\android\benchmark_app\.cxx\Debug\483a5l2y\arm64-v8a'
+C/C++: C:/xqvk2/customlib/kernels/generated/arm64_neon/xq_gemv_w4a16_neon.cpp:25:7: warning: unused function 'sumGroupScalar' [-Wunused-function]
+C/C++: float sumGroupScalar(const float* x, int count) {
+C/C++:       ^
+C/C++: 1 warning generated.
+
+> Task :customlib_benchmark:mergeDebugJniLibFolders
+> Task :customlib_benchmark:validateSigningDebug
+> Task :customlib_benchmark:writeDebugAppMetadata
+> Task :customlib_benchmark:writeDebugSigningConfigVersions
+> Task :customlib_benchmark:preReleaseBuild UP-TO-DATE
+> Task :customlib_benchmark:javaPreCompileRelease
+> Task :customlib_benchmark:checkReleaseAarMetadata
+> Task :customlib_benchmark:generateReleaseResValues
+> Task :customlib_benchmark:mapReleaseSourceSetPaths
+> Task :customlib_benchmark:generateReleaseResources
+> Task :customlib_benchmark:packageReleaseResources
+> Task :customlib_benchmark:mergeReleaseResources
+> Task :customlib_benchmark:parseReleaseLocalResources
+> Task :stock_mnn_benchmark:packageRelease
+> Task :stock_mnn_benchmark:createReleaseApkListingFileRedirect
+> Task :stock_mnn_benchmark:assembleRelease
+> Task :customlib_benchmark:createReleaseCompatibleScreenManifests
+> Task :customlib_benchmark:extractDeepLinksRelease
+> Task :customlib_benchmark:processReleaseMainManifest
+> Task :customlib_benchmark:processReleaseManifest
+> Task :customlib_benchmark:extractProguardFiles
+> Task :customlib_benchmark:processReleaseManifestForPackage
+> Task :customlib_benchmark:processReleaseResources
+> Task :customlib_benchmark:mergeDebugNativeLibs
+> Task :customlib_benchmark:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :customlib_benchmark:compileReleaseJavaWithJavac
+> Task :customlib_benchmark:generateReleaseLintVitalReportModel
+> Task :customlib_benchmark:stripDebugDebugSymbols
+> Task :customlib_benchmark:lintVitalAnalyzeRelease
+
+> Task :customlib_benchmark:buildCMakeRelWithDebInfo[arm64-v8a][xqbench_jni]
+C/C++: ninja: Entering directory `C:\xqvk2\android\benchmark_app\.cxx\RelWithDebInfo\327593v2\arm64-v8a'
+C/C++: C:/xqvk2/customlib/kernels/generated/arm64_neon/xq_gemv_w4a16_neon.cpp:25:7: warning: unused function 'sumGroupScalar' [-Wunused-function]
+C/C++: float sumGroupScalar(const float* x, int count) {
+C/C++:       ^
+C/C++: 1 warning generated.
+
+> Task :customlib_benchmark:lintVitalReportRelease
+> Task :customlib_benchmark:mergeReleaseJniLibFolders
+> Task :customlib_benchmark:lintVitalRelease
+> Task :customlib_benchmark:checkReleaseDuplicateClasses
+> Task :customlib_benchmark:dexBuilderRelease
+> Task :customlib_benchmark:desugarReleaseFileDependencies
+> Task :customlib_benchmark:mergeReleaseStartupProfile
+> Task :customlib_benchmark:mergeExtDexRelease
+> Task :customlib_benchmark:mergeReleaseArtProfile
+> Task :customlib_benchmark:mergeReleaseGlobalSynthetics
+> Task :customlib_benchmark:mergeReleaseShaders
+> Task :customlib_benchmark:compileReleaseShaders NO-SOURCE
+> Task :customlib_benchmark:generateReleaseAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeDexRelease
+> Task :customlib_benchmark:mergeReleaseAssets
+> Task :customlib_benchmark:compileReleaseArtProfile
+> Task :customlib_benchmark:compressReleaseAssets
+> Task :customlib_benchmark:extractReleaseVersionControlInfo
+> Task :customlib_benchmark:processReleaseJavaRes NO-SOURCE
+> Task :customlib_benchmark:mergeReleaseJavaResource
+> Task :customlib_benchmark:collectReleaseDependencies
+> Task :customlib_benchmark:sdkReleaseDependencyData
+> Task :customlib_benchmark:writeReleaseAppMetadata
+> Task :customlib_benchmark:writeReleaseSigningConfigVersions
+> Task :customlib_benchmark:preDebugAndroidTestBuild SKIPPED
+> Task :customlib_benchmark:javaPreCompileDebugAndroidTest
+> Task :customlib_benchmark:checkDebugAndroidTestAarMetadata
+> Task :customlib_benchmark:generateDebugAndroidTestResValues
+> Task :customlib_benchmark:mapDebugAndroidTestSourceSetPaths
+> Task :customlib_benchmark:generateDebugAndroidTestResources
+> Task :customlib_benchmark:processDebugAndroidTestManifest
+> Task :customlib_benchmark:mergeDebugAndroidTestResources
+> Task :customlib_benchmark:mergeReleaseNativeLibs
+> Task :customlib_benchmark:mergeDebugAndroidTestShaders
+> Task :customlib_benchmark:compileDebugAndroidTestShaders NO-SOURCE
+> Task :customlib_benchmark:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestAssets
+> Task :customlib_benchmark:compressDebugAndroidTestAssets
+> Task :customlib_benchmark:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:packageDebugAndroidTest
+> Task :stock_mnn_benchmark:createDebugAndroidTestApkListingFileRedirect
+> Task :customlib_benchmark:optimizeReleaseResources
+> Task :stock_mnn_benchmark:assembleDebugAndroidTest
+> Task :stock_mnn_benchmark:assembleAndroidTest
+> Task :customlib_benchmark:desugarDebugAndroidTestFileDependencies
+> Task :customlib_benchmark:checkDebugAndroidTestDuplicateClasses
+> Task :customlib_benchmark:mergeDebugAndroidTestJniLibFolders
+> Task :customlib_benchmark:stripReleaseDebugSymbols
+> Task :customlib_benchmark:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :customlib_benchmark:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :customlib_benchmark:validateSigningDebugAndroidTest
+> Task :customlib_benchmark:processDebugManifestForPackage
+> Task :customlib_benchmark:mergeLibDexDebugAndroidTest
+> Task :customlib_benchmark:writeDebugAndroidTestSigningConfigVersions
+> Task :customlib_benchmark:packageRelease
+> Task :customlib_benchmark:extractReleaseNativeSymbolTables
+> Task :customlib_benchmark:createReleaseApkListingFileRedirect
+> Task :customlib_benchmark:processDebugAndroidTestResources
+> Task :customlib_benchmark:processDebugResources
+> Task :customlib_benchmark:compileDebugJavaWithJavac
+> Task :customlib_benchmark:dexBuilderDebug
+> Task :customlib_benchmark:mergeProjectDexDebug
+> Task :customlib_benchmark:bundleDebugClassesToCompileJar
+> Task :customlib_benchmark:mergeReleaseNativeDebugMetadata
+> Task :customlib_benchmark:mergeExtDexDebugAndroidTest
+> Task :customlib_benchmark:compileDebugAndroidTestJavaWithJavac
+> Task :customlib_benchmark:assembleRelease
+> Task :customlib_benchmark:dexBuilderDebugAndroidTest
+> Task :customlib_benchmark:mergeProjectDexDebugAndroidTest
+> Task :customlib_benchmark:packageDebug
+> Task :customlib_benchmark:createDebugApkListingFileRedirect
+> Task :customlib_benchmark:assembleDebug
+> Task :customlib_benchmark:mergeDebugAndroidTestJavaResource
+> Task :customlib_benchmark:packageDebugAndroidTest
+> Task :customlib_benchmark:createDebugAndroidTestApkListingFileRedirect
+> Task :customlib_benchmark:assembleDebugAndroidTest
+> Task :customlib_benchmark:assembleAndroidTest
+
+[Incubating] Problems report is available at: file:///C:/xqvk2/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 34s
+218 actionable tasks: 218 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.0/userguide/configuration_cache_enabling.html

@@ -1,0 +1,355 @@
+{
+  "run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd",
+  "result": "PASSED_DEVICEFARM_TEST_BUT_NOT_FINAL_ACCEPTANCE",
+  "why_not_final": [
+    "short integration run only: prompt_tokens=1, max_new_tokens=1, warmup=0, measured=1",
+    "backend actual is cpu_vulkan_hybrid, not full vulkan",
+    "RMSNorm/RoPE/attention/linear_attention_state/lm_head/sampling/prefill_kv_build stayed CPU",
+    "no BENCH_QUALITY_JSON was produced for this Vulkan attempt",
+    "decode TPS is not a speedup and is not comparable to the official 512/256 benchmark"
+  ],
+  "custom_backend_requested": "vulkan",
+  "custom_backend_actual": "cpu_vulkan_hybrid",
+  "vulkan_generation_kernels_used": true,
+  "calls_mnn_llm_response_for_measured_generation": false,
+  "use_mnn_fallback": 0,
+  "fallback_op_families": [],
+  "op_family_backends": {
+    "q_proj": "vulkan",
+    "k_proj": "vulkan",
+    "v_proj": "vulkan",
+    "o_proj": "vulkan",
+    "gate_proj": "vulkan",
+    "up_proj": "vulkan",
+    "down_proj": "vulkan",
+    "linear_attention_projections": "vulkan",
+    "rmsnorm": "cpu",
+    "rope": "cpu",
+    "attention": "cpu",
+    "linear_attention_state": "cpu",
+    "lm_head": "cpu",
+    "sampling": "cpu",
+    "prefill_kv_build": "cpu"
+  },
+  "prompt_tokens_requested": 1,
+  "max_new_tokens": 1,
+  "warmup": 0,
+  "measured": 1,
+  "prefill_tps_mean": 0.186569,
+  "decode_tps_mean": 0.173017,
+  "decode_tpot_ms_mean": 5779.77,
+  "vulkan_kernel_rows": [
+    {
+      "name": "linear_attn_in_proj_a_w4a16",
+      "op_family": "linear_attention_projection",
+      "backend": "vulkan",
+      "calls": 48,
+      "total_ms": 47.0984,
+      "mean_ms": 0.981217,
+      "min_ms": 0.773854,
+      "max_ms": 1.39052
+    },
+    {
+      "name": "linear_attn_in_proj_b_w4a16",
+      "op_family": "linear_attention_projection",
+      "backend": "vulkan",
+      "calls": 48,
+      "total_ms": 41.1792,
+      "mean_ms": 0.8579,
+      "min_ms": 0.471875,
+      "max_ms": 1.35151
+    },
+    {
+      "name": "linear_attn_in_proj_qkv_w4a16",
+      "op_family": "linear_attention_projection",
+      "backend": "vulkan",
+      "calls": 48,
+      "total_ms": 1322.33,
+      "mean_ms": 27.5486,
+      "min_ms": 19.7361,
+      "max_ms": 53.6833
+    },
+    {
+      "name": "linear_attn_in_proj_z_w4a16",
+      "op_family": "linear_attention_projection",
+      "backend": "vulkan",
+      "calls": 48,
+      "total_ms": 729.889,
+      "mean_ms": 15.206,
+      "min_ms": 9.20255,
+      "max_ms": 19.7862
+    },
+    {
+      "name": "linear_attn_out_proj_w4a16",
+      "op_family": "linear_attention_projection",
+      "backend": "vulkan",
+      "calls": 48,
+      "total_ms": 666.62,
+      "mean_ms": 13.8879,
+      "min_ms": 9.17766,
+      "max_ms": 18.8248
+    },
+    {
+      "name": "linear_down_proj_w4a16",
+      "op_family": "down_proj",
+      "backend": "vulkan",
+      "calls": 64,
+      "total_ms": 2270.69,
+      "mean_ms": 35.4796,
+      "min_ms": 28.2025,
+      "max_ms": 50.3644
+    },
+    {
+      "name": "linear_gate_proj_w4a16",
+      "op_family": "gate_proj",
+      "backend": "vulkan",
+      "calls": 64,
+      "total_ms": 2509.98,
+      "mean_ms": 39.2184,
+      "min_ms": 31.9008,
+      "max_ms": 64.0748
+    },
+    {
+      "name": "linear_k_proj_w4a16",
+      "op_family": "k_proj",
+      "backend": "vulkan",
+      "calls": 16,
+      "total_ms": 75.5819,
+      "mean_ms": 4.72387,
+      "min_ms": 2.84901,
+      "max_ms": 6.79219
+    },
+    {
+      "name": "linear_o_proj_w4a16",
+      "op_family": "o_proj",
+      "backend": "vulkan",
+      "calls": 16,
+      "total_ms": 224.484,
+      "mean_ms": 14.0303,
+      "min_ms": 11.7657,
+      "max_ms": 18.4599
+    },
+    {
+      "name": "linear_q_proj_w4a16",
+      "op_family": "q_proj",
+      "backend": "vulkan",
+      "calls": 16,
+      "total_ms": 438.759,
+      "mean_ms": 27.4225,
+      "min_ms": 21.2485,
+      "max_ms": 35.7931
+    },
+    {
+      "name": "linear_up_proj_w4a16",
+      "op_family": "up_proj",
+      "backend": "vulkan",
+      "calls": 64,
+      "total_ms": 2500.39,
+      "mean_ms": 39.0686,
+      "min_ms": 30.1767,
+      "max_ms": 58.0763
+    },
+    {
+      "name": "linear_v_proj_w4a16",
+      "op_family": "v_proj",
+      "backend": "vulkan",
+      "calls": 16,
+      "total_ms": 70.838,
+      "mean_ms": 4.42738,
+      "min_ms": 2.80531,
+      "max_ms": 5.77161
+    }
+  ],
+  "cpu_kernel_rows_kept_in_hybrid": [
+    {
+      "name": "attention_output_gate_custom",
+      "op_family": "attention",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.624166,
+      "mean_ms": 0.0390104,
+      "min_ms": 0.022344,
+      "max_ms": 0.06599
+    },
+    {
+      "name": "attention_score_custom",
+      "op_family": "attention_score",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.206458,
+      "mean_ms": 0.0129036,
+      "min_ms": 0.004375,
+      "max_ms": 0.021354
+    },
+    {
+      "name": "attention_softmax_custom",
+      "op_family": "attention_softmax",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.015837,
+      "mean_ms": 0.000989812,
+      "min_ms": 0.000625,
+      "max_ms": 0.001459
+    },
+    {
+      "name": "attention_v_reduce_custom",
+      "op_family": "attention_v_reduce",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.051928,
+      "mean_ms": 0.0032455,
+      "min_ms": 0.001302,
+      "max_ms": 0.005157
+    },
+    {
+      "name": "embedding_bf16_row_read",
+      "op_family": "other",
+      "backend": "cpu",
+      "calls": 2,
+      "total_ms": 3.49474,
+      "mean_ms": 1.74737,
+      "min_ms": 0.736302,
+      "max_ms": 2.75844
+    },
+    {
+      "name": "kv_append_custom",
+      "op_family": "other",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.106668,
+      "mean_ms": 0.00666675,
+      "min_ms": 0.003386,
+      "max_ms": 0.010261
+    },
+    {
+      "name": "linear_attention_conv1d_custom",
+      "op_family": "linear_attention_state",
+      "backend": "cpu",
+      "calls": 48,
+      "total_ms": 8.53792,
+      "mean_ms": 0.177873,
+      "min_ms": 0.073958,
+      "max_ms": 0.321615
+    },
+    {
+      "name": "linear_attention_gated_rmsnorm_custom",
+      "op_family": "linear_attention_state",
+      "backend": "cpu",
+      "calls": 48,
+      "total_ms": 2.1663,
+      "mean_ms": 0.0451313,
+      "min_ms": 0.018802,
+      "max_ms": 0.076615
+    },
+    {
+      "name": "linear_attention_qk_l2norm_custom",
+      "op_family": "linear_attention_state",
+      "backend": "cpu",
+      "calls": 48,
+      "total_ms": 0.499997,
+      "mean_ms": 0.0104166,
+      "min_ms": 0.004166,
+      "max_ms": 0.020156
+    },
+    {
+      "name": "linear_attention_state_update_custom",
+      "op_family": "linear_attention_state",
+      "backend": "cpu",
+      "calls": 48,
+      "total_ms": 146.765,
+      "mean_ms": 3.0576,
+      "min_ms": 1.22099,
+      "max_ms": 5.45359
+    },
+    {
+      "name": "lm_head_custom",
+      "op_family": "lm_head",
+      "backend": "cpu",
+      "calls": 1,
+      "total_ms": 67.3979,
+      "mean_ms": 67.3979,
+      "min_ms": 67.3979,
+      "max_ms": 67.3979
+    },
+    {
+      "name": "prefill_kv_build_custom",
+      "op_family": "other",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.12198,
+      "mean_ms": 0.00762375,
+      "min_ms": 0.003958,
+      "max_ms": 0.011771
+    },
+    {
+      "name": "prefill_token_custom",
+      "op_family": "other",
+      "backend": "cpu",
+      "calls": 1,
+      "total_ms": 5357.23,
+      "mean_ms": 5357.23,
+      "min_ms": 5357.23,
+      "max_ms": 5357.23
+    },
+    {
+      "name": "rmsnorm_final",
+      "op_family": "rmsnorm",
+      "backend": "cpu",
+      "calls": 2,
+      "total_ms": 0.111927,
+      "mean_ms": 0.0559635,
+      "min_ms": 0.00802,
+      "max_ms": 0.103907
+    },
+    {
+      "name": "rmsnorm_input",
+      "op_family": "rmsnorm",
+      "backend": "cpu",
+      "calls": 64,
+      "total_ms": 0.971979,
+      "mean_ms": 0.0151872,
+      "min_ms": 0.006042,
+      "max_ms": 0.050208
+    },
+    {
+      "name": "rmsnorm_post_attention",
+      "op_family": "rmsnorm",
+      "backend": "cpu",
+      "calls": 64,
+      "total_ms": 0.674531,
+      "mean_ms": 0.0105395,
+      "min_ms": 0.004635,
+      "max_ms": 0.037031
+    },
+    {
+      "name": "rope_qk_custom",
+      "op_family": "rope",
+      "backend": "cpu",
+      "calls": 16,
+      "total_ms": 0.557083,
+      "mean_ms": 0.0348177,
+      "min_ms": 0.017188,
+      "max_ms": 0.049271
+    },
+    {
+      "name": "sampling_greedy_custom",
+      "op_family": "sampling",
+      "backend": "cpu",
+      "calls": 1,
+      "total_ms": 67.401,
+      "mean_ms": 67.401,
+      "min_ms": 67.401,
+      "max_ms": 67.401
+    },
+    {
+      "name": "silu_gate_mul_custom",
+      "op_family": "activation",
+      "backend": "cpu",
+      "calls": 64,
+      "total_ms": 5.38657,
+      "mean_ms": 0.0841651,
+      "min_ms": 0.041146,
+      "max_ms": 0.207188
+    }
+  ]
+}

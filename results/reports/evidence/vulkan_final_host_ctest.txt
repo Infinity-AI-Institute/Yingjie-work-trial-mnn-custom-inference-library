@@ -1,0 +1,10 @@
+Internal ctest changing into directory: C:/xqvk2/build-host-vulkan-attempt
+Test project C:/xqvk2/build-host-vulkan-attempt
+    Start 1: xq_kernel_correctness
+1/2 Test #1: xq_kernel_correctness ............   Passed    0.01 sec
+    Start 2: xq_runtime_correctness
+2/2 Test #2: xq_runtime_correctness ...........   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.05 sec

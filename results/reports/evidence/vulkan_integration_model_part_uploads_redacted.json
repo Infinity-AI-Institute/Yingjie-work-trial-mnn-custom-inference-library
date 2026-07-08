@@ -1,0 +1,23 @@
+[
+    {
+        "arn":  "arn:aws:devicefarm:us-west-2:884244642857:upload:64d2cc31-abd6-49f8-97da-162f82410bc0/8986e1bc-7a31-41d9-bff0-d52f80ca02a3",
+        "name":  "qwen35_xq_fullcustom_v17_part00.zippart",
+        "status":  "SUCCEEDED",
+        "bytes":  null,
+        "url":  "REDACTED_PRESIGNED_URL"
+    },
+    {
+        "arn":  "arn:aws:devicefarm:us-west-2:884244642857:upload:64d2cc31-abd6-49f8-97da-162f82410bc0/b00760e9-7724-4bbc-9302-c4195bc0d394",
+        "name":  "qwen35_xq_fullcustom_v17_part01.zippart",
+        "status":  "SUCCEEDED",
+        "bytes":  null,
+        "url":  "REDACTED_PRESIGNED_URL"
+    },
+    {
+        "arn":  "arn:aws:devicefarm:us-west-2:884244642857:upload:64d2cc31-abd6-49f8-97da-162f82410bc0/417fe757-73b6-40ff-8001-5ad4ef0b653d",
+        "name":  "qwen35_xq_fullcustom_v17_part02.zippart",
+        "status":  "SUCCEEDED",
+        "bytes":  null,
+        "url":  "REDACTED_PRESIGNED_URL"
+    }
+]

@@ -5,6 +5,7 @@ set(XQWEN35_SOURCES
   runtime/cache_manager.cpp
   runtime/telemetry.cpp
   runtime/custom_model.cpp
+  runtime/vulkan_backend.cpp
   mnn_bridge/mnn_loader.cpp
   mnn_bridge/graph_rewrite.cpp
   mnn_bridge/custom_op_registry.cpp
@@ -34,6 +35,11 @@ target_include_directories(xqwen35
 )
 
 target_compile_definitions(xqwen35 PRIVATE XQWEN35_BUILD=1)
+
+if(ANDROID)
+  target_compile_definitions(xqwen35 PRIVATE XQ_ENABLE_CUSTOM_VULKAN=1)
+  target_link_libraries(xqwen35 PRIVATE vulkan log)
+endif()
 
 if(XQ_ENABLE_MNN)
   target_compile_definitions(xqwen35 PRIVATE XQ_ENABLE_MNN=1)

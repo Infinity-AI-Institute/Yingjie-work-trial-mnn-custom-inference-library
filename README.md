@@ -116,3 +116,15 @@ The cleanup keeps source, documentation, final reports, and small evidence JSON/
 ## Honesty Rules
 
 This repository only claims results backed by artifacts. The final v27 result is a faithful same-device full-model stock-vs-custom benchmark with a separate output-quality guard. It is not a stock-MNN speedup result and does not claim custom Vulkan kernel execution.
+
+## Post-v27 Vulkan Attempt
+
+A later Vulkan implementation attempt is documented separately in `results/reports/final_vulkan_blocker_report.md` and `results/reports/vulkan_iteration_log.md`. That pass added a real custom Vulkan runtime plus a W4A16 GEMV compute shader, validated the shader on AWS Device Farm Samsung Galaxy S26 Ultra, and ran a short full-model custom generation integration where projection-family W4A16 rows reported `backend = vulkan`.
+
+That attempt is not the official final result:
+
+- accepted official result remains v27 CPU customlib;
+- `custom_backend_actual = cpu_vulkan_hybrid`, not full `vulkan`;
+- RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV still ran on CPU;
+- no Vulkan quality-validation `BENCH_QUALITY_JSON` was produced;
+- no 10 TPS or Vulkan speedup is claimed.

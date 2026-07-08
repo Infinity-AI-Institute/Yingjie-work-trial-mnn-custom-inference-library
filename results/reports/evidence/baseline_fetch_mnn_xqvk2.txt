@@ -1,0 +1,113 @@
+powershell : Cloning into 'third_party\MNN'...
+At line:2 char:441
++ ... .10909125'; powershell -NoProfile -ExecutionPolicy Bypass -File scrip ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Cloning into 'third_party\MNN'...:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Updating files:  20% (1693/8227)
+Updating files:  21% (1728/8227)
+Updating files:  22% (1810/8227)
+Updating files:  23% (1893/8227)
+Updating files:  24% (1975/8227)
+Updating files:  25% (2057/8227)
+Updating files:  26% (2140/8227)
+Updating files:  27% (2222/8227)
+Updating files:  28% (2304/8227)
+Updating files:  29% (2386/8227)
+Updating files:  30% (2469/8227)
+Updating files:  31% (2551/8227)
+Updating files:  32% (2633/8227)
+Updating files:  33% (2715/8227)
+Updating files:  34% (2798/8227)
+Updating files:  35% (2880/8227)
+Updating files:  36% (2962/8227)
+Updating files:  37% (3044/8227)
+Updating files:  38% (3127/8227)
+Updating files:  39% (3209/8227)
+Updating files:  40% (3291/8227)
+Updating files:  41% (3374/8227)
+Updating files:  42% (3456/8227)
+Updating files:  42% (3525/8227)
+Updating files:  43% (3538/8227)
+Updating files:  44% (3620/8227)
+Updating files:  45% (3703/8227)
+Updating files:  46% (3785/8227)
+Updating files:  47% (3867/8227)
+Updating files:  48% (3949/8227)
+Updating files:  49% (4032/8227)
+Updating files:  50% (4114/8227)
+Updating files:  51% (4196/8227)
+Updating files:  52% (4279/8227)
+Updating files:  53% (4361/8227)
+Updating files:  54% (4443/8227)
+Updating files:  55% (4525/8227)
+Updating files:  56% (4608/8227)
+Updating files:  57% (4690/8227)
+Updating files:  58% (4772/8227)
+Updating files:  59% (4854/8227)
+Updating files:  60% (4937/8227)
+Updating files:  60% (4939/8227)
+Updating files:  61% (5019/8227)
+Updating files:  62% (5101/8227)
+Updating files:  63% (5184/8227)
+Updating files:  64% (5266/8227)
+Updating files:  65% (5348/8227)
+Updating files:  66% (5430/8227)
+Updating files:  67% (5513/8227)
+Updating files:  68% (5595/8227)
+Updating files:  69% (5677/8227)
+Updating files:  70% (5759/8227)
+Updating files:  71% (5842/8227)
+Updating files:  72% (5924/8227)
+Updating files:  73% (6006/8227)
+Updating files:  74% (6088/8227)
+Updating files:  75% (6171/8227)
+Updating files:  76% (6253/8227)
+Updating files:  77% (6335/8227)
+Updating files:  78% (6418/8227)
+Updating files:  79% (6500/8227)
+Updating files:  79% (6528/8227)
+Updating files:  80% (6582/8227)
+Updating files:  81% (6664/8227)
+Updating files:  82% (6747/8227)
+Updating files:  83% (6829/8227)
+Updating files:  84% (6911/8227)
+Updating files:  85% (6993/8227)
+Updating files:  86% (7076/8227)
+Updating files:  87% (7158/8227)
+Updating files:  88% (7240/8227)
+Updating files:  89% (7323/8227)
+Updating files:  90% (7405/8227)
+Updating files:  91% (7487/8227)
+Updating files:  92% (7569/8227)
+Updating files:  93% (7652/8227)
+Updating files:  94% (7734/8227)
+Updating files:  95% (7816/8227)
+Updating files:  96% (7898/8227)
+Updating files:  97% (7981/8227)
+Updating files:  98% (8063/8227)
+Updating files:  99% (8145/8227)
+Updating files: 100% (8227/8227)
+Updating files: 100% (8227/8227), done.
+From https://github.com/alibaba/MNN
+ * branch            0bff03cbef43c783f44e41484b9f8a0b28bd758d -> FETCH_HEAD
+Note: switching to '0bff03cbef43c783f44e41484b9f8a0b28bd758d'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 0bff03c Merge pull request #4570 from LudovicoYIN/llm-qnn-raise-stack
+0bff03cbef43c783f44e41484b9f8a0b28bd758d

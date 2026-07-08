@@ -9,6 +9,22 @@
 - Custom speedup claim allowed: NO. Final custom decode TPS is `2.11989` and fresh stock MNN CPU decode TPS is `2.26870`, so custom is `0.9344x` stock CPU. The accepted v27 custom path is faster than v17 by `9.60%` but still slower than stock MNN CPU.
 - Vulkan attempted: YES. The custom run requested `cpu_vulkan_hybrid` and probed Vulkan successfully, but `custom_backend_actual = cpu` and no custom Vulkan generation kernels were used. Stock Vulkan remains a prior attempted backend that crashed before benchmark JSON in v17 and is not used for the final speed comparison.
 
+## Post-v27 Vulkan Implementation Attempt
+
+After v27, a separate Vulkan pass added a real custom Vulkan runtime and W4A16 GEMV compute shader. The shader passed Device Farm correctness on Samsung Galaxy S26 Ultra, and a short full-model custom integration run routed projection-family W4A16 kernels through Vulkan.
+
+That later attempt does not replace this final report:
+
+- Device Farm Vulkan selftest PASS run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/da6dfbc9-27eb-4a42-9202-bffda6b6bbe6`
+- Short full-model hybrid run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd`
+- Short run backend: `custom_backend_requested = vulkan`, `custom_backend_actual = cpu_vulkan_hybrid`
+- Vulkan families: W4A16 projection families only
+- CPU families remaining: RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV
+- Quality status: no Vulkan `BENCH_QUALITY_JSON`; not accepted as a quality-passing Vulkan final
+- Speed status: no 10 TPS claim and no Vulkan speedup claim
+
+See `results/reports/final_vulkan_blocker_report.md` and `results/reports/vulkan_iteration_log.md` for the implementation attempt and blocker evidence.
+
 ## Final Acceptance Summary
 
 | Gate | Result | Evidence |

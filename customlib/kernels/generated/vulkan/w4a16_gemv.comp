@@ -1,0 +1,74 @@
+#version 450
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+layout(push_constant) uniform Params {
+    uint rows;
+    uint cols;
+    uint group_size;
+    uint groups_per_row;
+    uint row_stride_bytes;
+    uint affine_asymmetric;
+    uint has_bias;
+    uint _pad0;
+} params;
+
+layout(std430, set = 0, binding = 0) readonly buffer PackedWeights {
+    uint packed_words[];
+};
+
+layout(std430, set = 0, binding = 1) readonly buffer Scales {
+    float scales[];
+};
+
+layout(std430, set = 0, binding = 2) readonly buffer Zeros {
+    float zeros[];
+};
+
+layout(std430, set = 0, binding = 3) readonly buffer InputVector {
+    float x[];
+};
+
+layout(std430, set = 0, binding = 4) readonly buffer Bias {
+    float bias[];
+};
+
+layout(std430, set = 0, binding = 5) writeonly buffer OutputVector {
+    float y[];
+};
+
+uint packed_byte(uint byte_index) {
+    uint word = packed_words[byte_index >> 2u];
+    uint shift = (byte_index & 3u) * 8u;
+    return (word >> shift) & 0xffu;
+}
+
+void main() {
+    uint row = gl_GlobalInvocationID.x;
+    if (row >= params.rows) {
+        return;
+    }
+
+    float acc = params.has_bias != 0u ? bias[row] : 0.0;
+    for (uint g = 0u; g < params.groups_per_row; ++g) {
+        uint c0 = g * params.group_size;
+        uint c1 = min(params.cols, c0 + params.group_size);
+        float code_dot = 0.0;
+        float x_sum = 0.0;
+        for (uint c = c0; c < c1; ++c) {
+            uint byte_index = row * params.row_stride_bytes + (c >> 1u);
+            uint byte_value = packed_byte(byte_index);
+            uint code = ((c & 1u) == 0u) ? (byte_value & 0x0fu) : ((byte_value >> 4u) & 0x0fu);
+            float xv = x[c];
+            code_dot += float(code) * xv;
+            x_sum += xv;
+        }
+        uint meta = row * params.groups_per_row + g;
+        if (params.affine_asymmetric != 0u) {
+            acc += scales[meta] * code_dot + zeros[meta] * x_sum;
+        } else {
+            acc += scales[meta] * (code_dot - zeros[meta] * x_sum);
+        }
+    }
+    y[row] = acc;
+}

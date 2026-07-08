@@ -6,21 +6,28 @@
 #include <cstdint>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace xq {
+
+namespace kernels {
+class VulkanBackend;
+}
 
 struct KernelStat {
     uint64_t calls = 0;
     double total_ms = 0.0;
     double min_ms = 0.0;
     double max_ms = 0.0;
+    std::string backend = "cpu";
 };
 
 class KernelTrace {
 public:
     void add(const std::string& name, double ms);
+    void add(const std::string& name, double ms, const std::string& backend);
     void reset();
     std::string toJson() const;
 
@@ -31,6 +38,7 @@ private:
 class CustomModel {
 public:
     bool load(const std::string& model_dir, std::string* error);
+    bool load(const std::string& model_dir, const std::string& backend, std::string* error);
     bool prefill(const int32_t* token_ids, size_t n_tokens, KernelTrace* trace, std::string* error);
     bool decodeOne(int32_t* token_id, size_t position, KernelTrace* trace, std::string* error);
     void resetState();
@@ -129,6 +137,10 @@ private:
     std::vector<float> logits_;
     std::ifstream embedding_stream_;
     std::vector<uint16_t> embedding_row_bf16_;
+    std::string backend_ = "cpu";
+    mutable std::unique_ptr<kernels::VulkanBackend> vulkan_backend_;
+    mutable uint64_t vulkan_linear_calls_ = 0;
+    mutable uint64_t vulkan_linear_failures_ = 0;
 };
 
 }  // namespace xq

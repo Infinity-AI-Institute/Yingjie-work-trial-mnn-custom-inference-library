@@ -1,0 +1,8 @@
+scan /storage/emulated/0/Android/data/com.example.xqwen35bench/files
+model zip part urls provided count=3
+model_zip_part_0_bytes=4500000000 total=4500000000
+model_zip_part_1_bytes=4500000000 total=9000000000
+model_zip_part_2_bytes=2266405198 total=11266405198
+model_zip_sha256=9de692be1c1ef1002fac25bd8f93c76e1d31975caa234fe1725f9eb294bfaa34
+delete_zip_after_unzip=true
+scan /storage/emulated/0/Android/data/com.example.xqwen35bench/files
