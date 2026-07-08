@@ -1,0 +1,1453 @@
+{
+  "schema_version": 4,
+  "engine": "customlib",
+  "backend": "cpu_vulkan_hybrid",
+  "backend_requested": "vulkan",
+  "backend_actual": "cpu_vulkan_hybrid",
+  "custom_backend_requested": "vulkan",
+  "custom_backend_actual": "cpu_vulkan_hybrid",
+  "status": "ok",
+  "model": {
+    "hf_repo": "Qwen/Qwen3.5-9B",
+    "hf_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "format": "xqwen35_custom_w4a16",
+    "quantization": {
+      "bits": 4,
+      "group_size": 64,
+      "scheme": "w4a16_groupwise"
+    }
+  },
+  "artifact": {
+    "model_dir": "/storage/emulated/0/Android/data/com.example.xqwen35bench/files"
+  },
+  "runtime": {
+    "threads": 8,
+    "backend_actual_verified": true,
+    "precision": "low",
+    "memory": "low",
+    "power": "normal",
+    "use_mmap": true,
+    "reuse_kv": false,
+    "selected_kernels": {
+      "summary": "custom_decode_loop;hotpath_replaced=true;full_custom_decode=true;backend_request=cpu_vulkan_hybrid;linear_backend=vulkan_attempt_unresident_w4a16_gemv;vulkan_linear_calls=497;vulkan_linear_failures=0;vulkan_tensor_calls=659;vulkan_tensor_failures=0;linear=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,linear_attn_qkv_a_b_z_out,lm_head;rmsnorm=vulkan_attempt_vector;rope=vulkan_attempt_vector;attention=vulkan_attempt_gqa_decode;attention_output_gate=vulkan_attempt_vector;linear_attention_state=vulka",
+      "hotpath_replaced": true,
+      "full_custom_decode": true,
+      "replaced_op_families": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj",
+        "rmsnorm",
+        "rope",
+        "attention",
+        "linear_attention_state",
+        "lm_head",
+        "sampling",
+        "prefill_kv_build"
+      ],
+      "fallback_op_families": [],
+      "op_family_backends": {
+        "q_proj": "vulkan",
+        "k_proj": "vulkan",
+        "v_proj": "vulkan",
+        "o_proj": "vulkan",
+        "gate_proj": "vulkan",
+        "up_proj": "vulkan",
+        "down_proj": "vulkan",
+        "linear_attention_projections": "vulkan",
+        "rmsnorm": "vulkan",
+        "rope": "vulkan",
+        "attention": "vulkan",
+        "linear_attention_state": "vulkan",
+        "activation": "vulkan",
+        "lm_head": "vulkan",
+        "sampling": "vulkan",
+        "prefill_kv_build": "vulkan"
+      }
+    }
+  },
+  "custom_path": {
+    "calls_mnn_llm_response_for_measured_generation": false,
+    "use_mnn_fallback": 0,
+    "vulkan_generation_kernels_used": true,
+    "decode_loop": "xq_session::generate -> xq_prefill/xq_decode_one -> CustomModel::prefill/runLayer/sampleGreedy",
+    "weight_format": "xq4_groupwise_w4a16"
+  },
+  "vulkan_attempt": {
+    "status": "ok",
+    "requested_backend": "vulkan",
+    "libvulkan_loaded": true,
+    "vkGetInstanceProcAddr_found": true,
+    "full_or_hybrid_kernel_status": "w4a16_linear_kernels_enabled",
+    "scope": "custom Vulkan W4A16 GEMV is attempted for projection families; RMSNorm/RoPE/attention/linear_attention_state/lm_head/sampling/prefill KV remain CPU in this integration",
+    "full_vulkan_generation": false,
+    "failure_reason": "full Vulkan generation is not accepted because major non-linear op families and lm_head/sampling are still CPU and W4A16 weights are uploaded per GEMV call"
+  },
+  "generation": {
+    "prompt_tokens_requested": 1,
+    "max_new_tokens": 1,
+    "prompt_token_id": 16,
+    "temperature": 0,
+    "top_k": 1,
+    "top_p": 1,
+    "batch_size": 1
+  },
+  "iterations": {
+    "warmup": 0,
+    "measured": 1,
+    "target_measured": 1
+  },
+  "timing": {
+    "load_ms": 3860.68,
+    "total_generate_ms": {
+      "mean": 14024.7,
+      "median": 14024.7,
+      "min": 14024.7,
+      "max": 14024.7,
+      "stdev": 0
+    }
+  },
+  "tokens_per_second": {
+    "prefill": {
+      "mean": 0.145409,
+      "median": 0.145409,
+      "min": 0.145409,
+      "max": 0.145409,
+      "stdev": 0
+    },
+    "decode": {
+      "mean": 0.139909,
+      "median": 0.139909,
+      "min": 0.139909,
+      "max": 0.139909,
+      "stdev": 0
+    }
+  },
+  "time_per_output_token_ms": {
+    "decode": {
+      "mean": 7147.49,
+      "median": 7147.49,
+      "min": 7147.49,
+      "max": 7147.49
+    }
+  },
+  "runs": [
+    {
+      "index": 0,
+      "warmup": false,
+      "status_code": 0,
+      "prompt_tokens": 1,
+      "generated_tokens": 1,
+      "prefill_ms": 6877.16,
+      "first_token_ms": 7147.49,
+      "decode_total_ms": 7147.49,
+      "total_generate_ms": 14024.7,
+      "prefill_tokens_per_second": 0.145409,
+      "decode_tokens_per_second": 0.139909,
+      "error": ""
+    }
+  ],
+  "per_kernel_wall_clock": {
+    "rows": [
+      {
+        "name": "attention_gqa_decode_custom",
+        "op_family": "attention",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 8.7299,
+        "mean_ms": 0.545619,
+        "min_ms": 0.279323,
+        "max_ms": 0.916927
+      },
+      {
+        "name": "attention_output_gate_custom",
+        "op_family": "attention",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 8.2763,
+        "mean_ms": 0.517269,
+        "min_ms": 0.258281,
+        "max_ms": 0.804427
+      },
+      {
+        "name": "attention_score_custom",
+        "op_family": "attention_score",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 2.90997,
+        "mean_ms": 0.181873,
+        "min_ms": 0.0931077,
+        "max_ms": 0.305642
+      },
+      {
+        "name": "attention_softmax_custom",
+        "op_family": "attention_softmax",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 2.90997,
+        "mean_ms": 0.181873,
+        "min_ms": 0.0931077,
+        "max_ms": 0.305642
+      },
+      {
+        "name": "attention_v_reduce_custom",
+        "op_family": "attention_v_reduce",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 2.90997,
+        "mean_ms": 0.181873,
+        "min_ms": 0.0931077,
+        "max_ms": 0.305642
+      },
+      {
+        "name": "embedding_bf16_row_read",
+        "op_family": "other",
+        "backend": "cpu",
+        "calls": 2,
+        "total_ms": 2.81807,
+        "mean_ms": 1.40904,
+        "min_ms": 0.729427,
+        "max_ms": 2.08865
+      },
+      {
+        "name": "k_norm_custom",
+        "op_family": "other",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 6.2625,
+        "mean_ms": 0.391406,
+        "min_ms": 0.243907,
+        "max_ms": 0.643645
+      },
+      {
+        "name": "kv_append_custom",
+        "op_family": "prefill_kv_build",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 15.0247,
+        "mean_ms": 0.939043,
+        "min_ms": 0.48474,
+        "max_ms": 1.88255
+      },
+      {
+        "name": "linear_attention_conv1d_custom",
+        "op_family": "linear_attention_state",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 44.7126,
+        "mean_ms": 0.931512,
+        "min_ms": 0.591979,
+        "max_ms": 1.33136
+      },
+      {
+        "name": "linear_attention_gated_rmsnorm_custom",
+        "op_family": "linear_attention_state",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 30.4393,
+        "mean_ms": 0.634152,
+        "min_ms": 0.450625,
+        "max_ms": 1.09286
+      },
+      {
+        "name": "linear_attention_qk_l2norm_custom",
+        "op_family": "linear_attention_state",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 38.4006,
+        "mean_ms": 0.800012,
+        "min_ms": 0.433541,
+        "max_ms": 1.42578
+      },
+      {
+        "name": "linear_attention_state_update_custom",
+        "op_family": "linear_attention_state",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 175.775,
+        "mean_ms": 3.66198,
+        "min_ms": 1.6799,
+        "max_ms": 7.43906
+      },
+      {
+        "name": "linear_attn_in_proj_a_w4a16",
+        "op_family": "linear_attention_projection",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 45.991,
+        "mean_ms": 0.958146,
+        "min_ms": 0.638646,
+        "max_ms": 1.44188
+      },
+      {
+        "name": "linear_attn_in_proj_b_w4a16",
+        "op_family": "linear_attention_projection",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 40.9459,
+        "mean_ms": 0.85304,
+        "min_ms": 0.484114,
+        "max_ms": 1.16896
+      },
+      {
+        "name": "linear_attn_in_proj_qkv_w4a16",
+        "op_family": "linear_attention_projection",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 1424.97,
+        "mean_ms": 29.6869,
+        "min_ms": 15.929,
+        "max_ms": 47.0579
+      },
+      {
+        "name": "linear_attn_in_proj_z_w4a16",
+        "op_family": "linear_attention_projection",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 801.631,
+        "mean_ms": 16.7006,
+        "min_ms": 7.52187,
+        "max_ms": 24.6462
+      },
+      {
+        "name": "linear_attn_out_proj_w4a16",
+        "op_family": "linear_attention_projection",
+        "backend": "vulkan",
+        "calls": 48,
+        "total_ms": 749.271,
+        "mean_ms": 15.6098,
+        "min_ms": 7.50552,
+        "max_ms": 22.5033
+      },
+      {
+        "name": "linear_down_proj_w4a16",
+        "op_family": "down_proj",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 2590.91,
+        "mean_ms": 40.483,
+        "min_ms": 22.6894,
+        "max_ms": 58.3029
+      },
+      {
+        "name": "linear_gate_proj_w4a16",
+        "op_family": "gate_proj",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 2663.04,
+        "mean_ms": 41.61,
+        "min_ms": 23.5346,
+        "max_ms": 59.5702
+      },
+      {
+        "name": "linear_k_proj_w4a16",
+        "op_family": "k_proj",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 75.5629,
+        "mean_ms": 4.72268,
+        "min_ms": 3.04609,
+        "max_ms": 5.88511
+      },
+      {
+        "name": "linear_o_proj_w4a16",
+        "op_family": "o_proj",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 250.022,
+        "mean_ms": 15.6264,
+        "min_ms": 10.6477,
+        "max_ms": 23.6982
+      },
+      {
+        "name": "linear_q_proj_w4a16",
+        "op_family": "q_proj",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 469.258,
+        "mean_ms": 29.3286,
+        "min_ms": 17.7113,
+        "max_ms": 48.3224
+      },
+      {
+        "name": "linear_up_proj_w4a16",
+        "op_family": "up_proj",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 2699.62,
+        "mean_ms": 42.1815,
+        "min_ms": 25.5334,
+        "max_ms": 64.9785
+      },
+      {
+        "name": "linear_v_proj_w4a16",
+        "op_family": "v_proj",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 78.3677,
+        "mean_ms": 4.89798,
+        "min_ms": 3.02297,
+        "max_ms": 7.42026
+      },
+      {
+        "name": "lm_head_custom",
+        "op_family": "lm_head",
+        "backend": "vulkan",
+        "calls": 1,
+        "total_ms": 1583.25,
+        "mean_ms": 1583.25,
+        "min_ms": 1583.25,
+        "max_ms": 1583.25
+      },
+      {
+        "name": "prefill_kv_build_custom",
+        "op_family": "prefill_kv_build",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 15.0503,
+        "mean_ms": 0.940645,
+        "min_ms": 0.485417,
+        "max_ms": 1.88427
+      },
+      {
+        "name": "prefill_token_custom",
+        "op_family": "other",
+        "backend": "vulkan",
+        "calls": 1,
+        "total_ms": 6874.76,
+        "mean_ms": 6874.76,
+        "min_ms": 6874.76,
+        "max_ms": 6874.76
+      },
+      {
+        "name": "q_norm_custom",
+        "op_family": "other",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 9.28995,
+        "mean_ms": 0.580622,
+        "min_ms": 0.494688,
+        "max_ms": 0.818334
+      },
+      {
+        "name": "residual_add_attention_custom",
+        "op_family": "attention",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 40.0666,
+        "mean_ms": 0.62604,
+        "min_ms": 0.482188,
+        "max_ms": 0.874896
+      },
+      {
+        "name": "residual_add_mlp_custom",
+        "op_family": "other",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 46.2578,
+        "mean_ms": 0.722778,
+        "min_ms": 0.46052,
+        "max_ms": 1.12693
+      },
+      {
+        "name": "rmsnorm_final",
+        "op_family": "rmsnorm",
+        "backend": "vulkan",
+        "calls": 2,
+        "total_ms": 1.82943,
+        "mean_ms": 0.914713,
+        "min_ms": 0.841302,
+        "max_ms": 0.988125
+      },
+      {
+        "name": "rmsnorm_input",
+        "op_family": "rmsnorm",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 32.313,
+        "mean_ms": 0.504891,
+        "min_ms": 0.272813,
+        "max_ms": 0.984896
+      },
+      {
+        "name": "rmsnorm_post_attention",
+        "op_family": "rmsnorm",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 27.3385,
+        "mean_ms": 0.427164,
+        "min_ms": 0.278959,
+        "max_ms": 0.789531
+      },
+      {
+        "name": "rope_qk_custom",
+        "op_family": "rope",
+        "backend": "vulkan",
+        "calls": 16,
+        "total_ms": 8.56464,
+        "mean_ms": 0.53529,
+        "min_ms": 0.273959,
+        "max_ms": 1.00109
+      },
+      {
+        "name": "sampling_greedy_custom",
+        "op_family": "sampling",
+        "backend": "vulkan",
+        "calls": 1,
+        "total_ms": 1583.26,
+        "mean_ms": 1583.26,
+        "min_ms": 1583.26,
+        "max_ms": 1583.26
+      },
+      {
+        "name": "silu_gate_mul_custom",
+        "op_family": "activation",
+        "backend": "vulkan",
+        "calls": 64,
+        "total_ms": 51.6877,
+        "mean_ms": 0.80762,
+        "min_ms": 0.600834,
+        "max_ms": 1.20417
+      }
+    ]
+  },
+  "custom_kernel_microbench": {
+    "status": "ok",
+    "measurement": "on_device_microbench",
+    "implementation": "generated_tiled_neon_fused_dequant_gemv_parallel_group_sum_reuse",
+    "iterations": {
+      "warmup": 1,
+      "measured": 3
+    },
+    "qwen35_shapes": {
+      "hidden_size": 4096,
+      "intermediate_size": 12288,
+      "num_attention_heads": 16,
+      "num_key_value_heads": 4,
+      "head_dim": 256,
+      "linear_key_head_dim": 128,
+      "linear_value_head_dim": 128
+    },
+    "rows": [
+      {
+        "name": "gemv_w4a16_attn_4096x4096",
+        "family": "linear_w4a16_gemv",
+        "op_family": "linear_w4a16_gemv",
+        "backend": "cpu",
+        "implementation": "generated_tiled_neon_fused_dequant_gemv_parallel_group_sum_reuse",
+        "qwen35_shape": "attention_or_output_projection",
+        "dims": {
+          "rows": 4096,
+          "cols": 4096,
+          "bits": 4,
+          "group_size": 64,
+          "input_dtype": "fp32_as_a16_proxy"
+        },
+        "wall_ms": {
+          "mean": 0.840104,
+          "median": 0.81026,
+          "min": 0.800885,
+          "max": 0.909167,
+          "stdev": 0.0489847
+        },
+        "checksum": 320.586
+      },
+      {
+        "name": "gemv_w4a16_mlp_up_12288x4096",
+        "family": "linear_w4a16_gemv",
+        "op_family": "linear_w4a16_gemv",
+        "backend": "cpu",
+        "implementation": "generated_tiled_neon_fused_dequant_gemv_parallel_group_sum_reuse",
+        "qwen35_shape": "mlp_gate_or_up_projection",
+        "dims": {
+          "rows": 12288,
+          "cols": 4096,
+          "bits": 4,
+          "group_size": 64,
+          "input_dtype": "fp32_as_a16_proxy"
+        },
+        "wall_ms": {
+          "mean": 2.54184,
+          "median": 2.48203,
+          "min": 2.39229,
+          "max": 2.7512,
+          "stdev": 0.152504
+        },
+        "checksum": 13.1145
+      },
+      {
+        "name": "gemv_w4a16_mlp_down_4096x12288",
+        "family": "linear_w4a16_gemv",
+        "op_family": "linear_w4a16_gemv",
+        "backend": "cpu",
+        "implementation": "generated_tiled_neon_fused_dequant_gemv_parallel_group_sum_reuse",
+        "qwen35_shape": "mlp_down_projection",
+        "dims": {
+          "rows": 4096,
+          "cols": 12288,
+          "bits": 4,
+          "group_size": 64,
+          "input_dtype": "fp32_as_a16_proxy"
+        },
+        "wall_ms": {
+          "mean": 2.42701,
+          "median": 2.39412,
+          "min": 2.39146,
+          "max": 2.49547,
+          "stdev": 0.0484171
+        },
+        "checksum": 207.929
+      },
+      {
+        "name": "rmsnorm_hidden4096",
+        "family": "rmsnorm",
+        "op_family": "rmsnorm",
+        "backend": "cpu",
+        "implementation": "customlib_reference",
+        "qwen35_shape": "hidden_size",
+        "dims": {
+          "n": 4096,
+          "eps": 1e-06,
+          "dtype": "fp32_as_bf16_proxy"
+        },
+        "wall_ms": {
+          "mean": 0.00493067,
+          "median": 0.004948,
+          "min": 0.004896,
+          "max": 0.004948,
+          "stdev": 2.4513e-05
+        },
+        "checksum": 9.94688
+      },
+      {
+        "name": "rope_q_heads16_dim256_pos512",
+        "family": "rope",
+        "op_family": "rope",
+        "backend": "cpu",
+        "implementation": "customlib_reference",
+        "qwen35_shape": "q_heads_x_head_dim",
+        "dims": {
+          "heads": 16,
+          "head_dim": 256,
+          "position": 512,
+          "theta": 10000000
+        },
+        "wall_ms": {
+          "mean": 0.110139,
+          "median": 0.110104,
+          "min": 0.110052,
+          "max": 0.110261,
+          "stdev": 8.88407e-05
+        },
+        "checksum": 2205.14
+      },
+      {
+        "name": "gqa_decode_ctx512_q16_kv4_dim256",
+        "family": "attention_decode",
+        "op_family": "attention_decode",
+        "backend": "cpu",
+        "implementation": "customlib_reference",
+        "qwen35_shape": "full_attention_layer_decode",
+        "dims": {
+          "context": 512,
+          "kv_heads": 4,
+          "q_heads": 16,
+          "head_dim": 256
+        },
+        "wall_ms": {
+          "mean": 1.84019,
+          "median": 1.8476,
+          "min": 1.81974,
+          "max": 1.85323,
+          "stdev": 0.014643
+        },
+        "checksum": -0.00442319
+      },
+      {
+        "name": "gated_delta_decode_k128_v128",
+        "family": "linear_attention_delta",
+        "op_family": "linear_attention_delta",
+        "backend": "cpu",
+        "implementation": "customlib_reference",
+        "qwen35_shape": "linear_attention_layer_decode",
+        "dims": {
+          "key_dim": 128,
+          "value_dim": 128,
+          "state_elements": 16384
+        },
+        "wall_ms": {
+          "mean": 0.036354,
+          "median": 0.036354,
+          "min": 0.036302,
+          "max": 0.036406,
+          "stdev": 4.24578e-05
+        },
+        "checksum": -0.0171842
+      }
+    ]
+  },
+  "mnn_hotpath_op_trace": {
+    "status": "ok",
+    "measurement": "mnn_llm_debug_callback_hotpath",
+    "note": "callback timing includes callback overhead; stage labels are inferred from LlmContext gen_seq_len",
+    "trace_generation": {
+      "prompt_tokens_requested": 512,
+      "max_new_tokens": 16,
+      "prompt_tokens_observed": 512,
+      "generated_tokens_observed": 16,
+      "status": "max_tokens_finished"
+    },
+    "timing": {
+      "load_wall_ms": 7797.93,
+      "response_wall_ms": 18307.9,
+      "prefill_ms": 11061.2,
+      "decode_total_ms": 7215.42,
+      "ttfa_ms": 0
+    },
+    "tokens_per_second": {
+      "prefill": 46.2879,
+      "decode": 2.21747
+    },
+    "time_per_output_token_ms": {
+      "decode": 450.964
+    },
+    "op_events": {
+      "unique_ops": 2672,
+      "calls": 22712,
+      "summed_callback_ms": 17997
+    },
+    "top_by_type": [
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "Convolution",
+        "calls": 249,
+        "total_ms": 9606.5,
+        "mean_ms": 38.5803,
+        "min_ms": 1.57948,
+        "max_ms": 91.0206,
+        "flops_m": 3543290.0
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "Convolution",
+        "name": "Convolution",
+        "calls": 3984,
+        "total_ms": 4403.5,
+        "mean_ms": 1.1053,
+        "min_ms": 0.017291,
+        "max_ms": 17.4143,
+        "flops_m": 7935.62
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "UnaryOp",
+        "name": "UnaryOp",
+        "calls": 2464,
+        "total_ms": 1336.82,
+        "mean_ms": 0.54254,
+        "min_ms": 0.008073,
+        "max_ms": 0.911302,
+        "flops_m": 0.507141
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Raster",
+        "name": "Raster",
+        "calls": 521,
+        "total_ms": 487.108,
+        "mean_ms": 0.934949,
+        "min_ms": 0.002343,
+        "max_ms": 3.1101,
+        "flops_m": 1241.7
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "LinearAttention",
+        "name": "LinearAttention",
+        "calls": 384,
+        "total_ms": 449.394,
+        "mean_ms": 1.1703,
+        "min_ms": 0.093073,
+        "max_ms": 1.79604,
+        "flops_m": 90.7346
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "LayerNorm",
+        "name": "LayerNorm",
+        "calls": 1680,
+        "total_ms": 355.727,
+        "mean_ms": 0.211742,
+        "min_ms": 0.004895,
+        "max_ms": 1.07615,
+        "flops_m": 0.386719
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "LinearAttention",
+        "name": "LinearAttention",
+        "calls": 24,
+        "total_ms": 301.117,
+        "mean_ms": 12.5465,
+        "min_ms": 10.7632,
+        "max_ms": 14.0093,
+        "flops_m": 46456.1
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "While",
+        "name": "While",
+        "calls": 528,
+        "total_ms": 275.503,
+        "mean_ms": 0.521787,
+        "min_ms": 0.003958,
+        "max_ms": 0.821615,
+        "flops_m": 0.0195618
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "UnaryOp",
+        "name": "UnaryOp",
+        "calls": 154,
+        "total_ms": 236.522,
+        "mean_ms": 1.53586,
+        "min_ms": 0.515105,
+        "max_ms": 5.14828,
+        "flops_m": 259.656
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "BinaryOp",
+        "name": "BinaryOp",
+        "calls": 169,
+        "total_ms": 115.647,
+        "mean_ms": 0.6843,
+        "min_ms": 0.003073,
+        "max_ms": 1.66557,
+        "flops_m": 389.422
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Attention",
+        "name": "Attention",
+        "calls": 8,
+        "total_ms": 112.243,
+        "mean_ms": 14.0303,
+        "min_ms": 12.3556,
+        "max_ms": 16.2657,
+        "flops_m": 17182
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "Attention",
+        "name": "Attention",
+        "calls": 128,
+        "total_ms": 94.5636,
+        "mean_ms": 0.738778,
+        "min_ms": 0.576458,
+        "max_ms": 1.04714,
+        "flops_m": 0.065544
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "LayerNorm",
+        "name": "LayerNorm",
+        "calls": 105,
+        "total_ms": 90.1411,
+        "mean_ms": 0.858486,
+        "min_ms": 0.016822,
+        "max_ms": 1.7438,
+        "flops_m": 196.004
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "Raster",
+        "name": "Raster",
+        "calls": 8336,
+        "total_ms": 61.0383,
+        "mean_ms": 0.00732225,
+        "min_ms": 0.001562,
+        "max_ms": 0.708646,
+        "flops_m": 2.66934
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "While",
+        "name": "While",
+        "calls": 81,
+        "total_ms": 43.4217,
+        "mean_ms": 0.536071,
+        "min_ms": 0.050885,
+        "max_ms": 0.784896,
+        "flops_m": 10.7656
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "BinaryOp",
+        "name": "BinaryOp",
+        "calls": 3472,
+        "total_ms": 16.9738,
+        "mean_ms": 0.00488878,
+        "min_ms": 0.001302,
+        "max_ms": 0.08401,
+        "flops_m": 0.762054
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Cast",
+        "name": "Cast",
+        "calls": 25,
+        "total_ms": 8.78395,
+        "mean_ms": 0.351358,
+        "min_ms": 0.003073,
+        "max_ms": 0.415,
+        "flops_m": 48.0015
+      },
+      {
+        "stage": "decode_inferred",
+        "type": "Cast",
+        "name": "Cast",
+        "calls": 400,
+        "total_ms": 2.03318,
+        "mean_ms": 0.00508295,
+        "min_ms": 0.001823,
+        "max_ms": 0.026459,
+        "flops_m": 0.0937529
+      }
+    ],
+    "top_by_name": [
+      {
+        "stage": "decode_inferred",
+        "type": "Convolution",
+        "name": "/lm/lm_head/Linear",
+        "calls": 16,
+        "total_ms": 246.809,
+        "mean_ms": 15.4256,
+        "min_ms": 13.432,
+        "max_ms": 17.4143,
+        "flops_m": 1017.12
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.11/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 91.0206,
+        "mean_ms": 91.0206,
+        "min_ms": 91.0206,
+        "max_ms": 91.0206,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.7/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 85.9578,
+        "mean_ms": 85.9578,
+        "min_ms": 85.9578,
+        "max_ms": 85.9578,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.8/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 84.7124,
+        "mean_ms": 84.7124,
+        "min_ms": 84.7124,
+        "max_ms": 84.7124,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.14/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 84.5302,
+        "mean_ms": 84.5302,
+        "min_ms": 84.5302,
+        "max_ms": 84.5302,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.28/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 83.7421,
+        "mean_ms": 83.7421,
+        "min_ms": 83.7421,
+        "max_ms": 83.7421,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.5/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 83.4459,
+        "mean_ms": 83.4459,
+        "min_ms": 83.4459,
+        "max_ms": 83.4459,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.11/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 82.7412,
+        "mean_ms": 82.7412,
+        "min_ms": 82.7412,
+        "max_ms": 82.7412,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.16/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 82.2755,
+        "mean_ms": 82.2755,
+        "min_ms": 82.2755,
+        "max_ms": 82.2755,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.25/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 82.0306,
+        "mean_ms": 82.0306,
+        "min_ms": 82.0306,
+        "max_ms": 82.0306,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.29/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 81.4536,
+        "mean_ms": 81.4536,
+        "min_ms": 81.4536,
+        "max_ms": 81.4536,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.30/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 81.4118,
+        "mean_ms": 81.4118,
+        "min_ms": 81.4118,
+        "max_ms": 81.4118,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.9/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 80.2712,
+        "mean_ms": 80.2712,
+        "min_ms": 80.2712,
+        "max_ms": 80.2712,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.28/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 80.1979,
+        "mean_ms": 80.1979,
+        "min_ms": 80.1979,
+        "max_ms": 80.1979,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.14/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 79.4103,
+        "mean_ms": 79.4103,
+        "min_ms": 79.4103,
+        "max_ms": 79.4103,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.7/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 79.1438,
+        "mean_ms": 79.1438,
+        "min_ms": 79.1438,
+        "max_ms": 79.1438,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.17/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 77.9259,
+        "mean_ms": 77.9259,
+        "min_ms": 77.9259,
+        "max_ms": 77.9259,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.6/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 76.8917,
+        "mean_ms": 76.8917,
+        "min_ms": 76.8917,
+        "max_ms": 76.8917,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.2/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 74.8088,
+        "mean_ms": 74.8088,
+        "min_ms": 74.8088,
+        "max_ms": 74.8088,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.9/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.8718,
+        "mean_ms": 73.8718,
+        "min_ms": 73.8718,
+        "max_ms": 73.8718,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.29/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.7622,
+        "mean_ms": 73.7622,
+        "min_ms": 73.7622,
+        "max_ms": 73.7622,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.19/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.7118,
+        "mean_ms": 73.7118,
+        "min_ms": 73.7118,
+        "max_ms": 73.7118,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.30/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.6064,
+        "mean_ms": 73.6064,
+        "min_ms": 73.6064,
+        "max_ms": 73.6064,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.21/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.3921,
+        "mean_ms": 73.3921,
+        "min_ms": 73.3921,
+        "max_ms": 73.3921,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.27/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.206,
+        "mean_ms": 73.206,
+        "min_ms": 73.206,
+        "max_ms": 73.206,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.3/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 73.1774,
+        "mean_ms": 73.1774,
+        "min_ms": 73.1774,
+        "max_ms": 73.1774,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.20/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 72.4206,
+        "mean_ms": 72.4206,
+        "min_ms": 72.4206,
+        "max_ms": 72.4206,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.9/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 71.4006,
+        "mean_ms": 71.4006,
+        "min_ms": 71.4006,
+        "max_ms": 71.4006,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.11/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 71.3674,
+        "mean_ms": 71.3674,
+        "min_ms": 71.3674,
+        "max_ms": 71.3674,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.12/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.933,
+        "mean_ms": 70.933,
+        "min_ms": 70.933,
+        "max_ms": 70.933,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.19/mlp/up_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.6967,
+        "mean_ms": 70.6967,
+        "min_ms": 70.6967,
+        "max_ms": 70.6967,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.12/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.6049,
+        "mean_ms": 70.6049,
+        "min_ms": 70.6049,
+        "max_ms": 70.6049,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.25/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.5022,
+        "mean_ms": 70.5022,
+        "min_ms": 70.5022,
+        "max_ms": 70.5022,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.4/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.4035,
+        "mean_ms": 70.4035,
+        "min_ms": 70.4035,
+        "max_ms": 70.4035,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.10/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.338,
+        "mean_ms": 70.338,
+        "min_ms": 70.338,
+        "max_ms": 70.338,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.16/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.2059,
+        "mean_ms": 70.2059,
+        "min_ms": 70.2059,
+        "max_ms": 70.2059,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.24/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 70.0695,
+        "mean_ms": 70.0695,
+        "min_ms": 70.0695,
+        "max_ms": 70.0695,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.17/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 69.7893,
+        "mean_ms": 69.7893,
+        "min_ms": 69.7893,
+        "max_ms": 69.7893,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.5/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 69.6358,
+        "mean_ms": 69.6358,
+        "min_ms": 69.6358,
+        "max_ms": 69.6358,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.13/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 69.6216,
+        "mean_ms": 69.6216,
+        "min_ms": 69.6216,
+        "max_ms": 69.6216,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.18/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 69.6111,
+        "mean_ms": 69.6111,
+        "min_ms": 69.6111,
+        "max_ms": 69.6111,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.15/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 69.3346,
+        "mean_ms": 69.3346,
+        "min_ms": 69.3346,
+        "max_ms": 69.3346,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.31/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 68.7868,
+        "mean_ms": 68.7868,
+        "min_ms": 68.7868,
+        "max_ms": 68.7868,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.26/mlp/down_proj/Linear",
+        "calls": 1,
+        "total_ms": 68.5898,
+        "mean_ms": 68.5898,
+        "min_ms": 68.5898,
+        "max_ms": 68.5898,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.24/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 67.8812,
+        "mean_ms": 67.8812,
+        "min_ms": 67.8812,
+        "max_ms": 67.8812,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.22/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 67.5041,
+        "mean_ms": 67.5041,
+        "min_ms": 67.5041,
+        "max_ms": 67.5041,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.8/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 67.0741,
+        "mean_ms": 67.0741,
+        "min_ms": 67.0741,
+        "max_ms": 67.0741,
+        "flops_m": 25769.8
+      },
+      {
+        "stage": "prefill_or_first_token_inferred",
+        "type": "Convolution",
+        "name": "/layers.4/mlp/gate_proj/Linear",
+        "calls": 1,
+        "total_ms": 67.0421,
+        "mean_ms": 67.0421,
+        "min_ms": 67.0421,
+        "max_ms": 67.0421,
+        "flops_m": 25769.8
+      }
+    ]
+  }
+}

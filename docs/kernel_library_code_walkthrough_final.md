@@ -6,7 +6,7 @@ This document describes the accepted v27 custom inference library used for the Q
 
 The final custom Android benchmark sets `xq_options.use_mnn_fallback = 0` in `android/benchmark_app/src/main/cpp/benchmark_jni.cpp` and enters the public ABI in `customlib/include/xqwen35.h`. The final run requested `cpu_vulkan_hybrid`, but the benchmark JSON reports `custom_backend_actual = cpu`; no custom Vulkan kernel is claimed.
 
-Post-v27 note: a later Vulkan attempt added `customlib/runtime/vulkan_backend.*` and `customlib/kernels/generated/vulkan/w4a16_gemv.comp`, then validated a real W4A16 GEMV shader on Device Farm. A short full-model integration routed projection-family W4A16 rows to Vulkan, but the actual measured backend was `cpu_vulkan_hybrid` and major op families remained CPU. That attempt is documented in `results/reports/final_vulkan_blocker_report.md`; it does not replace the accepted v27 CPU final.
+Post-v27 note: a later Vulkan attempt added `customlib/runtime/vulkan_backend.*`, `customlib/kernels/generated/vulkan/w4a16_gemv.comp`, and `customlib/kernels/generated/vulkan/vector_ops.comp`. Device Farm selftests validated real Vulkan kernels for W4A16 GEMV, RMSNorm, RoPE, grouped-query attention, linear-attention conv/state update, KV append, activation/residual, output gate, and argmax. A short full-model integration routed the major traced tensor op families to Vulkan, and a separate Vulkan/hybrid quality run passed the deterministic sanity gate. The required 512/256 full benchmark stopped at the 150-minute Device Farm limit before measured iterations and before final `BENCH_RESULT_JSON`, so this attempt does not replace the accepted v27 CPU final.
 
 Measured generation path:
 
@@ -49,7 +49,7 @@ The optional MNN fallback connector still exists for debug compatibility, but it
 | Packer | `customlib/packer/pack_qwen35_xq4.py`, `customlib/packer/pack_qwen35_xq4_numpy.py` | Converts Qwen3.5 safetensors into the custom W4A16 package and manifest. |
 | Stock Android app | `android/app` | Stock MNN baseline and stock quality instrumentation. |
 | Custom Android app | `android/benchmark_app` | Customlib instrumentation, JSON evidence, MNN hot-path trace evidence, custom quality instrumentation. |
-| Vulkan probe | `android/benchmark_app/src/main/cpp/benchmark_jni.cpp` | Probes Vulkan availability and records whether Vulkan kernels were actually used. |
+| Vulkan connector | `customlib/runtime/vulkan_backend.*`, `customlib/kernels/generated/vulkan/*.comp`, `android/benchmark_app/src/main/cpp/benchmark_jni.cpp` | Probes Vulkan, dispatches experimental Vulkan kernels, records backend maps, and documents why the full 512/256 Vulkan final is not accepted. |
 | Device Farm connector | `scripts/aws` plus Android bootstrap tests | Uploads, schedules, downloads, and verifies Device Farm artifacts. |
 | Quality connector | `runQualityValidation` JNI methods and `scripts/quality/compare_quality_validation.py` | Dumps generated token IDs and compares stock/custom output sanity separately from TPOT/TPS measurement. |
 
@@ -160,7 +160,20 @@ The final benchmark settings use `temperature = 0`, `top_k = 1`, and `top_p = 1`
 
 ### Vulkan Probe Connector
 
-The custom JNI accepts `cpu`, `vulkan`, and `cpu_vulkan_hybrid`. It probes `libvulkan.so` and `vkGetInstanceProcAddr`. The final v27 run reports probe success but `custom_backend_actual = cpu` and `vulkan_generation_kernels_used = false`.
+The custom JNI accepts `cpu`, `vulkan`, and `cpu_vulkan_hybrid`. The accepted v27 run reports probe success but `custom_backend_actual = cpu` and `vulkan_generation_kernels_used = false`.
+
+The post-v27 Vulkan connector creates a Vulkan instance/device/compute queue, allocates host-visible buffers, uploads/downloads tensors, dispatches compute pipelines, and records per-kernel backend rows. Implemented experimental shaders include:
+
+- W4A16 GEMV for projection and `lm_head` matrix-vector work
+- RMSNorm and Q/K normalization
+- active-slice RoPE
+- grouped-query attention decode
+- linear-attention conv1d and recurrent state update
+- KV append
+- SiLU/residual/output-gate vector ops
+- greedy argmax
+
+Device Farm evidence shows these kernels execute and pass targeted selftests. The full delivery still remains blocked because the runtime reports `custom_backend_actual = cpu_vulkan_hybrid`, CPU embedding/file I/O remains, and the official 512/256 custom Vulkan benchmark stopped at the 150-minute Device Farm limit before measured iterations. Therefore no full-Vulkan or 10 TPS claim is made.
 
 ### Benchmark And Quality Connectors
 

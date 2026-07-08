@@ -141,6 +141,8 @@ private:
     mutable std::unique_ptr<kernels::VulkanBackend> vulkan_backend_;
     mutable uint64_t vulkan_linear_calls_ = 0;
     mutable uint64_t vulkan_linear_failures_ = 0;
+    mutable uint64_t vulkan_tensor_calls_ = 0;
+    mutable uint64_t vulkan_tensor_failures_ = 0;
 };
 
 }  // namespace xq

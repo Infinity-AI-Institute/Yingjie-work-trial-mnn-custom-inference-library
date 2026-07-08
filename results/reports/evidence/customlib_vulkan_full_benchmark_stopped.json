@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_type": "devicefarm_full_benchmark_attempt",
+  "engine": "customlib",
+  "requested_backend": "vulkan",
+  "accepted_final_result": false,
+  "run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6650fcf-589f-49f6-8033-ed2030873d95",
+  "run_name": "customlib-vulkan-linear-state-full-benchmark-attempt",
+  "device_pool_arn": "arn:aws:devicefarm:us-west-2:884244642857:devicepool:64d2cc31-abd6-49f8-97da-162f82410bc0/14d31c96-b8fc-4930-99c7-1a8948124213",
+  "app_upload_arn": "arn:aws:devicefarm:us-west-2:884244642857:upload:64d2cc31-abd6-49f8-97da-162f82410bc0/a62910ee-6f00-4ccd-92b3-eedddc7e6c32",
+  "test_spec_arn": "arn:aws:devicefarm:us-west-2:884244642857:upload:64d2cc31-abd6-49f8-97da-162f82410bc0/096d6717-c538-42ff-a313-baca288a8781",
+  "devicefarm_status": "COMPLETED",
+  "devicefarm_result": "STOPPED",
+  "job_timeout_minutes": 150,
+  "device_minutes_total": 150.81,
+  "counters": {
+    "total": 3,
+    "passed": 2,
+    "failed": 0,
+    "errored": 0,
+    "stopped": 1
+  },
+  "model": {
+    "hf_repo": "Qwen/Qwen3.5-9B",
+    "hf_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "format": "xqwen35_custom_w4a16",
+    "model_zip_sha256": "9de692be1c1ef1002fac25bd8f93c76e1d31975caa234fe1725f9eb294bfaa34"
+  },
+  "benchmark_settings": {
+    "prompt_tokens_requested": 512,
+    "max_new_tokens": 256,
+    "temperature": 0,
+    "top_k": 1,
+    "top_p": 1,
+    "warmup_iterations": 1,
+    "measured_iterations": 3
+  },
+  "bench_result_json_emitted": false,
+  "instrumentation_final_status_emitted": false,
+  "observed_logcat_events": [
+    {
+      "timestamp": "2026-07-08 16:50:30.912",
+      "tag": "XQBENCH",
+      "message": "BENCH_START engine=customlib model_dir=/storage/emulated/0/Android/data/com.example.xqwen35bench/files requested_backend=vulkan actual_backend=cpu_vulkan_hybrid"
+    },
+    {
+      "timestamp": "2026-07-08 18:04:35.076",
+      "tag": "XQBENCH",
+      "message": "BENCH_ITER engine=customlib warmup=1 prompt=512 generated=256 prefill_ms=2840779.534 decode_ms=1599572.239 status=0"
+    }
+  ],
+  "partial_warmup_iteration": {
+    "completed": true,
+    "prompt_tokens": 512,
+    "generated_tokens": 256,
+    "prefill_ms": 2840779.534,
+    "decode_ms": 1599572.239,
+    "prefill_minutes": 47.346325566666664,
+    "decode_minutes": 26.65953731666667,
+    "prefill_tps": 0.1802322193158971,
+    "decode_tps": 0.16004278753927537,
+    "decode_tpot_ms": 6248.32905859375
+  },
+  "blocker": "The full 512 prompt-token / 256 decode-token run entered the custom Qwen3.5 path and completed one warmup iteration, but Device Farm stopped the job at the 150-minute limit before any measured iteration completed. Therefore no accepted full BENCH_RESULT_JSON exists for custom Vulkan.",
+  "claim_status": {
+    "full_vulkan_claim_allowed": false,
+    "ten_tps_claim_allowed": false,
+    "speedup_claim_allowed": false
+  }
+}

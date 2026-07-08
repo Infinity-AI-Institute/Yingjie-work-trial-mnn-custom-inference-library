@@ -79,6 +79,35 @@ std::string jsonEscape(const std::string& value) {
     return oss.str();
 }
 
+std::string traceBackendForFamilies(const std::string& kernel_trace_json, const std::vector<std::string>& families) {
+    bool saw_cpu = false;
+    bool saw_vulkan = false;
+    bool saw_mixed = false;
+    for (const std::string& family : families) {
+        const std::string token = "\"op_family\":\"" + family + "\",\"backend\":\"";
+        size_t pos = 0;
+        while ((pos = kernel_trace_json.find(token, pos)) != std::string::npos) {
+            const size_t backend_begin = pos + token.size();
+            const size_t backend_end = kernel_trace_json.find('"', backend_begin);
+            if (backend_end == std::string::npos) {
+                break;
+            }
+            const std::string backend = kernel_trace_json.substr(backend_begin, backend_end - backend_begin);
+            saw_cpu = saw_cpu || backend == "cpu";
+            saw_vulkan = saw_vulkan || backend == "vulkan";
+            saw_mixed = saw_mixed || backend == "mixed";
+            pos = backend_end + 1;
+        }
+    }
+    if (saw_mixed || (saw_cpu && saw_vulkan)) {
+        return "mixed";
+    }
+    if (saw_vulkan) {
+        return "vulkan";
+    }
+    return "cpu";
+}
+
 double tokensPerSecond(uint64_t tokens, double ms) {
     if (tokens == 0 || ms <= 0.0) {
         return 0.0;
@@ -429,10 +458,10 @@ std::string runVulkanProbeJson(const std::string& requested_backend) {
             << jsonEscape(load_error ? load_error : "libvulkan loaded but vkGetInstanceProcAddr was not found")
             << "\",";
     }
-    oss << "\"full_or_hybrid_kernel_status\":\"w4a16_linear_kernels_enabled\","
-        << "\"scope\":\"custom Vulkan W4A16 GEMV is attempted for projection families; RMSNorm/RoPE/attention/linear_attention_state/lm_head/sampling/prefill KV remain CPU in this integration\","
+    oss << "\"full_or_hybrid_kernel_status\":\"major_tensor_kernels_attempted\","
+        << "\"scope\":\"custom Vulkan kernels are attempted for W4A16 projections/lm_head, RMSNorm/head norm, RoPE, grouped-query attention decode, linear-attention conv/state update, KV append, SiLU/residual, output gate, and greedy argmax; the implementation is still reported as cpu_vulkan_hybrid because embedding/file I/O/control remain CPU and buffers are not persistently GPU-resident\","
         << "\"full_vulkan_generation\":false,"
-        << "\"failure_reason\":\"full Vulkan generation is not accepted because major non-linear op families and lm_head/sampling are still CPU and W4A16 weights are uploaded per GEMV call\""
+        << "\"failure_reason\":\"full Vulkan generation is not accepted unless a full 512/256 Device Farm run emits BENCH_RESULT_JSON with custom_backend_actual=vulkan; the current implementation is an experimental cpu_vulkan_hybrid path with per-call host-visible buffer upload/download overhead\""
         << "}";
     return oss.str();
 }
@@ -968,9 +997,28 @@ std::string makeJson(const std::string& model_dir,
             << "\"error\":\"" << jsonEscape(terminal_error.empty() ? "not all measurement iterations completed" : terminal_error)
             << "\",";
     }
-    const bool vulkan_linear_attempt =
+    const bool requested_vulkan_backend =
         custom_backend_actual == "cpu_vulkan_hybrid" || custom_backend_actual == "vulkan";
-    const char* linear_backend = vulkan_linear_attempt ? "vulkan" : "cpu";
+    const std::string q_backend = traceBackendForFamilies(kernel_trace_json, {"q_proj"});
+    const std::string k_backend = traceBackendForFamilies(kernel_trace_json, {"k_proj"});
+    const std::string v_backend = traceBackendForFamilies(kernel_trace_json, {"v_proj"});
+    const std::string o_backend = traceBackendForFamilies(kernel_trace_json, {"o_proj"});
+    const std::string gate_backend = traceBackendForFamilies(kernel_trace_json, {"gate_proj"});
+    const std::string up_backend = traceBackendForFamilies(kernel_trace_json, {"up_proj"});
+    const std::string down_backend = traceBackendForFamilies(kernel_trace_json, {"down_proj"});
+    const std::string linear_attn_proj_backend =
+        traceBackendForFamilies(kernel_trace_json, {"linear_attention_projection"});
+    const std::string rmsnorm_backend = traceBackendForFamilies(kernel_trace_json, {"rmsnorm"});
+    const std::string rope_backend = traceBackendForFamilies(kernel_trace_json, {"rope"});
+    const std::string attention_backend =
+        traceBackendForFamilies(kernel_trace_json, {"attention", "attention_score", "attention_softmax", "attention_v_reduce"});
+    const std::string linear_attention_backend = traceBackendForFamilies(kernel_trace_json, {"linear_attention_state"});
+    const std::string activation_backend = traceBackendForFamilies(kernel_trace_json, {"activation"});
+    const std::string lm_head_backend = traceBackendForFamilies(kernel_trace_json, {"lm_head"});
+    const std::string sampling_backend = traceBackendForFamilies(kernel_trace_json, {"sampling"});
+    const std::string prefill_backend = traceBackendForFamilies(kernel_trace_json, {"prefill_kv_build"});
+    const bool vulkan_generation_kernels_used =
+        requested_vulkan_backend && kernel_trace_json.find("\"backend\":\"vulkan\"") != std::string::npos;
     oss << "\"model\":{\"hf_repo\":\"Qwen/Qwen3.5-9B\","
         << "\"hf_revision\":\"c202236235762e1c871ad0ccb60c8ee5ba337b9a\","
         << "\"format\":\"xqwen35_custom_w4a16\","
@@ -986,16 +1034,18 @@ std::string makeJson(const std::string& model_dir,
         << "\"full_custom_decode\":true,"
         << "\"replaced_op_families\":[\"q_proj\",\"k_proj\",\"v_proj\",\"o_proj\",\"gate_proj\",\"up_proj\",\"down_proj\",\"rmsnorm\",\"rope\",\"attention\",\"linear_attention_state\",\"lm_head\",\"sampling\",\"prefill_kv_build\"],"
         << "\"fallback_op_families\":[],"
-        << "\"op_family_backends\":{\"q_proj\":\"" << linear_backend << "\",\"k_proj\":\"" << linear_backend
-        << "\",\"v_proj\":\"" << linear_backend << "\",\"o_proj\":\"" << linear_backend << "\","
-        << "\"gate_proj\":\"" << linear_backend << "\",\"up_proj\":\"" << linear_backend
-        << "\",\"down_proj\":\"" << linear_backend << "\",\"linear_attention_projections\":\""
-        << linear_backend << "\",\"rmsnorm\":\"cpu\",\"rope\":\"cpu\","
-        << "\"attention\":\"cpu\",\"linear_attention_state\":\"cpu\",\"lm_head\":\"cpu\",\"sampling\":\"cpu\","
-        << "\"prefill_kv_build\":\"cpu\"}}},"
+        << "\"op_family_backends\":{\"q_proj\":\"" << q_backend << "\",\"k_proj\":\"" << k_backend
+        << "\",\"v_proj\":\"" << v_backend << "\",\"o_proj\":\"" << o_backend << "\","
+        << "\"gate_proj\":\"" << gate_backend << "\",\"up_proj\":\"" << up_backend
+        << "\",\"down_proj\":\"" << down_backend << "\",\"linear_attention_projections\":\""
+        << linear_attn_proj_backend << "\",\"rmsnorm\":\"" << rmsnorm_backend << "\",\"rope\":\""
+        << rope_backend << "\",\"attention\":\"" << attention_backend << "\",\"linear_attention_state\":\""
+        << linear_attention_backend << "\",\"activation\":\"" << activation_backend << "\",\"lm_head\":\""
+        << lm_head_backend << "\",\"sampling\":\"" << sampling_backend << "\",\"prefill_kv_build\":\""
+        << prefill_backend << "\"}}},"
         << "\"custom_path\":{\"calls_mnn_llm_response_for_measured_generation\":false,"
         << "\"use_mnn_fallback\":0,"
-        << "\"vulkan_generation_kernels_used\":" << (vulkan_linear_attempt ? "true" : "false") << ","
+        << "\"vulkan_generation_kernels_used\":" << (vulkan_generation_kernels_used ? "true" : "false") << ","
         << "\"decode_loop\":\"xq_session::generate -> xq_prefill/xq_decode_one -> CustomModel::prefill/runLayer/sampleGreedy\","
         << "\"weight_format\":\"xq4_groupwise_w4a16\"},"
         << "\"vulkan_attempt\":" << vulkan_probe_json << ","

@@ -11,6 +11,7 @@
 #include <vector>
 
 #if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+#include "../kernels/generated/vulkan/vector_ops_spv.inc"
 #include "../kernels/generated/vulkan/w4a16_gemv_spv.inc"
 #include <vulkan/vulkan.h>
 #endif
@@ -144,6 +145,21 @@ struct Buffer {
     VkDeviceSize bytes = 0;
 };
 
+struct VectorPushConstants {
+    uint32_t op;
+    uint32_t n;
+    uint32_t heads;
+    uint32_t head_dim;
+    uint32_t q_heads;
+    uint32_t k_heads;
+    uint32_t rotary_dim;
+    uint32_t position;
+    float eps;
+    float theta;
+    uint32_t reserved0;
+    uint32_t reserved1;
+};
+
 struct VulkanBackend::Impl {
     VkInstance instance = VK_NULL_HANDLE;
     VkPhysicalDevice physical_device = VK_NULL_HANDLE;
@@ -154,6 +170,9 @@ struct VulkanBackend::Impl {
     VkDescriptorSetLayout descriptor_layout = VK_NULL_HANDLE;
     VkPipelineLayout pipeline_layout = VK_NULL_HANDLE;
     VkPipeline pipeline = VK_NULL_HANDLE;
+    VkDescriptorSetLayout vector_descriptor_layout = VK_NULL_HANDLE;
+    VkPipelineLayout vector_pipeline_layout = VK_NULL_HANDLE;
+    VkPipeline vector_pipeline = VK_NULL_HANDLE;
     std::string device_name;
     bool initialized = false;
 
@@ -252,6 +271,178 @@ struct VulkanBackend::Impl {
         vkUnmapMemory(device, b.memory);
         return true;
     }
+
+    bool runVector(const VectorPushConstants& pc,
+                   const void* a_data,
+                   size_t a_bytes,
+                   const void* b_data,
+                   size_t b_bytes,
+                   const void* c_data,
+                   size_t c_bytes,
+                   const void* d_init,
+                   size_t d_bytes,
+                   void* d_out,
+                   void* c_out,
+                   VulkanGemvTiming* timing,
+                   uint32_t dispatch_x,
+                   uint32_t dispatch_y,
+                   std::string* error) {
+        const auto total0 = Clock::now();
+        float zero = 0.0f;
+        Buffer bufs[4];
+        auto cleanup = [&]() {
+            for (Buffer& b : bufs) {
+                destroyBuffer(&b);
+            }
+        };
+        const size_t sizes[4] = {
+            std::max<size_t>(a_bytes, sizeof(float)),
+            std::max<size_t>(b_bytes, sizeof(float)),
+            std::max<size_t>(c_bytes, sizeof(float)),
+            std::max<size_t>(d_bytes, sizeof(float)),
+        };
+        for (int i = 0; i < 4; ++i) {
+            if (!createHostBuffer(static_cast<VkDeviceSize>(sizes[i]), &bufs[i], error)) {
+                cleanup();
+                return false;
+            }
+        }
+        const auto upload0 = Clock::now();
+        if (!upload(bufs[0], a_data ? a_data : &zero, a_data ? a_bytes : sizeof(float), error) ||
+            !upload(bufs[1], b_data ? b_data : &zero, b_data ? b_bytes : sizeof(float), error) ||
+            !upload(bufs[2], c_data ? c_data : &zero, c_data ? c_bytes : sizeof(float), error) ||
+            !upload(bufs[3], d_init ? d_init : &zero, d_init ? d_bytes : sizeof(float), error)) {
+            cleanup();
+            return false;
+        }
+        const auto upload1 = Clock::now();
+
+        VkDescriptorPoolSize pool_size{};
+        pool_size.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        pool_size.descriptorCount = 4;
+        VkDescriptorPoolCreateInfo pool_info{};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.maxSets = 1;
+        pool_info.poolSizeCount = 1;
+        pool_info.pPoolSizes = &pool_size;
+        VkDescriptorPool descriptor_pool = VK_NULL_HANDLE;
+        VkResult vr = vkCreateDescriptorPool(device, &pool_info, nullptr, &descriptor_pool);
+        if (vr != VK_SUCCESS) {
+            *error = std::string("vkCreateDescriptorPool(vector) failed: ") + vkResultName(vr);
+            cleanup();
+            return false;
+        }
+
+        VkDescriptorSetAllocateInfo set_info{};
+        set_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        set_info.descriptorPool = descriptor_pool;
+        set_info.descriptorSetCount = 1;
+        set_info.pSetLayouts = &vector_descriptor_layout;
+        VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
+        vr = vkAllocateDescriptorSets(device, &set_info, &descriptor_set);
+        if (vr != VK_SUCCESS) {
+            *error = std::string("vkAllocateDescriptorSets(vector) failed: ") + vkResultName(vr);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+
+        VkDescriptorBufferInfo infos[4]{};
+        VkWriteDescriptorSet writes[4]{};
+        for (uint32_t i = 0; i < 4; ++i) {
+            infos[i].buffer = bufs[i].buffer;
+            infos[i].offset = 0;
+            infos[i].range = bufs[i].bytes;
+            writes[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            writes[i].dstSet = descriptor_set;
+            writes[i].dstBinding = i;
+            writes[i].descriptorCount = 1;
+            writes[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            writes[i].pBufferInfo = &infos[i];
+        }
+        vkUpdateDescriptorSets(device, 4, writes, 0, nullptr);
+
+        VkCommandBufferAllocateInfo cmd_alloc{};
+        cmd_alloc.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        cmd_alloc.commandPool = command_pool;
+        cmd_alloc.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        cmd_alloc.commandBufferCount = 1;
+        VkCommandBuffer cmd = VK_NULL_HANDLE;
+        vr = vkAllocateCommandBuffers(device, &cmd_alloc, &cmd);
+        if (vr != VK_SUCCESS) {
+            *error = std::string("vkAllocateCommandBuffers(vector) failed: ") + vkResultName(vr);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+
+        VkCommandBufferBeginInfo begin{};
+        begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        vr = vkBeginCommandBuffer(cmd, &begin);
+        if (vr != VK_SUCCESS) {
+            *error = std::string("vkBeginCommandBuffer(vector) failed: ") + vkResultName(vr);
+            vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vector_pipeline);
+        vkCmdBindDescriptorSets(
+            cmd, VK_PIPELINE_BIND_POINT_COMPUTE, vector_pipeline_layout, 0, 1, &descriptor_set, 0, nullptr);
+        vkCmdPushConstants(cmd, vector_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pc), &pc);
+        vkCmdDispatch(cmd, std::max(1u, dispatch_x), std::max(1u, dispatch_y), 1);
+        vr = vkEndCommandBuffer(cmd);
+        if (vr != VK_SUCCESS) {
+            *error = std::string("vkEndCommandBuffer(vector) failed: ") + vkResultName(vr);
+            vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+
+        const auto dispatch0 = Clock::now();
+        VkSubmitInfo submit{};
+        submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit.commandBufferCount = 1;
+        submit.pCommandBuffers = &cmd;
+        vr = vkQueueSubmit(queue, 1, &submit, VK_NULL_HANDLE);
+        if (vr == VK_SUCCESS) {
+            vr = vkQueueWaitIdle(queue);
+        }
+        const auto dispatch1 = Clock::now();
+        if (vr != VK_SUCCESS) {
+            *error = std::string("Vulkan vector dispatch failed: ") + vkResultName(vr);
+            vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+
+        const auto download0 = Clock::now();
+        if (c_out && !download(bufs[2], c_out, c_bytes, error)) {
+            vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+        if (d_out && !download(bufs[3], d_out, d_bytes, error)) {
+            vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+            vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+            cleanup();
+            return false;
+        }
+        const auto download1 = Clock::now();
+        if (timing) {
+            timing->upload_ms = elapsedMs(upload0, upload1);
+            timing->dispatch_ms = elapsedMs(dispatch0, dispatch1);
+            timing->download_ms = elapsedMs(download0, download1);
+            timing->total_ms = elapsedMs(total0, Clock::now());
+        }
+        vkFreeCommandBuffers(device, command_pool, 1, &cmd);
+        vkDestroyDescriptorPool(device, descriptor_pool, nullptr);
+        cleanup();
+        return true;
+    }
 };
 
 struct GemvPushConstants {
@@ -279,6 +470,15 @@ VulkanBackend::VulkanBackend() : impl_(new Impl()) {}
 VulkanBackend::~VulkanBackend() {
 #if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
     if (impl_->device != VK_NULL_HANDLE) {
+        if (impl_->vector_pipeline != VK_NULL_HANDLE) {
+            vkDestroyPipeline(impl_->device, impl_->vector_pipeline, nullptr);
+        }
+        if (impl_->vector_pipeline_layout != VK_NULL_HANDLE) {
+            vkDestroyPipelineLayout(impl_->device, impl_->vector_pipeline_layout, nullptr);
+        }
+        if (impl_->vector_descriptor_layout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(impl_->device, impl_->vector_descriptor_layout, nullptr);
+        }
         if (impl_->pipeline != VK_NULL_HANDLE) {
             vkDestroyPipeline(impl_->device, impl_->pipeline, nullptr);
         }
@@ -437,6 +637,65 @@ bool VulkanBackend::initialize(std::string* error) {
     vkDestroyShaderModule(impl_->device, shader, nullptr);
     if (vr != VK_SUCCESS) {
         *error = std::string("vkCreateComputePipelines failed: ") + vkResultName(vr);
+        return false;
+    }
+
+    VkDescriptorSetLayoutBinding vector_bindings[4]{};
+    for (uint32_t i = 0; i < 4; ++i) {
+        vector_bindings[i].binding = i;
+        vector_bindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        vector_bindings[i].descriptorCount = 1;
+        vector_bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    }
+    VkDescriptorSetLayoutCreateInfo vector_layout_info{};
+    vector_layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    vector_layout_info.bindingCount = 4;
+    vector_layout_info.pBindings = vector_bindings;
+    vr = vkCreateDescriptorSetLayout(impl_->device, &vector_layout_info, nullptr, &impl_->vector_descriptor_layout);
+    if (vr != VK_SUCCESS) {
+        *error = std::string("vkCreateDescriptorSetLayout(vector) failed: ") + vkResultName(vr);
+        return false;
+    }
+
+    VkPushConstantRange vector_push_range{};
+    vector_push_range.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+    vector_push_range.offset = 0;
+    vector_push_range.size = sizeof(VectorPushConstants);
+    VkPipelineLayoutCreateInfo vector_pipeline_layout_info{};
+    vector_pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    vector_pipeline_layout_info.setLayoutCount = 1;
+    vector_pipeline_layout_info.pSetLayouts = &impl_->vector_descriptor_layout;
+    vector_pipeline_layout_info.pushConstantRangeCount = 1;
+    vector_pipeline_layout_info.pPushConstantRanges = &vector_push_range;
+    vr = vkCreatePipelineLayout(impl_->device, &vector_pipeline_layout_info, nullptr, &impl_->vector_pipeline_layout);
+    if (vr != VK_SUCCESS) {
+        *error = std::string("vkCreatePipelineLayout(vector) failed: ") + vkResultName(vr);
+        return false;
+    }
+
+    VkShaderModuleCreateInfo vector_shader_info{};
+    vector_shader_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    vector_shader_info.codeSize = vulkan_shader::kVectorOpsSpvSize;
+    vector_shader_info.pCode = vulkan_shader::kVectorOpsSpv;
+    VkShaderModule vector_shader = VK_NULL_HANDLE;
+    vr = vkCreateShaderModule(impl_->device, &vector_shader_info, nullptr, &vector_shader);
+    if (vr != VK_SUCCESS) {
+        *error = std::string("vkCreateShaderModule(vector) failed: ") + vkResultName(vr);
+        return false;
+    }
+    VkPipelineShaderStageCreateInfo vector_stage{};
+    vector_stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vector_stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    vector_stage.module = vector_shader;
+    vector_stage.pName = "main";
+    VkComputePipelineCreateInfo vector_pipeline_info{};
+    vector_pipeline_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    vector_pipeline_info.stage = vector_stage;
+    vector_pipeline_info.layout = impl_->vector_pipeline_layout;
+    vr = vkCreateComputePipelines(impl_->device, VK_NULL_HANDLE, 1, &vector_pipeline_info, nullptr, &impl_->vector_pipeline);
+    vkDestroyShaderModule(impl_->device, vector_shader, nullptr);
+    if (vr != VK_SUCCESS) {
+        *error = std::string("vkCreateComputePipelines(vector) failed: ") + vkResultName(vr);
         return false;
     }
     impl_->initialized = true;
@@ -649,6 +908,733 @@ bool VulkanBackend::gemvW4A16(const QuantizedMatrix& matrix,
 #endif
 }
 
+bool VulkanBackend::rmsNorm(const float* x,
+                            const float* weight,
+                            int n,
+                            float eps,
+                            float* y,
+                            VulkanGemvTiming* timing,
+                            std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !x || !weight || !y || n <= 0) {
+        if (error && n <= 0) {
+            *error = "invalid rmsNorm arguments";
+        }
+        return false;
+    }
+    VectorPushConstants pc{};
+    pc.op = 0;
+    pc.n = static_cast<uint32_t>(n);
+    pc.heads = 1;
+    pc.head_dim = static_cast<uint32_t>(n);
+    pc.eps = eps;
+    return impl_->runVector(pc,
+                            x,
+                            static_cast<size_t>(n) * sizeof(float),
+                            weight,
+                            static_cast<size_t>(n) * sizeof(float),
+                            nullptr,
+                            0,
+                            nullptr,
+                            static_cast<size_t>(n) * sizeof(float),
+                            y,
+                            nullptr,
+                            timing,
+                            1,
+                            1,
+                            error);
+#else
+    (void)x;
+    (void)weight;
+    (void)n;
+    (void)eps;
+    (void)y;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::headRmsNorm(float* x,
+                                const float* weight,
+                                int heads,
+                                int head_dim,
+                                float eps,
+                                VulkanGemvTiming* timing,
+                                std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !x || !weight || heads <= 0 || head_dim <= 0) {
+        if (error && (heads <= 0 || head_dim <= 0)) {
+            *error = "invalid headRmsNorm arguments";
+        }
+        return false;
+    }
+    const int n = heads * head_dim;
+    std::vector<float> out(static_cast<size_t>(n), 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 0;
+    pc.n = static_cast<uint32_t>(n);
+    pc.heads = static_cast<uint32_t>(heads);
+    pc.head_dim = static_cast<uint32_t>(head_dim);
+    pc.eps = eps;
+    const bool ok = impl_->runVector(pc,
+                                     x,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     weight,
+                                     static_cast<size_t>(head_dim) * sizeof(float),
+                                     nullptr,
+                                     0,
+                                     out.data(),
+                                     out.size() * sizeof(float),
+                                     out.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>(heads),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(x, out.data(), out.size() * sizeof(float));
+    }
+    return ok;
+#else
+    (void)x;
+    (void)weight;
+    (void)heads;
+    (void)head_dim;
+    (void)eps;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::l2NormalizeHeads(float* x, int heads, int head_dim, VulkanGemvTiming* timing, std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !x || heads <= 0 || head_dim <= 0) {
+        if (error && (heads <= 0 || head_dim <= 0)) {
+            *error = "invalid l2NormalizeHeads arguments";
+        }
+        return false;
+    }
+    const int n = heads * head_dim;
+    std::vector<float> out(static_cast<size_t>(n), 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 1;
+    pc.n = static_cast<uint32_t>(n);
+    pc.heads = static_cast<uint32_t>(heads);
+    pc.head_dim = static_cast<uint32_t>(head_dim);
+    pc.eps = 1.0e-6f;
+    const bool ok = impl_->runVector(pc,
+                                     x,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     nullptr,
+                                     0,
+                                     nullptr,
+                                     0,
+                                     out.data(),
+                                     out.size() * sizeof(float),
+                                     out.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>(heads),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(x, out.data(), out.size() * sizeof(float));
+    }
+    return ok;
+#else
+    (void)x;
+    (void)heads;
+    (void)head_dim;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::gatedRmsNorm(const float* x,
+                                 const float* weight,
+                                 const float* gate,
+                                 int heads,
+                                 int head_dim,
+                                 float eps,
+                                 float* y,
+                                 VulkanGemvTiming* timing,
+                                 std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !x || !weight || !gate || !y || heads <= 0 || head_dim <= 0) {
+        if (error && (heads <= 0 || head_dim <= 0)) {
+            *error = "invalid gatedRmsNorm arguments";
+        }
+        return false;
+    }
+    const int n = heads * head_dim;
+    VectorPushConstants pc{};
+    pc.op = 2;
+    pc.n = static_cast<uint32_t>(n);
+    pc.heads = static_cast<uint32_t>(heads);
+    pc.head_dim = static_cast<uint32_t>(head_dim);
+    pc.eps = eps;
+    return impl_->runVector(pc,
+                            x,
+                            static_cast<size_t>(n) * sizeof(float),
+                            weight,
+                            static_cast<size_t>(head_dim) * sizeof(float),
+                            gate,
+                            static_cast<size_t>(n) * sizeof(float),
+                            nullptr,
+                            static_cast<size_t>(n) * sizeof(float),
+                            y,
+                            nullptr,
+                            timing,
+                            static_cast<uint32_t>(heads),
+                            1,
+                            error);
+#else
+    (void)x;
+    (void)weight;
+    (void)gate;
+    (void)heads;
+    (void)head_dim;
+    (void)eps;
+    (void)y;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::rope(float* q,
+                         int q_heads,
+                         float* k,
+                         int k_heads,
+                         int head_dim,
+                         int rotary_dim,
+                         int position,
+                         float theta,
+                         VulkanGemvTiming* timing,
+                         std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !q || !k || q_heads <= 0 || k_heads <= 0 || head_dim <= 0 || rotary_dim <= 0) {
+        if (error && (q_heads <= 0 || k_heads <= 0 || head_dim <= 0 || rotary_dim <= 0)) {
+            *error = "invalid rope arguments";
+        }
+        return false;
+    }
+    const int q_n = q_heads * head_dim;
+    const int k_n = k_heads * head_dim;
+    std::vector<float> out_q(static_cast<size_t>(q_n), 0.0f);
+    std::vector<float> out_k(static_cast<size_t>(k_n), 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 3;
+    pc.n = static_cast<uint32_t>(q_n + k_n);
+    pc.q_heads = static_cast<uint32_t>(q_heads);
+    pc.k_heads = static_cast<uint32_t>(k_heads);
+    pc.head_dim = static_cast<uint32_t>(head_dim);
+    pc.rotary_dim = static_cast<uint32_t>(rotary_dim);
+    pc.position = static_cast<uint32_t>(std::max(0, position));
+    pc.theta = theta;
+    const uint32_t groups = static_cast<uint32_t>((q_n + k_n + 255) / 256);
+    const bool ok = impl_->runVector(pc,
+                                     q,
+                                     static_cast<size_t>(q_n) * sizeof(float),
+                                     k,
+                                     static_cast<size_t>(k_n) * sizeof(float),
+                                     out_q.data(),
+                                     out_q.size() * sizeof(float),
+                                     out_k.data(),
+                                     out_k.size() * sizeof(float),
+                                     out_k.data(),
+                                     out_q.data(),
+                                     timing,
+                                     groups,
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(q, out_q.data(), out_q.size() * sizeof(float));
+        std::memcpy(k, out_k.data(), out_k.size() * sizeof(float));
+    }
+    return ok;
+#else
+    (void)q;
+    (void)q_heads;
+    (void)k;
+    (void)k_heads;
+    (void)head_dim;
+    (void)rotary_dim;
+    (void)position;
+    (void)theta;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::siluGateMul(const float* gate,
+                                const float* up,
+                                int n,
+                                float* y,
+                                VulkanGemvTiming* timing,
+                                std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !gate || !up || !y || n <= 0) {
+        if (error && n <= 0) {
+            *error = "invalid siluGateMul arguments";
+        }
+        return false;
+    }
+    VectorPushConstants pc{};
+    pc.op = 4;
+    pc.n = static_cast<uint32_t>(n);
+    return impl_->runVector(pc,
+                            gate,
+                            static_cast<size_t>(n) * sizeof(float),
+                            up,
+                            static_cast<size_t>(n) * sizeof(float),
+                            nullptr,
+                            0,
+                            nullptr,
+                            static_cast<size_t>(n) * sizeof(float),
+                            y,
+                            nullptr,
+                            timing,
+                            static_cast<uint32_t>((n + 255) / 256),
+                            1,
+                            error);
+#else
+    (void)gate;
+    (void)up;
+    (void)n;
+    (void)y;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::residualAdd(float* hidden,
+                                const float* delta,
+                                int n,
+                                VulkanGemvTiming* timing,
+                                std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !hidden || !delta || n <= 0) {
+        if (error && n <= 0) {
+            *error = "invalid residualAdd arguments";
+        }
+        return false;
+    }
+    std::vector<float> out(static_cast<size_t>(n), 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 5;
+    pc.n = static_cast<uint32_t>(n);
+    const bool ok = impl_->runVector(pc,
+                                     hidden,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     delta,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     nullptr,
+                                     0,
+                                     out.data(),
+                                     out.size() * sizeof(float),
+                                     out.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>((n + 255) / 256),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(hidden, out.data(), out.size() * sizeof(float));
+    }
+    return ok;
+#else
+    (void)hidden;
+    (void)delta;
+    (void)n;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::attentionOutputGate(float* hidden,
+                                        const float* gate,
+                                        int n,
+                                        VulkanGemvTiming* timing,
+                                        std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !hidden || !gate || n <= 0) {
+        if (error && n <= 0) {
+            *error = "invalid attentionOutputGate arguments";
+        }
+        return false;
+    }
+    std::vector<float> out(static_cast<size_t>(n), 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 6;
+    pc.n = static_cast<uint32_t>(n);
+    const bool ok = impl_->runVector(pc,
+                                     hidden,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     gate,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     nullptr,
+                                     0,
+                                     out.data(),
+                                     out.size() * sizeof(float),
+                                     out.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>((n + 255) / 256),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(hidden, out.data(), out.size() * sizeof(float));
+    }
+    return ok;
+#else
+    (void)hidden;
+    (void)gate;
+    (void)n;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::argmax(const float* logits,
+                           int n,
+                           int* out_index,
+                           float* out_value,
+                           VulkanGemvTiming* timing,
+                           std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !logits || !out_index || !out_value || n <= 0) {
+        if (error && n <= 0) {
+            *error = "invalid argmax arguments";
+        }
+        return false;
+    }
+    float out[2] = {0.0f, 0.0f};
+    VectorPushConstants pc{};
+    pc.op = 7;
+    pc.n = static_cast<uint32_t>(n);
+    const bool ok = impl_->runVector(pc,
+                                     logits,
+                                     static_cast<size_t>(n) * sizeof(float),
+                                     nullptr,
+                                     0,
+                                     nullptr,
+                                     0,
+                                     out,
+                                     sizeof(out),
+                                     out,
+                                     nullptr,
+                                     timing,
+                                     1,
+                                     1,
+                                     error);
+    if (ok) {
+        *out_index = static_cast<int>(out[0]);
+        *out_value = out[1];
+    }
+    return ok;
+#else
+    (void)logits;
+    (void)n;
+    (void)out_index;
+    (void)out_value;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::gqaDecode(const float* q,
+                              const float* k_cache,
+                              const float* v_cache,
+                              int context,
+                              int q_heads,
+                              int kv_heads,
+                              int head_dim,
+                              float* out,
+                              VulkanGemvTiming* timing,
+                              std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !q || !k_cache || !v_cache || !out || context <= 0 || q_heads <= 0 || kv_heads <= 0 ||
+        head_dim <= 0) {
+        if (error && (context <= 0 || q_heads <= 0 || kv_heads <= 0 || head_dim <= 0)) {
+            *error = "invalid gqaDecode arguments";
+        }
+        return false;
+    }
+    const size_t q_bytes = static_cast<size_t>(q_heads) * static_cast<size_t>(head_dim) * sizeof(float);
+    const size_t kv_bytes =
+        static_cast<size_t>(context) * static_cast<size_t>(kv_heads) * static_cast<size_t>(head_dim) * sizeof(float);
+    const size_t out_bytes = static_cast<size_t>(q_heads) * static_cast<size_t>(head_dim) * sizeof(float);
+    VectorPushConstants pc{};
+    pc.op = 8;
+    pc.n = static_cast<uint32_t>(context);
+    pc.q_heads = static_cast<uint32_t>(q_heads);
+    pc.k_heads = static_cast<uint32_t>(kv_heads);
+    pc.head_dim = static_cast<uint32_t>(head_dim);
+    return impl_->runVector(pc,
+                            q,
+                            q_bytes,
+                            k_cache,
+                            kv_bytes,
+                            v_cache,
+                            kv_bytes,
+                            nullptr,
+                            out_bytes,
+                            out,
+                            nullptr,
+                            timing,
+                            static_cast<uint32_t>(q_heads),
+                            1,
+                            error);
+#else
+    (void)q;
+    (void)k_cache;
+    (void)v_cache;
+    (void)context;
+    (void)q_heads;
+    (void)kv_heads;
+    (void)head_dim;
+    (void)out;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::linearAttentionConv1d(const float* input,
+                                          const float* state,
+                                          const float* weight,
+                                          int conv_dim,
+                                          int kernel_dim,
+                                          float* conv_out,
+                                          float* new_state,
+                                          VulkanGemvTiming* timing,
+                                          std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !input || !weight || !conv_out || conv_dim <= 0 || kernel_dim <= 0) {
+        if (error && (conv_dim <= 0 || kernel_dim <= 0)) {
+            *error = "invalid linearAttentionConv1d arguments";
+        }
+        return false;
+    }
+    const int history = std::max(0, kernel_dim - 1);
+    std::vector<float> zero_state;
+    const float* state_data = state;
+    if (history > 0 && !state_data) {
+        zero_state.assign(static_cast<size_t>(conv_dim) * static_cast<size_t>(history), 0.0f);
+        state_data = zero_state.data();
+    }
+    std::vector<float> combined(static_cast<size_t>(conv_dim) +
+                                    static_cast<size_t>(conv_dim) * static_cast<size_t>(history),
+                                0.0f);
+    VectorPushConstants pc{};
+    pc.op = 9;
+    pc.n = static_cast<uint32_t>(conv_dim);
+    pc.heads = static_cast<uint32_t>(history);
+    pc.head_dim = static_cast<uint32_t>(kernel_dim);
+    const bool ok = impl_->runVector(pc,
+                                     input,
+                                     static_cast<size_t>(conv_dim) * sizeof(float),
+                                     state_data,
+                                     static_cast<size_t>(conv_dim) * static_cast<size_t>(history) * sizeof(float),
+                                     weight,
+                                     static_cast<size_t>(conv_dim) * static_cast<size_t>(kernel_dim) * sizeof(float),
+                                     combined.data(),
+                                     combined.size() * sizeof(float),
+                                     combined.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>((conv_dim + 255) / 256),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(conv_out, combined.data(), static_cast<size_t>(conv_dim) * sizeof(float));
+        if (new_state && history > 0) {
+            std::memcpy(new_state,
+                        combined.data() + static_cast<size_t>(conv_dim),
+                        static_cast<size_t>(conv_dim) * static_cast<size_t>(history) * sizeof(float));
+        }
+    }
+    return ok;
+#else
+    (void)input;
+    (void)state;
+    (void)weight;
+    (void)conv_dim;
+    (void)kernel_dim;
+    (void)conv_out;
+    (void)new_state;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::linearAttentionStateUpdate(const float* linear_conv,
+                                               const float* linear_a,
+                                               const float* linear_b,
+                                               const float* a_log,
+                                               const float* dt_bias,
+                                               float* recurrent_state,
+                                               int key_heads,
+                                               int value_heads,
+                                               int key_dim,
+                                               int value_dim,
+                                               float* out,
+                                               VulkanGemvTiming* timing,
+                                               std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !linear_conv || !linear_a || !linear_b || !a_log || !dt_bias || !recurrent_state ||
+        !out || key_heads <= 0 || value_heads <= 0 || key_dim <= 0 || value_dim <= 0) {
+        if (error && (key_heads <= 0 || value_heads <= 0 || key_dim <= 0 || value_dim <= 0)) {
+            *error = "invalid linearAttentionStateUpdate arguments";
+        }
+        return false;
+    }
+    std::vector<float> aux(static_cast<size_t>(value_heads) * 4u, 0.0f);
+    std::memcpy(aux.data(), linear_a, static_cast<size_t>(value_heads) * sizeof(float));
+    std::memcpy(aux.data() + static_cast<size_t>(value_heads),
+                linear_b,
+                static_cast<size_t>(value_heads) * sizeof(float));
+    std::memcpy(aux.data() + static_cast<size_t>(value_heads) * 2u,
+                a_log,
+                static_cast<size_t>(value_heads) * sizeof(float));
+    std::memcpy(aux.data() + static_cast<size_t>(value_heads) * 3u,
+                dt_bias,
+                static_cast<size_t>(value_heads) * sizeof(float));
+    const size_t mixed_values =
+        static_cast<size_t>(key_heads) * static_cast<size_t>(key_dim) * 2u +
+        static_cast<size_t>(value_heads) * static_cast<size_t>(value_dim);
+    const size_t out_values = static_cast<size_t>(value_heads) * static_cast<size_t>(value_dim);
+    const size_t state_values = static_cast<size_t>(value_heads) * static_cast<size_t>(key_dim) *
+                                static_cast<size_t>(value_dim);
+    std::vector<float> combined(out_values + state_values, 0.0f);
+    VectorPushConstants pc{};
+    pc.op = 10;
+    pc.n = static_cast<uint32_t>(value_heads);
+    pc.heads = static_cast<uint32_t>(key_heads);
+    pc.head_dim = static_cast<uint32_t>(key_dim);
+    pc.q_heads = static_cast<uint32_t>(value_dim);
+    const bool ok = impl_->runVector(pc,
+                                     linear_conv,
+                                     mixed_values * sizeof(float),
+                                     recurrent_state,
+                                     state_values * sizeof(float),
+                                     aux.data(),
+                                     aux.size() * sizeof(float),
+                                     combined.data(),
+                                     combined.size() * sizeof(float),
+                                     combined.data(),
+                                     nullptr,
+                                     timing,
+                                     static_cast<uint32_t>(value_heads),
+                                     1,
+                                     error);
+    if (ok) {
+        std::memcpy(out, combined.data(), out_values * sizeof(float));
+        std::memcpy(recurrent_state, combined.data() + out_values, state_values * sizeof(float));
+    }
+    return ok;
+#else
+    (void)linear_conv;
+    (void)linear_a;
+    (void)linear_b;
+    (void)a_log;
+    (void)dt_bias;
+    (void)recurrent_state;
+    (void)key_heads;
+    (void)value_heads;
+    (void)key_dim;
+    (void)value_dim;
+    (void)out;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
+bool VulkanBackend::appendFloatVector(const float* old_data,
+                                      int old_values,
+                                      const float* append_data,
+                                      int append_values,
+                                      float* out,
+                                      VulkanGemvTiming* timing,
+                                      std::string* error) {
+#if defined(XQ_ENABLE_CUSTOM_VULKAN) && defined(__ANDROID__)
+    if (!initialize(error) || !append_data || !out || old_values < 0 || append_values <= 0) {
+        if (error && (old_values < 0 || append_values <= 0)) {
+            *error = "invalid appendFloatVector arguments";
+        }
+        return false;
+    }
+    float zero = 0.0f;
+    const float* old_ptr = old_values > 0 && old_data ? old_data : &zero;
+    VectorPushConstants pc{};
+    pc.op = 11;
+    pc.n = static_cast<uint32_t>(old_values);
+    pc.heads = static_cast<uint32_t>(append_values);
+    const int total = old_values + append_values;
+    return impl_->runVector(pc,
+                            old_ptr,
+                            static_cast<size_t>(std::max(1, old_values)) * sizeof(float),
+                            append_data,
+                            static_cast<size_t>(append_values) * sizeof(float),
+                            nullptr,
+                            0,
+                            out,
+                            static_cast<size_t>(total) * sizeof(float),
+                            out,
+                            nullptr,
+                            timing,
+                            static_cast<uint32_t>((total + 255) / 256),
+                            1,
+                            error);
+#else
+    (void)old_data;
+    (void)old_values;
+    (void)append_data;
+    (void)append_values;
+    (void)out;
+    (void)timing;
+    if (error) {
+        *error = "custom Vulkan vector ops are only compiled for Android builds";
+    }
+    return false;
+#endif
+}
+
 xq_status runVulkanW4A16SelfTestJson(char* json_out, size_t json_capacity) {
     std::ostringstream json;
     VulkanBackend backend;
@@ -715,6 +1701,323 @@ xq_status runVulkanW4A16SelfTestJson(char* json_out, size_t json_capacity) {
         }
         json << "}";
     }
+    json << "],\"vector_results\":[";
+    bool first_vector = true;
+    auto appendVectorResult = [&](const char* name,
+                                  bool ok,
+                                  const DiffStats& diff,
+                                  double tolerance,
+                                  const VulkanGemvTiming& timing,
+                                  const std::string& vector_error) {
+        const bool pass = ok && diff.max_abs <= tolerance && std::isfinite(diff.max_abs);
+        all_pass = all_pass && pass;
+        if (!first_vector) {
+            json << ",";
+        }
+        first_vector = false;
+        json << "{\"name\":\"" << name << "\",\"backend\":\"vulkan\""
+             << ",\"vulkan_upload_ms\":" << timing.upload_ms
+             << ",\"vulkan_dispatch_ms\":" << timing.dispatch_ms
+             << ",\"vulkan_download_ms\":" << timing.download_ms
+             << ",\"vulkan_total_ms\":" << timing.total_ms
+             << ",\"max_abs_error\":" << diff.max_abs
+             << ",\"mean_abs_error\":" << diff.mean_abs
+             << ",\"tolerance\":" << tolerance
+             << ",\"pass\":" << (pass ? "true" : "false");
+        if (!ok) {
+            json << ",\"error\":\"" << jsonEscape(vector_error) << "\"";
+        }
+        json << "}";
+    };
+
+    {
+        const int n = 1024;
+        std::vector<float> x = makeDeterministicInput(n);
+        std::vector<float> w(n);
+        for (int i = 0; i < n; ++i) {
+            w[static_cast<size_t>(i)] = 0.8f + 0.001f * static_cast<float>(i % 17);
+        }
+        std::vector<float> cpu(n), vk(n);
+        double sum = 0.0;
+        for (float v : x) {
+            sum += static_cast<double>(v) * static_cast<double>(v);
+        }
+        const float inv = 1.0f / std::sqrt(static_cast<float>(sum / n) + 1.0e-6f);
+        for (int i = 0; i < n; ++i) {
+            cpu[static_cast<size_t>(i)] = x[static_cast<size_t>(i)] * inv * w[static_cast<size_t>(i)];
+        }
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.rmsNorm(x.data(), w.data(), n, 1.0e-6f, vk.data(), &timing, &vector_error);
+        appendVectorResult("rmsnorm_vector", ok, ok ? compareVectors(cpu, vk) : DiffStats{}, 1.0e-4, timing, vector_error);
+    }
+
+    {
+        const int q_heads = 2;
+        const int k_heads = 1;
+        const int head_dim = 16;
+        const int rotary_dim = 8;
+        const int position = 7;
+        const float theta = 10000000.0f;
+        std::vector<float> q = makeDeterministicInput(q_heads * head_dim);
+        std::vector<float> k = makeDeterministicInput(k_heads * head_dim);
+        std::vector<float> q_ref = q;
+        std::vector<float> k_ref = k;
+        auto ropeRef = [&](std::vector<float>* data, int heads) {
+            const int active_dim = std::min(head_dim, rotary_dim);
+            const int half = active_dim / 2;
+            for (int h = 0; h < heads; ++h) {
+                float* base = data->data() + h * head_dim;
+                for (int i = 0; i < half; ++i) {
+                    const float inv_freq = std::pow(theta, -static_cast<float>(2 * i) / static_cast<float>(active_dim));
+                    const float angle = static_cast<float>(position) * inv_freq;
+                    const float c = std::cos(angle);
+                    const float s = std::sin(angle);
+                    const float x0 = base[i];
+                    const float x1 = base[half + i];
+                    base[i] = x0 * c - x1 * s;
+                    base[half + i] = x1 * c + x0 * s;
+                }
+            }
+        };
+        ropeRef(&q_ref, q_heads);
+        ropeRef(&k_ref, k_heads);
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.rope(q.data(), q_heads, k.data(), k_heads, head_dim, rotary_dim, position, theta, &timing, &vector_error);
+        std::vector<float> cpu = q_ref;
+        cpu.insert(cpu.end(), k_ref.begin(), k_ref.end());
+        std::vector<float> got = q;
+        got.insert(got.end(), k.begin(), k.end());
+        appendVectorResult("rope_qk_vector", ok, ok ? compareVectors(cpu, got) : DiffStats{}, 1.0e-4, timing, vector_error);
+    }
+
+    {
+        const int n = 2048;
+        std::vector<float> gate = makeDeterministicInput(n);
+        std::vector<float> up = makeDeterministicInput(n);
+        std::vector<float> cpu(n), vk(n);
+        for (int i = 0; i < n; ++i) {
+            const float g = gate[static_cast<size_t>(i)];
+            cpu[static_cast<size_t>(i)] = g / (1.0f + std::exp(-g)) * up[static_cast<size_t>(i)];
+        }
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.siluGateMul(gate.data(), up.data(), n, vk.data(), &timing, &vector_error);
+        appendVectorResult("silu_gate_mul_vector", ok, ok ? compareVectors(cpu, vk) : DiffStats{}, 1.0e-5, timing, vector_error);
+    }
+
+    {
+        const int n = 2048;
+        std::vector<float> hidden = makeDeterministicInput(n);
+        std::vector<float> delta = makeDeterministicInput(n);
+        std::vector<float> cpu = hidden;
+        for (int i = 0; i < n; ++i) {
+            cpu[static_cast<size_t>(i)] += delta[static_cast<size_t>(i)];
+        }
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.residualAdd(hidden.data(), delta.data(), n, &timing, &vector_error);
+        appendVectorResult("residual_add_vector", ok, ok ? compareVectors(cpu, hidden) : DiffStats{}, 1.0e-6, timing, vector_error);
+    }
+
+    {
+        const int context = 5;
+        const int q_heads = 4;
+        const int kv_heads = 2;
+        const int head_dim = 8;
+        std::vector<float> q = makeDeterministicInput(q_heads * head_dim);
+        std::vector<float> k_cache = makeDeterministicInput(context * kv_heads * head_dim);
+        std::vector<float> v_cache = makeDeterministicInput(context * kv_heads * head_dim);
+        std::vector<float> cpu(q_heads * head_dim, 0.0f);
+        std::vector<float> vk(q_heads * head_dim, 0.0f);
+        const int group = std::max(1, q_heads / kv_heads);
+        const float scale = 1.0f / std::sqrt(static_cast<float>(head_dim));
+        std::vector<float> scores(context);
+        for (int qh = 0; qh < q_heads; ++qh) {
+            const int kh = std::min(kv_heads - 1, qh / group);
+            float max_score = -std::numeric_limits<float>::infinity();
+            for (int t = 0; t < context; ++t) {
+                float dot = 0.0f;
+                for (int d = 0; d < head_dim; ++d) {
+                    dot += q[static_cast<size_t>(qh * head_dim + d)] *
+                           k_cache[static_cast<size_t>((t * kv_heads + kh) * head_dim + d)];
+                }
+                scores[static_cast<size_t>(t)] = dot * scale;
+                max_score = std::max(max_score, scores[static_cast<size_t>(t)]);
+            }
+            float denom = 0.0f;
+            for (int t = 0; t < context; ++t) {
+                scores[static_cast<size_t>(t)] = std::exp(scores[static_cast<size_t>(t)] - max_score);
+                denom += scores[static_cast<size_t>(t)];
+            }
+            const float inv = denom > 0.0f ? 1.0f / denom : 0.0f;
+            for (int t = 0; t < context; ++t) {
+                const float weight = scores[static_cast<size_t>(t)] * inv;
+                for (int d = 0; d < head_dim; ++d) {
+                    cpu[static_cast<size_t>(qh * head_dim + d)] +=
+                        weight * v_cache[static_cast<size_t>((t * kv_heads + kh) * head_dim + d)];
+                }
+            }
+        }
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.gqaDecode(
+            q.data(), k_cache.data(), v_cache.data(), context, q_heads, kv_heads, head_dim, vk.data(), &timing, &vector_error);
+        appendVectorResult("gqa_decode_vector", ok, ok ? compareVectors(cpu, vk) : DiffStats{}, 1.0e-4, timing, vector_error);
+    }
+
+    {
+        const int conv_dim = 96;
+        const int kernel_dim = 4;
+        const int history = kernel_dim - 1;
+        std::vector<float> input = makeDeterministicInput(conv_dim);
+        std::vector<float> state = makeDeterministicInput(conv_dim * history);
+        std::vector<float> weight = makeDeterministicInput(conv_dim * kernel_dim);
+        std::vector<float> cpu_out(conv_dim, 0.0f);
+        std::vector<float> cpu_state = state;
+        for (int c = 0; c < conv_dim; ++c) {
+            float acc = 0.0f;
+            for (int k = 0; k < history; ++k) {
+                acc += state[static_cast<size_t>(c * history + k)] *
+                       weight[static_cast<size_t>(c * kernel_dim + k)];
+            }
+            acc += input[static_cast<size_t>(c)] * weight[static_cast<size_t>(c * kernel_dim + history)];
+            cpu_out[static_cast<size_t>(c)] = acc / (1.0f + std::exp(-acc));
+            for (int k = 0; k < history; ++k) {
+                cpu_state[static_cast<size_t>(c * history + k)] =
+                    (k + 1 < history) ? state[static_cast<size_t>(c * history + k + 1)] : input[static_cast<size_t>(c)];
+            }
+        }
+        std::vector<float> vk_out(conv_dim, 0.0f);
+        std::vector<float> vk_state(state.size(), 0.0f);
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.linearAttentionConv1d(input.data(),
+                                                      state.data(),
+                                                      weight.data(),
+                                                      conv_dim,
+                                                      kernel_dim,
+                                                      vk_out.data(),
+                                                      vk_state.data(),
+                                                      &timing,
+                                                      &vector_error);
+        std::vector<float> cpu = cpu_out;
+        cpu.insert(cpu.end(), cpu_state.begin(), cpu_state.end());
+        std::vector<float> got = vk_out;
+        got.insert(got.end(), vk_state.begin(), vk_state.end());
+        appendVectorResult("linear_attention_conv1d_vector",
+                           ok,
+                           ok ? compareVectors(cpu, got) : DiffStats{},
+                           1.0e-5,
+                           timing,
+                           vector_error);
+    }
+
+    {
+        const int key_heads = 2;
+        const int value_heads = 4;
+        const int key_dim = 8;
+        const int value_dim = 8;
+        const int mixed_values = key_heads * key_dim * 2 + value_heads * value_dim;
+        std::vector<float> linear_conv = makeDeterministicInput(mixed_values);
+        std::vector<float> linear_a = makeDeterministicInput(value_heads);
+        std::vector<float> linear_b = makeDeterministicInput(value_heads);
+        std::vector<float> a_log(value_heads);
+        std::vector<float> dt_bias(value_heads);
+        for (int i = 0; i < value_heads; ++i) {
+            a_log[static_cast<size_t>(i)] = -0.7f + 0.02f * static_cast<float>(i);
+            dt_bias[static_cast<size_t>(i)] = 0.03f * static_cast<float>(i - 1);
+        }
+        std::vector<float> cpu_state = makeDeterministicInput(value_heads * key_dim * value_dim);
+        std::vector<float> vk_state = cpu_state;
+        std::vector<float> cpu(value_heads * value_dim, 0.0f);
+        std::vector<float> vk(value_heads * value_dim, 0.0f);
+        const float* query = linear_conv.data();
+        const float* key = linear_conv.data() + key_heads * key_dim;
+        const float* value = linear_conv.data() + key_heads * key_dim * 2;
+        const int factor = std::max(1, value_heads / std::max(1, key_heads));
+        for (int vh = 0; vh < value_heads; ++vh) {
+            const int kh = std::min(key_heads - 1, vh / factor);
+            const float beta = 1.0f / (1.0f + std::exp(-linear_b[static_cast<size_t>(vh)]));
+            const float gate = -std::exp(a_log[static_cast<size_t>(vh)]) *
+                               std::log(1.0f + std::exp(linear_a[static_cast<size_t>(vh)] +
+                                                        dt_bias[static_cast<size_t>(vh)]));
+            gatedDeltaDecodeReference(query + kh * key_dim,
+                                      key + kh * key_dim,
+                                      value + vh * value_dim,
+                                      beta,
+                                      gate,
+                                      key_dim,
+                                      value_dim,
+                                      cpu_state.data() + static_cast<size_t>(vh * key_dim * value_dim),
+                                      cpu.data() + static_cast<size_t>(vh * value_dim));
+        }
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.linearAttentionStateUpdate(linear_conv.data(),
+                                                           linear_a.data(),
+                                                           linear_b.data(),
+                                                           a_log.data(),
+                                                           dt_bias.data(),
+                                                           vk_state.data(),
+                                                           key_heads,
+                                                           value_heads,
+                                                           key_dim,
+                                                           value_dim,
+                                                           vk.data(),
+                                                           &timing,
+                                                           &vector_error);
+        std::vector<float> cpu_combined = cpu;
+        cpu_combined.insert(cpu_combined.end(), cpu_state.begin(), cpu_state.end());
+        std::vector<float> got = vk;
+        got.insert(got.end(), vk_state.begin(), vk_state.end());
+        appendVectorResult("linear_attention_state_update_vector",
+                           ok,
+                           ok ? compareVectors(cpu_combined, got) : DiffStats{},
+                           1.0e-4,
+                           timing,
+                           vector_error);
+    }
+
+    {
+        const int old_values = 17;
+        const int append_values = 9;
+        std::vector<float> old_data = makeDeterministicInput(old_values);
+        std::vector<float> append_data = makeDeterministicInput(append_values);
+        std::vector<float> cpu = old_data;
+        cpu.insert(cpu.end(), append_data.begin(), append_data.end());
+        std::vector<float> vk(cpu.size(), 0.0f);
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.appendFloatVector(
+            old_data.data(), old_values, append_data.data(), append_values, vk.data(), &timing, &vector_error);
+        appendVectorResult("append_vector", ok, ok ? compareVectors(cpu, vk) : DiffStats{}, 1.0e-6, timing, vector_error);
+    }
+
+    {
+        const int n = 2048;
+        std::vector<float> logits = makeDeterministicInput(n);
+        logits[1337] = 42.0f;
+        int ref_idx = 0;
+        float ref_val = logits[0];
+        for (int i = 1; i < n; ++i) {
+            if (logits[static_cast<size_t>(i)] > ref_val) {
+                ref_val = logits[static_cast<size_t>(i)];
+                ref_idx = i;
+            }
+        }
+        int vk_idx = -1;
+        float vk_val = 0.0f;
+        VulkanGemvTiming timing;
+        std::string vector_error;
+        const bool ok = backend.argmax(logits.data(), n, &vk_idx, &vk_val, &timing, &vector_error);
+        DiffStats diff;
+        diff.max_abs = (ok && vk_idx == ref_idx) ? std::abs(static_cast<double>(vk_val - ref_val)) : 1.0e9;
+        diff.mean_abs = diff.max_abs;
+        appendVectorResult("argmax_vector", ok, diff, 1.0e-6, timing, vector_error);
+    }
+
     json << "],\"wall_clock_ms\":" << elapsedMs(start, Clock::now())
          << ",\"status\":\"" << (all_pass ? "ok" : "error") << "\",\"pass\":" << (all_pass ? "true" : "false")
          << "}";

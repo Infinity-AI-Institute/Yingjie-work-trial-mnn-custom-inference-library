@@ -206,13 +206,182 @@ Why it was not accepted:
 - No `BENCH_QUALITY_JSON` was produced.
 - Performance was far below v27 CPU custom and stock MNN CPU.
 
+## Attempt 6: Add Vulkan Vector, GQA, And Argmax Kernels
+
+Code changes:
+
+- Added `customlib/kernels/generated/vulkan/vector_ops.comp`.
+- Added generated SPIR-V include `customlib/kernels/generated/vulkan/vector_ops_spv.inc`.
+- Extended `customlib/runtime/vulkan_backend.*` with vector/tensor dispatch helpers.
+- Integrated Vulkan attempts in `customlib/runtime/custom_model.cpp`.
+
+New kernel families attempted:
+
+- RMSNorm and Q/K normalization
+- Qwen3.5 active-slice RoPE
+- grouped-query attention score / softmax / V reduce
+- SiLU gate multiply
+- residual add
+- attention output gate
+- greedy argmax
+
+Device Farm selftest evidence:
+
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/f3506fac-58d8-4b03-bdf1-5f81d24af6ae`
+- Evidence JSON: `results/reports/evidence/vulkan_linear_state_selftest_passed.json`
+
+Result:
+
+- W4A16 4096 x 4096: PASS, max abs error `6.85453e-06`.
+- `rmsnorm_vector`: PASS.
+- `rope_qk_vector`: PASS.
+- `silu_gate_mul_vector`: PASS.
+- `residual_add_vector`: PASS.
+- `gqa_decode_vector`: PASS.
+- `argmax_vector`: PASS.
+
+## Attempt 7: Linear-Attention State Vulkan Fix
+
+Initial state-update shader result:
+
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/4e0bfbd2-d0c7-49ba-b70c-ec8cf197202b`
+- Result: failed `linear_attention_state_update_vector`.
+- Failure: max abs error `0.0007919` exceeded tolerance `0.0001`.
+
+Fix:
+
+- The shader computed the prediction from the pre-decay recurrent state.
+- The CPU reference decays state before computing the prediction.
+- Updated shader math to use `decay * state` in the prediction term.
+
+Retest:
+
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/f3506fac-58d8-4b03-bdf1-5f81d24af6ae`
+- Result: PASSED.
+- `linear_attention_state_update_vector` max abs error `1.49012e-08`.
+
+## Attempt 8: Extended Full-Model Short Integration
+
+Run ARN:
+
+```text
+arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6c5ec8c-7f52-4164-bc7f-c64f5e6105d5
+```
+
+Settings:
+
+| Field | Value |
+| --- | --- |
+| Model | full Qwen3.5-9B package |
+| Prompt tokens | 1 |
+| max_new_tokens | 1 |
+| Warmup / measured | 0 / 1 |
+| Requested backend | `vulkan` |
+| Actual backend | `cpu_vulkan_hybrid` |
+
+Result:
+
+- Device Farm result: PASSED.
+- `BENCH_RESULT_JSON` emitted.
+- `use_mnn_fallback = 0`.
+- `calls_mnn_llm_response_for_measured_generation = false`.
+- `fallback_op_families = []`.
+- `vulkan_generation_kernels_used = true`.
+- Decode TPS `0.139909`, TPOT `7147.49 ms`.
+
+Evidence:
+
+- `results/reports/evidence/customlib_vulkan_linear_state_integration_short_benchmark.json`
+
+Backend map in the evidence reports Vulkan for:
+
+```text
+q_proj, k_proj, v_proj, o_proj,
+gate_proj, up_proj, down_proj,
+linear_attention_projections,
+rmsnorm, rope, attention,
+linear_attention_state, activation,
+lm_head, sampling, prefill_kv_build
+```
+
+Remaining issue:
+
+- The actual backend remains `cpu_vulkan_hybrid`.
+- `embedding_bf16_row_read` remains CPU.
+- Performance is far below the accepted CPU final due per-operation host-visible upload/dispatch/download.
+
+## Attempt 9: Vulkan/Hybrid Quality Validation
+
+First quality attempt:
+
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/01cb5b7b-7cc8-476a-8a99-f47a1f9711b0`
+- Result: failed before `BENCH_QUALITY_JSON`; the test spec used expired model presigned URLs and download returned HTTP 403.
+
+Retry:
+
+- Run ARN: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e7081f14-99c2-4943-b6f9-222f8501fb90`
+- Evidence:
+  - `results/reports/evidence/quality_validation_custom_vulkan_linear_state_english.json`
+  - `results/reports/evidence/quality_validation_vulkan_linear_state_english_comparison.json`
+  - `results/reports/quality_validation_vulkan_linear_state_report.md`
+
+Result:
+
+- `BENCH_QUALITY_JSON` emitted.
+- Quality sanity gate: PASS.
+- Comparison-gate prompts: 5 / 5.
+- Exact full-token matches: 1 / 5.
+- Invalid tokens: none.
+- Empty outputs: none.
+- Repeated token 220: none.
+- Degenerate repetition: none.
+
+This is a useful output sanity pass, not a production semantic-quality claim.
+
+## Attempt 10: Required Full 512/256 Benchmark
+
+Run ARN:
+
+```text
+arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6650fcf-589f-49f6-8033-ed2030873d95
+```
+
+Settings:
+
+| Field | Value |
+| --- | --- |
+| Model | full Qwen3.5-9B package |
+| Prompt tokens | 512 |
+| max_new_tokens | 256 |
+| Warmup / measured | 1 / 3 |
+| Requested backend | `vulkan` |
+
+Result:
+
+- Device Farm status/result: `COMPLETED` / `STOPPED`.
+- Job timeout: 150 minutes.
+- No accepted `BENCH_RESULT_JSON`.
+- Evidence: `results/reports/evidence/customlib_vulkan_full_benchmark_stopped.json`.
+
+Logcat progress:
+
+```text
+16:50:30 BENCH_START engine=customlib requested_backend=vulkan actual_backend=cpu_vulkan_hybrid
+18:04:35 BENCH_ITER engine=customlib warmup=1 prompt=512 generated=256 prefill_ms=2840779.534 decode_ms=1599572.239 status=0
+```
+
+The completed warmup alone took about 74.006 minutes, with partial warmup decode TPS `0.160043`. The job stopped before the three measured iterations, so this cannot be used as the final performance comparison.
+
 ## Current Blocker Summary
 
-The Vulkan implementation is real but incomplete:
+The Vulkan implementation is real and exercised on Device Farm, but it is not an accepted full Vulkan final:
 
 - W4A16 Vulkan GEMV exists and passes Device Farm correctness.
-- W4A16 projection families can run through Vulkan inside the full-model custom path.
-- The runtime still needs persistent GPU-resident weights and Vulkan implementations for RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV.
-- The current upload-per-call design is slower than CPU and cannot approach 10 TPS.
+- Vulkan vector/tensor kernels for RMSNorm, RoPE, GQA, linear-attention state, KV append, activation/residual, output gate, and argmax pass Device Farm selftests.
+- A full-model short custom path reports Vulkan for the major traced tensor families and does not call MNN generation.
+- Vulkan/hybrid quality validation emits `BENCH_QUALITY_JSON` and passes sanity.
+- The runtime still reports `custom_backend_actual = cpu_vulkan_hybrid`, not `vulkan`.
+- The full 512/256 benchmark stopped at 150 minutes before measured iterations and before final `BENCH_RESULT_JSON`.
+- The current host-visible upload/download design is far slower than CPU and cannot approach 10 TPS.
 
-No final Vulkan success, quality pass, speedup, or 10 TPS claim is made.
+No final full-Vulkan success, 10 TPS claim, or speedup claim is made.

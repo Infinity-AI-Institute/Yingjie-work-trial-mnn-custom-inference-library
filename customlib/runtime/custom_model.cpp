@@ -168,7 +168,8 @@ std::string traceOpFamily(const std::string& name) {
     if (name.find("sampling") != std::string::npos) {
         return "sampling";
     }
-    if (name.find("kv_cache") != std::string::npos || name.find("embedding_load") != std::string::npos) {
+    if (name.find("prefill_kv_build") != std::string::npos || name.find("kv_append") != std::string::npos ||
+        name.find("kv_cache") != std::string::npos || name.find("embedding_load") != std::string::npos) {
         return "prefill_kv_build";
     }
     if (name.find("silu") != std::string::npos) {
@@ -423,6 +424,8 @@ bool CustomModel::load(const std::string& model_dir, const std::string& backend,
     backend_ = backend.empty() ? "cpu" : backend;
     vulkan_linear_calls_ = 0;
     vulkan_linear_failures_ = 0;
+    vulkan_tensor_calls_ = 0;
+    vulkan_tensor_failures_ = 0;
     vulkan_backend_.reset();
     model_dir_ = model_dir;
     const std::string manifest = readSmallFile(model_dir + "/xqwen35_manifest.json");
@@ -628,7 +631,9 @@ bool CustomModel::prefill(const int32_t* token_ids, size_t n_tokens, KernelTrace
         }
         runFinalNorm(trace);
         if (trace) {
-            trace->add("prefill_token_custom", elapsedMs(t0, Clock::now()));
+            trace->add("prefill_token_custom",
+                       elapsedMs(t0, Clock::now()),
+                       (vulkan_backend_ && vulkan_backend_->isInitialized()) ? "vulkan" : "cpu");
         }
     }
     return true;
@@ -674,20 +679,56 @@ void CustomModel::appendKv(Layer& layer,
     const size_t old_size = layer.k_cache.size();
     const size_t copy_k = std::min(k.size(), kv_values);
     const size_t copy_v = std::min(v.size(), kv_values);
-    layer.k_cache.resize(old_size + kv_values);
-    layer.v_cache.resize(old_size + kv_values);
-    std::copy_n(k.data(), copy_k, layer.k_cache.data() + old_size);
-    if (copy_k < kv_values) {
-        std::fill(layer.k_cache.data() + old_size + copy_k, layer.k_cache.data() + old_size + kv_values, 0.0f);
+    bool used_vk = false;
+    if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+        std::vector<float> k_append(kv_values, 0.0f);
+        std::vector<float> v_append(kv_values, 0.0f);
+        std::copy_n(k.data(), copy_k, k_append.data());
+        std::copy_n(v.data(), copy_v, v_append.data());
+        std::vector<float> new_k(old_size + kv_values, 0.0f);
+        std::vector<float> new_v(old_size + kv_values, 0.0f);
+        kernels::VulkanGemvTiming vk_timing;
+        std::string vk_error;
+        const bool k_ok = vulkan_backend_->appendFloatVector(layer.k_cache.empty() ? nullptr : layer.k_cache.data(),
+                                                            static_cast<int>(old_size),
+                                                            k_append.data(),
+                                                            static_cast<int>(kv_values),
+                                                            new_k.data(),
+                                                            &vk_timing,
+                                                            &vk_error);
+        vk_error.clear();
+        const bool v_ok = vulkan_backend_->appendFloatVector(layer.v_cache.empty() ? nullptr : layer.v_cache.data(),
+                                                            static_cast<int>(old_size),
+                                                            v_append.data(),
+                                                            static_cast<int>(kv_values),
+                                                            new_v.data(),
+                                                            &vk_timing,
+                                                            &vk_error);
+        if (k_ok && v_ok) {
+            layer.k_cache.swap(new_k);
+            layer.v_cache.swap(new_v);
+            used_vk = true;
+            ++vulkan_tensor_calls_;
+        } else {
+            ++vulkan_tensor_failures_;
+        }
     }
-    std::copy_n(v.data(), copy_v, layer.v_cache.data() + old_size);
-    if (copy_v < kv_values) {
-        std::fill(layer.v_cache.data() + old_size + copy_v, layer.v_cache.data() + old_size + kv_values, 0.0f);
+    if (!used_vk) {
+        layer.k_cache.resize(old_size + kv_values);
+        layer.v_cache.resize(old_size + kv_values);
+        std::copy_n(k.data(), copy_k, layer.k_cache.data() + old_size);
+        if (copy_k < kv_values) {
+            std::fill(layer.k_cache.data() + old_size + copy_k, layer.k_cache.data() + old_size + kv_values, 0.0f);
+        }
+        std::copy_n(v.data(), copy_v, layer.v_cache.data() + old_size);
+        if (copy_v < kv_values) {
+            std::fill(layer.v_cache.data() + old_size + copy_v, layer.v_cache.data() + old_size + kv_values, 0.0f);
+        }
     }
     layer.kv_len += 1;
     if (trace) {
-        trace->add("kv_append_custom", elapsedMs(t0, Clock::now()));
-        trace->add("prefill_kv_build_custom", elapsedMs(t0, Clock::now()));
+        trace->add("kv_append_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
+        trace->add("prefill_kv_build_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
     }
 }
 
@@ -713,13 +754,76 @@ void CustomModel::runFullAttention(Layer& layer, size_t position, KernelTrace* t
 
     {
         const auto t0 = Clock::now();
-        applyHeadRms(q_query_.data(), layer.q_norm.data(), num_attention_heads_, head_dim_, rms_eps_);
-        applyHeadRms(k_.data(), layer.k_norm.data(), num_key_value_heads_, head_dim_, rms_eps_);
-        applyRopeVector(
-            q_query_.data(), num_attention_heads_, head_dim_, rotary_dim_, static_cast<int>(position), rope_theta_);
-        applyRopeVector(k_.data(), num_key_value_heads_, head_dim_, rotary_dim_, static_cast<int>(position), rope_theta_);
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->headRmsNorm(
+                    q_query_.data(), layer.q_norm.data(), num_attention_heads_, head_dim_, rms_eps_, &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            applyHeadRms(q_query_.data(), layer.q_norm.data(), num_attention_heads_, head_dim_, rms_eps_);
+        }
         if (trace) {
-            trace->add("rope_qk_custom", elapsedMs(t0, Clock::now()));
+            trace->add("q_norm_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
+        }
+    }
+    {
+        const auto t0 = Clock::now();
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->headRmsNorm(
+                    k_.data(), layer.k_norm.data(), num_key_value_heads_, head_dim_, rms_eps_, &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            applyHeadRms(k_.data(), layer.k_norm.data(), num_key_value_heads_, head_dim_, rms_eps_);
+        }
+        if (trace) {
+            trace->add("k_norm_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
+        }
+    }
+    {
+        const auto t0 = Clock::now();
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->rope(q_query_.data(),
+                                      num_attention_heads_,
+                                      k_.data(),
+                                      num_key_value_heads_,
+                                      head_dim_,
+                                      rotary_dim_,
+                                      static_cast<int>(position),
+                                      rope_theta_,
+                                      &vk_timing,
+                                      &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            applyRopeVector(
+                q_query_.data(), num_attention_heads_, head_dim_, rotary_dim_, static_cast<int>(position), rope_theta_);
+            applyRopeVector(
+                k_.data(), num_key_value_heads_, head_dim_, rotary_dim_, static_cast<int>(position), rope_theta_);
+        }
+        if (trace) {
+            trace->add("rope_qk_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
 
@@ -734,7 +838,37 @@ void CustomModel::runFullAttention(Layer& layer, size_t position, KernelTrace* t
     }
     std::fill(max_scores_.begin(), max_scores_.end(), -1.0e30f);
     const int group = std::max(1, num_attention_heads_ / std::max(1, num_key_value_heads_));
+    bool used_vk_gqa = false;
     {
+        const auto t0 = Clock::now();
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->gqaDecode(q_query_.data(),
+                                           layer.k_cache.data(),
+                                           layer.v_cache.data(),
+                                           context,
+                                           num_attention_heads_,
+                                           num_key_value_heads_,
+                                           head_dim_,
+                                           attn_hidden_.data(),
+                                           &vk_timing,
+                                           &vk_error)) {
+                used_vk_gqa = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (used_vk_gqa && trace) {
+            const double ms = elapsedMs(t0, Clock::now());
+            trace->add("attention_gqa_decode_custom", ms, "vulkan");
+            trace->add("attention_score_custom", ms / 3.0, "vulkan");
+            trace->add("attention_softmax_custom", ms / 3.0, "vulkan");
+            trace->add("attention_v_reduce_custom", ms / 3.0, "vulkan");
+        }
+    }
+    if (!used_vk_gqa) {
         const auto t0 = Clock::now();
         for (int qh = 0; qh < num_attention_heads_; ++qh) {
             const int kh = std::min(num_key_value_heads_ - 1, qh / group);
@@ -755,7 +889,7 @@ void CustomModel::runFullAttention(Layer& layer, size_t position, KernelTrace* t
             trace->add("attention_score_custom", elapsedMs(t0, Clock::now()));
         }
     }
-    {
+    if (!used_vk_gqa) {
         const auto t0 = Clock::now();
         for (int qh = 0; qh < num_attention_heads_; ++qh) {
             float denom = 0.0f;
@@ -773,7 +907,7 @@ void CustomModel::runFullAttention(Layer& layer, size_t position, KernelTrace* t
             trace->add("attention_softmax_custom", elapsedMs(t0, Clock::now()));
         }
     }
-    {
+    if (!used_vk_gqa) {
         const auto t0 = Clock::now();
         std::fill(attn_hidden_.begin(), attn_hidden_.end(), 0.0f);
         for (int qh = 0; qh < num_attention_heads_; ++qh) {
@@ -794,11 +928,25 @@ void CustomModel::runFullAttention(Layer& layer, size_t position, KernelTrace* t
     }
     {
         const auto t0 = Clock::now();
-        for (int i = 0; i < q_dim; ++i) {
-            attn_hidden_[static_cast<size_t>(i)] *= sigmoid(attn_gate_[static_cast<size_t>(i)]);
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->attentionOutputGate(
+                    attn_hidden_.data(), attn_gate_.data(), q_dim, &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            for (int i = 0; i < q_dim; ++i) {
+                attn_hidden_[static_cast<size_t>(i)] *= sigmoid(attn_gate_[static_cast<size_t>(i)]);
+            }
         }
         if (trace) {
-            trace->add("attention_output_gate_custom", elapsedMs(t0, Clock::now()));
+            trace->add("attention_output_gate_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     runLinear("linear_o_proj_w4a16", layer.o_proj, attn_hidden_, &scratch_hidden_, trace);
@@ -813,28 +961,51 @@ void CustomModel::runLinearAttention(Layer& layer, KernelTrace* trace) {
     {
         const auto t0 = Clock::now();
         const int history = std::max(0, linear_conv_kernel_dim_ - 1);
-        for (int c = 0; c < linear_conv_dim_; ++c) {
-            float acc = 0.0f;
-            for (int k = 0; k < history; ++k) {
-                const size_t state_index = static_cast<size_t>(c * history + k);
-                const size_t weight_index = static_cast<size_t>(c * linear_conv_kernel_dim_ + k);
-                acc += layer.linear_conv_state[state_index] * layer.linear_conv_weight[weight_index];
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            std::vector<float> next_state(layer.linear_conv_state.size(), 0.0f);
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->linearAttentionConv1d(linear_mixed_.data(),
+                                                       layer.linear_conv_state.data(),
+                                                       layer.linear_conv_weight.data(),
+                                                       linear_conv_dim_,
+                                                       linear_conv_kernel_dim_,
+                                                       linear_conv_.data(),
+                                                       next_state.data(),
+                                                       &vk_timing,
+                                                       &vk_error)) {
+                layer.linear_conv_state.swap(next_state);
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
             }
-            acc += linear_mixed_[static_cast<size_t>(c)] *
-                   layer.linear_conv_weight[static_cast<size_t>(c * linear_conv_kernel_dim_ + history)];
-            linear_conv_[static_cast<size_t>(c)] = silu(acc);
         }
-        for (int c = 0; c < linear_conv_dim_; ++c) {
-            float* state = layer.linear_conv_state.data() + static_cast<size_t>(c * history);
-            for (int k = 0; k + 1 < history; ++k) {
-                state[k] = state[k + 1];
+        if (!used_vk) {
+            for (int c = 0; c < linear_conv_dim_; ++c) {
+                float acc = 0.0f;
+                for (int k = 0; k < history; ++k) {
+                    const size_t state_index = static_cast<size_t>(c * history + k);
+                    const size_t weight_index = static_cast<size_t>(c * linear_conv_kernel_dim_ + k);
+                    acc += layer.linear_conv_state[state_index] * layer.linear_conv_weight[weight_index];
+                }
+                acc += linear_mixed_[static_cast<size_t>(c)] *
+                       layer.linear_conv_weight[static_cast<size_t>(c * linear_conv_kernel_dim_ + history)];
+                linear_conv_[static_cast<size_t>(c)] = silu(acc);
             }
-            if (history > 0) {
-                state[history - 1] = linear_mixed_[static_cast<size_t>(c)];
+            for (int c = 0; c < linear_conv_dim_; ++c) {
+                float* state = layer.linear_conv_state.data() + static_cast<size_t>(c * history);
+                for (int k = 0; k + 1 < history; ++k) {
+                    state[k] = state[k + 1];
+                }
+                if (history > 0) {
+                    state[history - 1] = linear_mixed_[static_cast<size_t>(c)];
+                }
             }
         }
         if (trace) {
-            trace->add("linear_attention_conv1d_custom", elapsedMs(t0, Clock::now()));
+            trace->add("linear_attention_conv1d_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
 
@@ -843,51 +1014,122 @@ void CustomModel::runLinearAttention(Layer& layer, KernelTrace* trace) {
     float* value = linear_conv_.data() + linear_key_dim_ * 2;
     {
         const auto t0 = Clock::now();
-        l2NormalizeHeads(query, linear_num_key_heads_, linear_key_head_dim_);
-        l2NormalizeHeads(key, linear_num_key_heads_, linear_key_head_dim_);
+        bool used_vk_query = false;
+        bool used_vk_key = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->l2NormalizeHeads(query, linear_num_key_heads_, linear_key_head_dim_, &vk_timing, &vk_error)) {
+                used_vk_query = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+            vk_error.clear();
+            if (vulkan_backend_->l2NormalizeHeads(key, linear_num_key_heads_, linear_key_head_dim_, &vk_timing, &vk_error)) {
+                used_vk_key = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk_query) {
+            l2NormalizeHeads(query, linear_num_key_heads_, linear_key_head_dim_);
+        }
+        if (!used_vk_key) {
+            l2NormalizeHeads(key, linear_num_key_heads_, linear_key_head_dim_);
+        }
         if (trace) {
-            trace->add("linear_attention_qk_l2norm_custom", elapsedMs(t0, Clock::now()));
+            trace->add("linear_attention_qk_l2norm_custom",
+                       elapsedMs(t0, Clock::now()),
+                       (used_vk_query && used_vk_key) ? "vulkan" : "cpu");
         }
     }
 
     {
         const auto t0 = Clock::now();
-        const int factor = std::max(1, linear_num_value_heads_ / std::max(1, linear_num_key_heads_));
-        std::fill(attn_hidden_.begin(), attn_hidden_.end(), 0.0f);
-        for (int vh = 0; vh < linear_num_value_heads_; ++vh) {
-            const int kh = std::min(linear_num_key_heads_ - 1, vh / factor);
-            const float beta = sigmoid(linear_b_[static_cast<size_t>(vh)]);
-            const float a_log = layer.linear_a_log[static_cast<size_t>(vh)];
-            const float dt_bias = layer.linear_dt_bias[static_cast<size_t>(vh)];
-            const float gate = -std::exp(a_log) * softplus(linear_a_[static_cast<size_t>(vh)] + dt_bias);
-            float* state = layer.linear_recurrent_state.data() +
-                           static_cast<size_t>(vh * linear_key_head_dim_ * linear_value_head_dim_);
-            float* out = attn_hidden_.data() + static_cast<size_t>(vh * linear_value_head_dim_);
-            kernels::gatedDeltaDecodeReference(query + kh * linear_key_head_dim_,
-                                               key + kh * linear_key_head_dim_,
-                                               value + vh * linear_value_head_dim_,
-                                               beta,
-                                               gate,
-                                               linear_key_head_dim_,
-                                               linear_value_head_dim_,
-                                               state,
-                                               out);
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->linearAttentionStateUpdate(linear_conv_.data(),
+                                                           linear_a_.data(),
+                                                           linear_b_.data(),
+                                                           layer.linear_a_log.data(),
+                                                           layer.linear_dt_bias.data(),
+                                                           layer.linear_recurrent_state.data(),
+                                                           linear_num_key_heads_,
+                                                           linear_num_value_heads_,
+                                                           linear_key_head_dim_,
+                                                           linear_value_head_dim_,
+                                                           attn_hidden_.data(),
+                                                           &vk_timing,
+                                                           &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            const int factor = std::max(1, linear_num_value_heads_ / std::max(1, linear_num_key_heads_));
+            std::fill(attn_hidden_.begin(), attn_hidden_.end(), 0.0f);
+            for (int vh = 0; vh < linear_num_value_heads_; ++vh) {
+                const int kh = std::min(linear_num_key_heads_ - 1, vh / factor);
+                const float beta = sigmoid(linear_b_[static_cast<size_t>(vh)]);
+                const float a_log = layer.linear_a_log[static_cast<size_t>(vh)];
+                const float dt_bias = layer.linear_dt_bias[static_cast<size_t>(vh)];
+                const float gate = -std::exp(a_log) * softplus(linear_a_[static_cast<size_t>(vh)] + dt_bias);
+                float* state = layer.linear_recurrent_state.data() +
+                               static_cast<size_t>(vh * linear_key_head_dim_ * linear_value_head_dim_);
+                float* out = attn_hidden_.data() + static_cast<size_t>(vh * linear_value_head_dim_);
+                kernels::gatedDeltaDecodeReference(query + kh * linear_key_head_dim_,
+                                                   key + kh * linear_key_head_dim_,
+                                                   value + vh * linear_value_head_dim_,
+                                                   beta,
+                                                   gate,
+                                                   linear_key_head_dim_,
+                                                   linear_value_head_dim_,
+                                                   state,
+                                                   out);
+            }
         }
         if (trace) {
-            trace->add("linear_attention_state_update_custom", elapsedMs(t0, Clock::now()));
+            trace->add("linear_attention_state_update_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     {
         const auto t0 = Clock::now();
-        applyGatedHeadRms(attn_hidden_.data(),
-                          layer.linear_norm.data(),
-                          linear_z_.data(),
-                          linear_num_value_heads_,
-                          linear_value_head_dim_,
-                          rms_eps_,
-                          attn_hidden_.data());
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->gatedRmsNorm(attn_hidden_.data(),
+                                             layer.linear_norm.data(),
+                                             linear_z_.data(),
+                                             linear_num_value_heads_,
+                                             linear_value_head_dim_,
+                                             rms_eps_,
+                                             attn_hidden_.data(),
+                                             &vk_timing,
+                                             &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            applyGatedHeadRms(attn_hidden_.data(),
+                              layer.linear_norm.data(),
+                              linear_z_.data(),
+                              linear_num_value_heads_,
+                              linear_value_head_dim_,
+                              rms_eps_,
+                              attn_hidden_.data());
+        }
         if (trace) {
-            trace->add("linear_attention_gated_rmsnorm_custom", elapsedMs(t0, Clock::now()));
+            trace->add("linear_attention_gated_rmsnorm_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     runLinear("linear_attn_out_proj_w4a16", layer.linear_out_proj, attn_hidden_, &scratch_hidden_, trace);
@@ -896,9 +1138,23 @@ void CustomModel::runLinearAttention(Layer& layer, KernelTrace* trace) {
 void CustomModel::runLayer(Layer& layer, size_t position, KernelTrace* trace) {
     {
         const auto t0 = Clock::now();
-        kernels::rmsnormReference(hidden_.data(), layer.input_norm.data(), hidden_size_, rms_eps_, normed_.data());
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->rmsNorm(
+                    hidden_.data(), layer.input_norm.data(), hidden_size_, rms_eps_, normed_.data(), &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            kernels::rmsnormReference(hidden_.data(), layer.input_norm.data(), hidden_size_, rms_eps_, normed_.data());
+        }
         if (trace) {
-            trace->add("rmsnorm_input", elapsedMs(t0, Clock::now()));
+            trace->add("rmsnorm_input", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     if (layer.full_attention) {
@@ -906,13 +1162,46 @@ void CustomModel::runLayer(Layer& layer, size_t position, KernelTrace* trace) {
     } else {
         runLinearAttention(layer, trace);
     }
-    addResidual(&hidden_, scratch_hidden_);
+    {
+        const auto t0 = Clock::now();
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->residualAdd(hidden_.data(), scratch_hidden_.data(), hidden_size_, &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            addResidual(&hidden_, scratch_hidden_);
+        }
+        if (trace) {
+            trace->add("residual_add_attention_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
+        }
+    }
 
     {
         const auto t0 = Clock::now();
-        kernels::rmsnormReference(hidden_.data(), layer.post_norm.data(), hidden_size_, rms_eps_, normed_.data());
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->rmsNorm(
+                    hidden_.data(), layer.post_norm.data(), hidden_size_, rms_eps_, normed_.data(), &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            kernels::rmsnormReference(hidden_.data(), layer.post_norm.data(), hidden_size_, rms_eps_, normed_.data());
+        }
         if (trace) {
-            trace->add("rmsnorm_post_attention", elapsedMs(t0, Clock::now()));
+            trace->add("rmsnorm_post_attention", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     runLinear("linear_gate_proj_w4a16", layer.gate_proj, normed_, &gate_, trace);
@@ -922,23 +1211,70 @@ void CustomModel::runLayer(Layer& layer, size_t position, KernelTrace* trace) {
         if (ffn_.size() != static_cast<size_t>(intermediate_size_)) {
             ffn_.resize(static_cast<size_t>(intermediate_size_));
         }
-        for (int i = 0; i < intermediate_size_; ++i) {
-            ffn_[static_cast<size_t>(i)] = silu(gate_[static_cast<size_t>(i)]) * up_[static_cast<size_t>(i)];
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->siluGateMul(
+                    gate_.data(), up_.data(), intermediate_size_, ffn_.data(), &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            for (int i = 0; i < intermediate_size_; ++i) {
+                ffn_[static_cast<size_t>(i)] = silu(gate_[static_cast<size_t>(i)]) * up_[static_cast<size_t>(i)];
+            }
         }
         if (trace) {
-            trace->add("silu_gate_mul_custom", elapsedMs(t0, Clock::now()));
+            trace->add("silu_gate_mul_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
         }
     }
     runLinear("linear_down_proj_w4a16", layer.down_proj, ffn_, &scratch_hidden_, trace);
-    addResidual(&hidden_, scratch_hidden_);
+    {
+        const auto t0 = Clock::now();
+        bool used_vk = false;
+        if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+            kernels::VulkanGemvTiming vk_timing;
+            std::string vk_error;
+            if (vulkan_backend_->residualAdd(hidden_.data(), scratch_hidden_.data(), hidden_size_, &vk_timing, &vk_error)) {
+                used_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+            }
+        }
+        if (!used_vk) {
+            addResidual(&hidden_, scratch_hidden_);
+        }
+        if (trace) {
+            trace->add("residual_add_mlp_custom", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
+        }
+    }
 }
 
 void CustomModel::runFinalNorm(KernelTrace* trace) {
     const auto t0 = Clock::now();
-    kernels::rmsnormReference(hidden_.data(), final_norm_.data(), hidden_size_, rms_eps_, scratch_hidden_.data());
+    bool used_vk = false;
+    if (vulkan_backend_ && vulkan_backend_->isInitialized()) {
+        kernels::VulkanGemvTiming vk_timing;
+        std::string vk_error;
+        if (vulkan_backend_->rmsNorm(
+                hidden_.data(), final_norm_.data(), hidden_size_, rms_eps_, scratch_hidden_.data(), &vk_timing, &vk_error)) {
+            used_vk = true;
+            ++vulkan_tensor_calls_;
+        } else {
+            ++vulkan_tensor_failures_;
+        }
+    }
+    if (!used_vk) {
+        kernels::rmsnormReference(hidden_.data(), final_norm_.data(), hidden_size_, rms_eps_, scratch_hidden_.data());
+    }
     hidden_.swap(scratch_hidden_);
     if (trace) {
-        trace->add("rmsnorm_final", elapsedMs(t0, Clock::now()));
+        trace->add("rmsnorm_final", elapsedMs(t0, Clock::now()), used_vk ? "vulkan" : "cpu");
     }
 }
 
@@ -950,9 +1286,37 @@ bool CustomModel::sampleGreedy(int32_t* token_id, KernelTrace* trace, std::strin
     const auto t0 = Clock::now();
     float best_value = -std::numeric_limits<float>::infinity();
     int best = 0;
-    if (lm_head_.bits == 4) {
+    bool lm_head_vk = false;
+    bool sampling_vk = false;
+    if (vulkan_backend_ && vulkan_backend_->isInitialized() && lm_head_.bits == 4) {
+        logits_.assign(static_cast<size_t>(lm_head_.rows), 0.0f);
+        kernels::VulkanGemvTiming vk_timing;
+        std::string vk_error;
+        if (vulkan_backend_->gemvW4A16(lm_head_, hidden_.data(), logits_.data(), &vk_timing, &vk_error)) {
+            lm_head_vk = true;
+            ++vulkan_linear_calls_;
+            vk_error.clear();
+            if (vulkan_backend_->argmax(logits_.data(), lm_head_.rows, &best, &best_value, &vk_timing, &vk_error)) {
+                sampling_vk = true;
+                ++vulkan_tensor_calls_;
+            } else {
+                ++vulkan_tensor_failures_;
+                best_value = logits_.empty() ? -std::numeric_limits<float>::infinity() : logits_[0];
+                for (int i = 1; i < static_cast<int>(logits_.size()); ++i) {
+                    const float value = logits_[static_cast<size_t>(i)];
+                    if (value > best_value) {
+                        best_value = value;
+                        best = i;
+                    }
+                }
+            }
+        } else {
+            ++vulkan_linear_failures_;
+        }
+    }
+    if (!lm_head_vk && lm_head_.bits == 4) {
         best = kernels::gemvW4A16ArgmaxNeon(lm_head_, hidden_.data(), &best_value);
-    } else {
+    } else if (!lm_head_vk) {
         runLinear("lm_head_custom_fallback_logits", lm_head_, hidden_, &logits_, trace);
         best_value = logits_.empty() ? -std::numeric_limits<float>::infinity() : logits_[0];
         for (int i = 1; i < static_cast<int>(logits_.size()); ++i) {
@@ -964,11 +1328,11 @@ bool CustomModel::sampleGreedy(int32_t* token_id, KernelTrace* trace, std::strin
         }
     }
     if (trace) {
-        trace->add("lm_head_custom", elapsedMs(t0, Clock::now()));
+        trace->add("lm_head_custom", elapsedMs(t0, Clock::now()), lm_head_vk ? "vulkan" : "cpu");
     }
     *token_id = best;
     if (trace) {
-        trace->add("sampling_greedy_custom", elapsedMs(t0, Clock::now()));
+        trace->add("sampling_greedy_custom", elapsedMs(t0, Clock::now()), sampling_vk ? "vulkan" : "cpu");
     }
     return true;
 }
@@ -999,10 +1363,19 @@ std::string CustomModel::coverageSummary() const {
         << "linear_backend=" << (vk_enabled ? "vulkan_attempt_unresident_w4a16_gemv" : "cpu") << ";"
         << "vulkan_linear_calls=" << vulkan_linear_calls_ << ";"
         << "vulkan_linear_failures=" << vulkan_linear_failures_ << ";"
+        << "vulkan_tensor_calls=" << vulkan_tensor_calls_ << ";"
+        << "vulkan_tensor_failures=" << vulkan_tensor_failures_ << ";"
         << "linear=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,linear_attn_qkv_a_b_z_out,lm_head;"
-        << "rmsnorm=custom_cpu;rope=custom_cpu;attention=custom_gqa_decode_cpu;"
-        << "linear_attention_state=custom_gated_delta_cpu;sampling=custom_greedy_cpu;"
-        << "prefill_kv_build=custom_cpu;fallback_ops=none";
+        << "rmsnorm=" << (vk_enabled ? "vulkan_attempt_vector" : "custom_cpu") << ";"
+        << "rope=" << (vk_enabled ? "vulkan_attempt_vector" : "custom_cpu") << ";"
+        << "attention=" << (vk_enabled ? "vulkan_attempt_gqa_decode" : "custom_cpu") << ";attention_output_gate="
+        << (vk_enabled ? "vulkan_attempt_vector" : "custom_cpu") << ";"
+        << "linear_attention_state=" << (vk_enabled ? "vulkan_attempt_conv_state_update" : "custom_gated_delta_cpu")
+        << ";linear_attention_qk_norm="
+        << (vk_enabled ? "vulkan_attempt_vector" : "custom_cpu") << ";"
+        << "linear_attention_gated_rmsnorm=" << (vk_enabled ? "vulkan_attempt_vector" : "custom_cpu") << ";"
+        << "sampling=" << (vk_enabled ? "vulkan_attempt_argmax_after_logits" : "custom_greedy_cpu") << ";"
+        << "prefill_kv_build=" << (vk_enabled ? "vulkan_attempt_append" : "custom_cpu") << ";fallback_ops=none";
     return oss.str();
 }
 

@@ -11,16 +11,17 @@
 
 ## Post-v27 Vulkan Implementation Attempt
 
-After v27, a separate Vulkan pass added a real custom Vulkan runtime and W4A16 GEMV compute shader. The shader passed Device Farm correctness on Samsung Galaxy S26 Ultra, and a short full-model custom integration run routed projection-family W4A16 kernels through Vulkan.
+After v27, a separate Vulkan pass added a real custom Vulkan runtime, W4A16 GEMV shader, vector/tensor shaders, grouped-query attention shader, linear-attention state shader, KV append shader, and argmax shader. Those kernels passed Device Farm selftests on Samsung Galaxy S26 Ultra. A short full-model custom integration run routed the major traced tensor op families through Vulkan, and a separate quality-validation run emitted `BENCH_QUALITY_JSON` and passed the deterministic sanity gate.
 
 That later attempt does not replace this final report:
 
-- Device Farm Vulkan selftest PASS run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/da6dfbc9-27eb-4a42-9202-bffda6b6bbe6`
-- Short full-model hybrid run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd`
+- Device Farm extended Vulkan selftest PASS run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/f3506fac-58d8-4b03-bdf1-5f81d24af6ae`
+- Short full-model hybrid run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6c5ec8c-7f52-4164-bc7f-c64f5e6105d5`
 - Short run backend: `custom_backend_requested = vulkan`, `custom_backend_actual = cpu_vulkan_hybrid`
-- Vulkan families: W4A16 projection families only
-- CPU families remaining: RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV
-- Quality status: no Vulkan `BENCH_QUALITY_JSON`; not accepted as a quality-passing Vulkan final
+- Vulkan families in short integration trace: q/k/v/o, gate/up/down, linear-attention projections, RMSNorm, RoPE, attention, linear-attention state, activation, lm_head, sampling, and prefill KV build
+- CPU rows remaining in short trace: embedding BF16 row read / file I/O and CPU control; actual backend remains hybrid
+- Quality status: Vulkan/hybrid quality `BENCH_QUALITY_JSON` emitted; sanity gate passed, exact full-output match 1 / 5, no production-quality semantic claim
+- Required full benchmark run: `arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6650fcf-589f-49f6-8033-ed2030873d95`, result `STOPPED` at 150 minutes before measured iterations and before final `BENCH_RESULT_JSON`
 - Speed status: no 10 TPS claim and no Vulkan speedup claim
 
 See `results/reports/final_vulkan_blocker_report.md` and `results/reports/vulkan_iteration_log.md` for the implementation attempt and blocker evidence.

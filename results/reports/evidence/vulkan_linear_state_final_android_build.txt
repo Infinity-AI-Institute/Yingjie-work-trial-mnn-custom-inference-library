@@ -1,0 +1,275 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :stock_mnn_benchmark:preBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:preDebugBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :stock_mnn_benchmark:javaPreCompileDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:checkDebugAarMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:generateDebugResValues UP-TO-DATE
+> Task :stock_mnn_benchmark:mapDebugSourceSetPaths UP-TO-DATE
+> Task :stock_mnn_benchmark:generateDebugResources UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugResources UP-TO-DATE
+> Task :stock_mnn_benchmark:packageDebugResources UP-TO-DATE
+> Task :stock_mnn_benchmark:parseDebugLocalResources UP-TO-DATE
+> Task :stock_mnn_benchmark:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :stock_mnn_benchmark:extractDeepLinksDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugMainManifest UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugManifest UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugManifestForPackage UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugResources UP-TO-DATE
+> Task :stock_mnn_benchmark:compileDebugJavaWithJavac UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugShaders UP-TO-DATE
+> Task :stock_mnn_benchmark:compileDebugShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateDebugAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:compressDebugAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:mergeDebugJavaResource UP-TO-DATE
+> Task :stock_mnn_benchmark:checkDebugDuplicateClasses UP-TO-DATE
+> Task :stock_mnn_benchmark:desugarDebugFileDependencies UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugStartupProfile UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeExtDexDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeLibDexDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:dexBuilderDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeProjectDexDebug UP-TO-DATE
+
+> Task :stock_mnn_benchmark:configureCMakeDebug[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :stock_mnn_benchmark:buildCMakeDebug[arm64-v8a][xqstock_jni]
+> Task :stock_mnn_benchmark:mergeDebugJniLibFolders UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugNativeLibs UP-TO-DATE
+> Task :stock_mnn_benchmark:stripDebugDebugSymbols UP-TO-DATE
+> Task :stock_mnn_benchmark:validateSigningDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:writeDebugAppMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :stock_mnn_benchmark:packageDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :stock_mnn_benchmark:assembleDebug UP-TO-DATE
+> Task :stock_mnn_benchmark:preReleaseBuild UP-TO-DATE
+> Task :stock_mnn_benchmark:javaPreCompileRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:checkReleaseAarMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:generateReleaseResValues UP-TO-DATE
+> Task :stock_mnn_benchmark:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :stock_mnn_benchmark:generateReleaseResources UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseResources UP-TO-DATE
+> Task :stock_mnn_benchmark:packageReleaseResources UP-TO-DATE
+> Task :stock_mnn_benchmark:parseReleaseLocalResources UP-TO-DATE
+> Task :stock_mnn_benchmark:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :stock_mnn_benchmark:extractDeepLinksRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:processReleaseMainManifest UP-TO-DATE
+> Task :stock_mnn_benchmark:processReleaseManifest UP-TO-DATE
+> Task :stock_mnn_benchmark:processReleaseManifestForPackage UP-TO-DATE
+> Task :stock_mnn_benchmark:processReleaseResources UP-TO-DATE
+> Task :stock_mnn_benchmark:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :stock_mnn_benchmark:extractProguardFiles UP-TO-DATE
+> Task :stock_mnn_benchmark:generateReleaseLintVitalReportModel UP-TO-DATE
+> Task :stock_mnn_benchmark:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:lintVitalReportRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:lintVitalRelease
+> Task :stock_mnn_benchmark:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :stock_mnn_benchmark:buildCMakeRelWithDebInfo[arm64-v8a][xqstock_jni]
+> Task :stock_mnn_benchmark:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseNativeLibs UP-TO-DATE
+> Task :stock_mnn_benchmark:stripReleaseDebugSymbols UP-TO-DATE
+> Task :stock_mnn_benchmark:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseNativeDebugMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :stock_mnn_benchmark:dexBuilderRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:desugarReleaseFileDependencies UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseStartupProfile UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeExtDexRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDexRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseArtProfile UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :stock_mnn_benchmark:compileReleaseArtProfile UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseShaders UP-TO-DATE
+> Task :stock_mnn_benchmark:compileReleaseShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateReleaseAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeReleaseAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:compressReleaseAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :stock_mnn_benchmark:processReleaseJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:mergeReleaseJavaResource UP-TO-DATE
+> Task :stock_mnn_benchmark:optimizeReleaseResources UP-TO-DATE
+> Task :stock_mnn_benchmark:collectReleaseDependencies UP-TO-DATE
+> Task :stock_mnn_benchmark:sdkReleaseDependencyData UP-TO-DATE
+> Task :stock_mnn_benchmark:writeReleaseAppMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :stock_mnn_benchmark:packageRelease UP-TO-DATE
+> Task :stock_mnn_benchmark:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :stock_mnn_benchmark:assembleRelease
+> Task :stock_mnn_benchmark:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :stock_mnn_benchmark:preDebugAndroidTestBuild SKIPPED
+> Task :stock_mnn_benchmark:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :stock_mnn_benchmark:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :stock_mnn_benchmark:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :stock_mnn_benchmark:generateDebugAndroidTestResources UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugAndroidTestManifest UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugAndroidTestResources UP-TO-DATE
+> Task :stock_mnn_benchmark:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :stock_mnn_benchmark:compileDebugAndroidTestShaders NO-SOURCE
+> Task :stock_mnn_benchmark:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :stock_mnn_benchmark:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :stock_mnn_benchmark:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :stock_mnn_benchmark:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :stock_mnn_benchmark:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :stock_mnn_benchmark:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :stock_mnn_benchmark:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :stock_mnn_benchmark:packageDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :stock_mnn_benchmark:assembleDebugAndroidTest UP-TO-DATE
+> Task :stock_mnn_benchmark:assembleAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:preBuild UP-TO-DATE
+> Task :customlib_benchmark:preDebugBuild UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :customlib_benchmark:javaPreCompileDebug UP-TO-DATE
+> Task :customlib_benchmark:checkDebugAarMetadata UP-TO-DATE
+> Task :customlib_benchmark:generateDebugResValues UP-TO-DATE
+> Task :customlib_benchmark:mapDebugSourceSetPaths UP-TO-DATE
+> Task :customlib_benchmark:generateDebugResources UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugResources UP-TO-DATE
+> Task :customlib_benchmark:packageDebugResources UP-TO-DATE
+> Task :customlib_benchmark:parseDebugLocalResources UP-TO-DATE
+> Task :customlib_benchmark:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :customlib_benchmark:extractDeepLinksDebug UP-TO-DATE
+> Task :customlib_benchmark:processDebugMainManifest UP-TO-DATE
+> Task :customlib_benchmark:processDebugManifest UP-TO-DATE
+> Task :customlib_benchmark:processDebugManifestForPackage UP-TO-DATE
+> Task :customlib_benchmark:processDebugResources UP-TO-DATE
+> Task :customlib_benchmark:compileDebugJavaWithJavac UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugShaders UP-TO-DATE
+> Task :customlib_benchmark:compileDebugShaders NO-SOURCE
+> Task :customlib_benchmark:generateDebugAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAssets UP-TO-DATE
+> Task :customlib_benchmark:compressDebugAssets UP-TO-DATE
+> Task :customlib_benchmark:processDebugJavaRes NO-SOURCE
+> Task :customlib_benchmark:mergeDebugJavaResource UP-TO-DATE
+> Task :customlib_benchmark:checkDebugDuplicateClasses UP-TO-DATE
+> Task :customlib_benchmark:desugarDebugFileDependencies UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugStartupProfile UP-TO-DATE
+> Task :customlib_benchmark:mergeExtDexDebug UP-TO-DATE
+> Task :customlib_benchmark:mergeLibDexDebug UP-TO-DATE
+> Task :customlib_benchmark:dexBuilderDebug UP-TO-DATE
+> Task :customlib_benchmark:mergeProjectDexDebug UP-TO-DATE
+> Task :customlib_benchmark:configureCMakeDebug[arm64-v8a]
+> Task :customlib_benchmark:buildCMakeDebug[arm64-v8a][xqbench_jni]
+> Task :customlib_benchmark:mergeDebugJniLibFolders UP-TO-DATE
+> Task :customlib_benchmark:validateSigningDebug UP-TO-DATE
+> Task :customlib_benchmark:writeDebugAppMetadata UP-TO-DATE
+> Task :customlib_benchmark:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :customlib_benchmark:preReleaseBuild UP-TO-DATE
+> Task :customlib_benchmark:javaPreCompileRelease UP-TO-DATE
+> Task :customlib_benchmark:checkReleaseAarMetadata UP-TO-DATE
+> Task :customlib_benchmark:generateReleaseResValues UP-TO-DATE
+> Task :customlib_benchmark:mapReleaseSourceSetPaths UP-TO-DATE
+> Task :customlib_benchmark:generateReleaseResources UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseResources UP-TO-DATE
+> Task :customlib_benchmark:packageReleaseResources UP-TO-DATE
+> Task :customlib_benchmark:parseReleaseLocalResources UP-TO-DATE
+> Task :customlib_benchmark:createReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :customlib_benchmark:extractDeepLinksRelease UP-TO-DATE
+> Task :customlib_benchmark:processReleaseMainManifest UP-TO-DATE
+> Task :customlib_benchmark:processReleaseManifest UP-TO-DATE
+> Task :customlib_benchmark:processReleaseManifestForPackage UP-TO-DATE
+> Task :customlib_benchmark:processReleaseResources UP-TO-DATE
+> Task :customlib_benchmark:compileReleaseJavaWithJavac UP-TO-DATE
+> Task :customlib_benchmark:extractProguardFiles UP-TO-DATE
+> Task :customlib_benchmark:generateReleaseLintVitalReportModel UP-TO-DATE
+> Task :customlib_benchmark:lintVitalAnalyzeRelease UP-TO-DATE
+> Task :customlib_benchmark:lintVitalReportRelease UP-TO-DATE
+> Task :customlib_benchmark:lintVitalRelease
+> Task :customlib_benchmark:configureCMakeRelWithDebInfo[arm64-v8a]
+> Task :customlib_benchmark:mergeDebugNativeLibs
+> Task :customlib_benchmark:buildCMakeRelWithDebInfo[arm64-v8a][xqbench_jni]
+> Task :customlib_benchmark:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :customlib_benchmark:checkReleaseDuplicateClasses UP-TO-DATE
+> Task :customlib_benchmark:dexBuilderRelease UP-TO-DATE
+> Task :customlib_benchmark:desugarReleaseFileDependencies UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseStartupProfile UP-TO-DATE
+> Task :customlib_benchmark:mergeExtDexRelease UP-TO-DATE
+> Task :customlib_benchmark:mergeDexRelease UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseArtProfile UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseGlobalSynthetics UP-TO-DATE
+> Task :customlib_benchmark:compileReleaseArtProfile UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseShaders UP-TO-DATE
+> Task :customlib_benchmark:compileReleaseShaders NO-SOURCE
+> Task :customlib_benchmark:generateReleaseAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeReleaseAssets UP-TO-DATE
+> Task :customlib_benchmark:compressReleaseAssets UP-TO-DATE
+> Task :customlib_benchmark:extractReleaseVersionControlInfo UP-TO-DATE
+> Task :customlib_benchmark:processReleaseJavaRes NO-SOURCE
+> Task :customlib_benchmark:mergeReleaseJavaResource UP-TO-DATE
+> Task :customlib_benchmark:optimizeReleaseResources UP-TO-DATE
+> Task :customlib_benchmark:collectReleaseDependencies UP-TO-DATE
+> Task :customlib_benchmark:sdkReleaseDependencyData UP-TO-DATE
+> Task :customlib_benchmark:writeReleaseAppMetadata UP-TO-DATE
+> Task :customlib_benchmark:writeReleaseSigningConfigVersions UP-TO-DATE
+> Task :customlib_benchmark:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :customlib_benchmark:preDebugAndroidTestBuild SKIPPED
+> Task :customlib_benchmark:javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :customlib_benchmark:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :customlib_benchmark:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :customlib_benchmark:generateDebugAndroidTestResources UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :customlib_benchmark:processDebugAndroidTestManifest UP-TO-DATE
+> Task :customlib_benchmark:processDebugAndroidTestResources UP-TO-DATE
+> Task :customlib_benchmark:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :customlib_benchmark:compileDebugAndroidTestShaders NO-SOURCE
+> Task :customlib_benchmark:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :customlib_benchmark:compressDebugAndroidTestAssets UP-TO-DATE
+> Task :customlib_benchmark:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :customlib_benchmark:mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :customlib_benchmark:checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :customlib_benchmark:desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :customlib_benchmark:mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :customlib_benchmark:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :customlib_benchmark:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :customlib_benchmark:validateSigningDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :customlib_benchmark:packageDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :customlib_benchmark:assembleDebugAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:assembleAndroidTest UP-TO-DATE
+> Task :customlib_benchmark:stripDebugDebugSymbols
+> Task :customlib_benchmark:mergeReleaseNativeLibs
+> Task :customlib_benchmark:stripReleaseDebugSymbols
+> Task :customlib_benchmark:packageRelease
+> Task :customlib_benchmark:createReleaseApkListingFileRedirect UP-TO-DATE
+> Task :customlib_benchmark:packageDebug
+> Task :customlib_benchmark:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :customlib_benchmark:assembleDebug
+> Task :customlib_benchmark:extractReleaseNativeSymbolTables
+> Task :customlib_benchmark:mergeReleaseNativeDebugMetadata
+> Task :customlib_benchmark:assembleRelease
+
+[Incubating] Problems report is available at: file:///C:/xqvk2/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.0/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 19s
+218 actionable tasks: 18 executed, 200 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.0/userguide/configuration_cache_enabling.html

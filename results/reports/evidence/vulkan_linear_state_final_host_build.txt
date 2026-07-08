@@ -1,0 +1,16 @@
+[1/7] Building CXX object customlib/CMakeFiles/xqwen35.dir/runtime/vulkan_backend.cpp.obj
+[2/7] Building CXX object customlib/CMakeFiles/xqwen35.dir/runtime/session.cpp.obj
+C:/xqvk2/customlib/runtime/session.cpp:64:13: warning: 'std::string xq::{anonymous}::jsonEscape(const std::string&)' defined but not used [-Wunused-function]
+   64 | std::string jsonEscape(const std::string& value) {
+      |             ^~~~~~~~~~
+C:/xqvk2/customlib/runtime/session.cpp:54:6: warning: 'void xq::{anonymous}::ensureDir(const std::string&)' defined but not used [-Wunused-function]
+   54 | void ensureDir(const std::string& path) {
+      |      ^~~~~~~~~
+C:/xqvk2/customlib/runtime/session.cpp:49:6: warning: 'bool xq::{anonymous}::fileExists(const std::string&)' defined but not used [-Wunused-function]
+   49 | bool fileExists(const std::string& path) {
+      |      ^~~~~~~~~~
+[3/7] Building CXX object customlib/CMakeFiles/xqwen35.dir/runtime/custom_model.cpp.obj
+[4/7] Linking CXX shared library customlib\libxqwen35.dll
+[5/7] Linking CXX executable xq_kernel_correctness.exe
+[6/7] Linking CXX executable xq_runtime_correctness.exe
+[7/7] Linking CXX executable xq_host_quality_runner.exe

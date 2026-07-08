@@ -1,0 +1,303 @@
+#version 450
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+layout(std430, set = 0, binding = 0) readonly buffer ABuffer { float a[]; };
+layout(std430, set = 0, binding = 1) readonly buffer BBuffer { float b[]; };
+layout(std430, set = 0, binding = 2) buffer CBuffer { float cbuf[]; };
+layout(std430, set = 0, binding = 3) writeonly buffer DBuffer { float d[]; };
+
+layout(push_constant) uniform Params {
+    uint op;
+    uint n;
+    uint heads;
+    uint head_dim;
+    uint q_heads;
+    uint k_heads;
+    uint rotary_dim;
+    uint position;
+    float eps;
+    float theta;
+    uint reserved0;
+    uint reserved1;
+} pc;
+
+shared float s_val[256];
+shared uint s_idx[256];
+
+float silu(float x) {
+    return x / (1.0 + exp(-x));
+}
+
+void reduce_norm_op(bool mean_norm, bool use_weight, bool use_gate) {
+    uint h = gl_WorkGroupID.x;
+    uint lane = gl_LocalInvocationID.x;
+    uint base = h * pc.head_dim;
+    float local = 0.0;
+    for (uint i = lane; i < pc.head_dim; i += 256u) {
+        float v = a[base + i];
+        local += v * v;
+    }
+    s_val[lane] = local;
+    barrier();
+    for (uint stride = 128u; stride > 0u; stride >>= 1u) {
+        if (lane < stride) {
+            s_val[lane] += s_val[lane + stride];
+        }
+        barrier();
+    }
+    float denom = mean_norm ? (s_val[0] / float(pc.head_dim) + pc.eps) : (s_val[0] + pc.eps);
+    float inv = inversesqrt(denom);
+    for (uint i = lane; i < pc.head_dim; i += 256u) {
+        float outv = a[base + i] * inv;
+        if (use_weight) {
+            outv *= b[i];
+        }
+        if (use_gate) {
+            outv *= silu(cbuf[base + i]);
+        }
+        d[base + i] = outv;
+    }
+}
+
+void elementwise_op() {
+    uint idx = gl_GlobalInvocationID.x;
+    if (idx >= pc.n) {
+        return;
+    }
+    if (pc.op == 4u) {
+        d[idx] = silu(a[idx]) * b[idx];
+    } else if (pc.op == 5u) {
+        d[idx] = a[idx] + b[idx];
+    } else if (pc.op == 6u) {
+        d[idx] = a[idx] / (1.0 + exp(-b[idx]));
+    }
+}
+
+void rope_op() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint q_total = pc.q_heads * pc.head_dim;
+    uint k_total = pc.k_heads * pc.head_dim;
+    uint total = q_total + k_total;
+    if (idx >= total) {
+        return;
+    }
+    bool is_q = idx < q_total;
+    uint local_idx = is_q ? idx : (idx - q_total);
+    uint h = local_idx / pc.head_dim;
+    uint dim = local_idx - h * pc.head_dim;
+    uint active_dim = min(pc.head_dim, pc.rotary_dim);
+    uint half_dim = active_dim / 2u;
+    float value;
+    if (dim < active_dim && half_dim > 0u) {
+        uint pair = dim < half_dim ? dim : dim - half_dim;
+        float inv_freq = pow(pc.theta, -float(2u * pair) / float(active_dim));
+        float angle = float(pc.position) * inv_freq;
+        float cs = cos(angle);
+        float sn = sin(angle);
+        uint base = h * pc.head_dim;
+        float x0 = is_q ? a[base + pair] : b[base + pair];
+        float x1 = is_q ? a[base + half_dim + pair] : b[base + half_dim + pair];
+        value = dim < half_dim ? (x0 * cs - x1 * sn) : (x1 * cs + x0 * sn);
+    } else {
+        value = is_q ? a[local_idx] : b[local_idx];
+    }
+    if (is_q) {
+        cbuf[local_idx] = value;
+    } else {
+        d[local_idx] = value;
+    }
+}
+
+void argmax_op() {
+    uint lane = gl_LocalInvocationID.x;
+    float best = -3.402823466e+38;
+    uint best_idx = 0u;
+    for (uint i = lane; i < pc.n; i += 256u) {
+        float v = a[i];
+        if (v > best || (v == best && i < best_idx)) {
+            best = v;
+            best_idx = i;
+        }
+    }
+    s_val[lane] = best;
+    s_idx[lane] = best_idx;
+    barrier();
+    for (uint stride = 128u; stride > 0u; stride >>= 1u) {
+        if (lane < stride) {
+            float other = s_val[lane + stride];
+            uint other_idx = s_idx[lane + stride];
+            if (other > s_val[lane] || (other == s_val[lane] && other_idx < s_idx[lane])) {
+                s_val[lane] = other;
+                s_idx[lane] = other_idx;
+            }
+        }
+        barrier();
+    }
+    if (lane == 0u) {
+        d[0] = float(s_idx[0]);
+        d[1] = s_val[0];
+    }
+}
+
+void gqa_decode_op() {
+    uint qh = gl_WorkGroupID.x;
+    uint lane = gl_LocalInvocationID.x;
+    uint context = pc.n;
+    if (qh >= pc.q_heads || context == 0u || pc.head_dim == 0u || pc.k_heads == 0u) {
+        return;
+    }
+    uint group = max(1u, pc.q_heads / max(1u, pc.k_heads));
+    uint kh = min(pc.k_heads - 1u, qh / group);
+    float scale = inversesqrt(float(pc.head_dim));
+
+    float local_max = -3.402823466e+38;
+    for (uint t = lane; t < context; t += 256u) {
+        float dot = 0.0;
+        uint q_base = qh * pc.head_dim;
+        uint k_base = (t * pc.k_heads + kh) * pc.head_dim;
+        for (uint d0 = 0u; d0 < pc.head_dim; ++d0) {
+            dot += a[q_base + d0] * b[k_base + d0];
+        }
+        local_max = max(local_max, dot * scale);
+    }
+    s_val[lane] = local_max;
+    barrier();
+    for (uint stride = 128u; stride > 0u; stride >>= 1u) {
+        if (lane < stride) {
+            s_val[lane] = max(s_val[lane], s_val[lane + stride]);
+        }
+        barrier();
+    }
+    float max_score = s_val[0];
+
+    float local_denom = 0.0;
+    for (uint t = lane; t < context; t += 256u) {
+        float dot = 0.0;
+        uint q_base = qh * pc.head_dim;
+        uint k_base = (t * pc.k_heads + kh) * pc.head_dim;
+        for (uint d0 = 0u; d0 < pc.head_dim; ++d0) {
+            dot += a[q_base + d0] * b[k_base + d0];
+        }
+        local_denom += exp(dot * scale - max_score);
+    }
+    s_val[lane] = local_denom;
+    barrier();
+    for (uint stride = 128u; stride > 0u; stride >>= 1u) {
+        if (lane < stride) {
+            s_val[lane] += s_val[lane + stride];
+        }
+        barrier();
+    }
+    float inv_denom = s_val[0] > 0.0 ? (1.0 / s_val[0]) : 0.0;
+
+    for (uint dim = lane; dim < pc.head_dim; dim += 256u) {
+        float acc = 0.0;
+        uint q_base = qh * pc.head_dim;
+        for (uint t = 0u; t < context; ++t) {
+            uint k_base = (t * pc.k_heads + kh) * pc.head_dim;
+            float dot = 0.0;
+            for (uint d0 = 0u; d0 < pc.head_dim; ++d0) {
+                dot += a[q_base + d0] * b[k_base + d0];
+            }
+            float weight = exp(dot * scale - max_score) * inv_denom;
+            uint v_base = (t * pc.k_heads + kh) * pc.head_dim;
+            acc += weight * cbuf[v_base + dim];
+        }
+        d[qh * pc.head_dim + dim] = acc;
+    }
+}
+
+void linear_conv1d_op() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint conv_dim = pc.n;
+    uint history = pc.heads;
+    uint kernel_dim = pc.head_dim;
+    if (idx >= conv_dim || kernel_dim == 0u) {
+        return;
+    }
+    float acc = 0.0;
+    for (uint k = 0u; k < history; ++k) {
+        acc += b[idx * history + k] * cbuf[idx * kernel_dim + k];
+    }
+    acc += a[idx] * cbuf[idx * kernel_dim + history];
+    d[idx] = silu(acc);
+    for (uint k = 0u; k < history; ++k) {
+        float next_value = (k + 1u < history) ? b[idx * history + k + 1u] : a[idx];
+        d[conv_dim + idx * history + k] = next_value;
+    }
+}
+
+void linear_state_update_op() {
+    uint vh = gl_WorkGroupID.x;
+    uint lane = gl_LocalInvocationID.x;
+    uint value_heads = pc.n;
+    uint key_heads = pc.heads;
+    uint key_dim = pc.head_dim;
+    uint value_dim = pc.q_heads;
+    if (vh >= value_heads || key_heads == 0u || key_dim == 0u || value_dim == 0u) {
+        return;
+    }
+    uint group = max(1u, value_heads / max(1u, key_heads));
+    uint kh = min(key_heads - 1u, vh / group);
+    uint query_base = kh * key_dim;
+    uint key_base = key_heads * key_dim + kh * key_dim;
+    uint value_base = key_heads * key_dim * 2u + vh * value_dim;
+    uint state_base = vh * key_dim * value_dim;
+    uint new_state_base = value_heads * value_dim + state_base;
+    float beta = 1.0 / (1.0 + exp(-cbuf[value_heads + vh]));
+    float gate = -exp(cbuf[value_heads * 2u + vh]) *
+                 log(1.0 + exp(cbuf[vh] + cbuf[value_heads * 3u + vh]));
+    float decay = exp(gate);
+    float scale = inversesqrt(float(key_dim));
+
+    for (uint j = lane; j < value_dim; j += 256u) {
+        float pred = 0.0;
+        for (uint i = 0u; i < key_dim; ++i) {
+            pred += b[state_base + i * value_dim + j] * decay * a[key_base + i];
+        }
+        float delta = beta * (a[value_base + j] - pred);
+        float outv = 0.0;
+        for (uint i = 0u; i < key_dim; ++i) {
+            float updated = b[state_base + i * value_dim + j] * decay + a[key_base + i] * delta;
+            d[new_state_base + i * value_dim + j] = updated;
+            outv += updated * a[query_base + i] * scale;
+        }
+        d[vh * value_dim + j] = outv;
+    }
+}
+
+void append_vector_op() {
+    uint idx = gl_GlobalInvocationID.x;
+    uint old_values = pc.n;
+    uint append_values = pc.heads;
+    uint total = old_values + append_values;
+    if (idx >= total) {
+        return;
+    }
+    d[idx] = idx < old_values ? a[idx] : b[idx - old_values];
+}
+
+void main() {
+    if (pc.op == 0u) {
+        reduce_norm_op(true, true, false);
+    } else if (pc.op == 1u) {
+        reduce_norm_op(false, false, false);
+    } else if (pc.op == 2u) {
+        reduce_norm_op(true, true, true);
+    } else if (pc.op == 3u) {
+        rope_op();
+    } else if (pc.op == 4u || pc.op == 5u || pc.op == 6u) {
+        elementwise_op();
+    } else if (pc.op == 7u) {
+        argmax_op();
+    } else if (pc.op == 8u) {
+        gqa_decode_op();
+    } else if (pc.op == 9u) {
+        linear_conv1d_op();
+    } else if (pc.op == 10u) {
+        linear_state_update_op();
+    } else if (pc.op == 11u) {
+        append_vector_op();
+    }
+}

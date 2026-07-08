@@ -119,12 +119,13 @@ This repository only claims results backed by artifacts. The final v27 result is
 
 ## Post-v27 Vulkan Attempt
 
-A later Vulkan implementation attempt is documented separately in `results/reports/final_vulkan_blocker_report.md` and `results/reports/vulkan_iteration_log.md`. That pass added a real custom Vulkan runtime plus a W4A16 GEMV compute shader, validated the shader on AWS Device Farm Samsung Galaxy S26 Ultra, and ran a short full-model custom generation integration where projection-family W4A16 rows reported `backend = vulkan`.
+A later Vulkan implementation attempt is documented separately in `results/reports/final_vulkan_blocker_report.md` and `results/reports/vulkan_iteration_log.md`. That pass added a real custom Vulkan runtime plus W4A16 GEMV, vector/tensor, grouped-query attention, linear-attention state, KV append, and argmax shaders. The extended selftests passed on AWS Device Farm Samsung Galaxy S26 Ultra, and a short full-model custom generation integration reported Vulkan for the major traced tensor op families.
 
 That attempt is not the official final result:
 
 - accepted official result remains v27 CPU customlib;
 - `custom_backend_actual = cpu_vulkan_hybrid`, not full `vulkan`;
-- RMSNorm, RoPE, attention, linear-attention state, lm_head, sampling, and prefill KV still ran on CPU;
-- no Vulkan quality-validation `BENCH_QUALITY_JSON` was produced;
+- CPU embedding/file I/O and control remain around the Vulkan dispatches;
+- Vulkan/hybrid quality validation emitted `BENCH_QUALITY_JSON` and passed the deterministic sanity gate, but exact full-output match was only 1 / 5 and production-quality output is not claimed;
+- the required full 512/256 Device Farm benchmark stopped at 150 minutes before measured iterations and before final `BENCH_RESULT_JSON`;
 - no 10 TPS or Vulkan speedup is claimed.

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-06T07:41:26Z",
+  "generated_utc": "2026-07-08T19:30:00Z",
   "version": "v27_quality_performance_final",
   "baseline": {
     "v17_commit": "7660928f728784355d029bb3afec13236a217fe3",
@@ -24,15 +24,27 @@
     "implemented": [
       "custom Vulkan runtime",
       "custom W4A16 GEMV compute shader",
-      "Device Farm Vulkan W4A16 correctness selftest",
-      "short full-model cpu_vulkan_hybrid integration for W4A16 projection families"
+      "custom vector/tensor compute shader",
+      "Vulkan RMSNorm and Q/K normalization",
+      "Vulkan active-slice RoPE",
+      "Vulkan grouped-query attention decode",
+      "Vulkan linear-attention conv1d and recurrent state update",
+      "Vulkan KV append",
+      "Vulkan activation/residual/output-gate vector ops",
+      "Vulkan lm_head W4A16 path and greedy argmax path",
+      "Device Farm Vulkan correctness selftests",
+      "short full-model cpu_vulkan_hybrid integration for major traced tensor op families",
+      "Device Farm Vulkan/hybrid quality validation",
+      "required full 512/256 Device Farm benchmark attempt"
     ],
-    "selftest_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/da6dfbc9-27eb-4a42-9202-bffda6b6bbe6",
-    "short_integration_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/938721e9-46ab-4266-8e02-4445eb0704bd",
+    "extended_selftest_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/f3506fac-58d8-4b03-bdf1-5f81d24af6ae",
+    "short_integration_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6c5ec8c-7f52-4164-bc7f-c64f5e6105d5",
+    "quality_validation_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e7081f14-99c2-4943-b6f9-222f8501fb90",
+    "full_benchmark_attempt_run_arn": "arn:aws:devicefarm:us-west-2:884244642857:run:64d2cc31-abd6-49f8-97da-162f82410bc0/e6650fcf-589f-49f6-8033-ed2030873d95",
     "short_integration_backend_requested": "vulkan",
     "short_integration_backend_actual": "cpu_vulkan_hybrid",
     "vulkan_generation_kernels_used": true,
-    "vulkan_op_families": [
+    "vulkan_op_families_in_short_integration": [
       "q_proj",
       "k_proj",
       "v_proj",
@@ -40,22 +52,41 @@
       "gate_proj",
       "up_proj",
       "down_proj",
-      "linear_attention_projections"
-    ],
-    "cpu_op_families_remaining": [
+      "linear_attention_projections",
       "rmsnorm",
       "rope",
       "attention",
       "linear_attention_state",
+      "activation",
       "lm_head",
       "sampling",
       "prefill_kv_build"
     ],
-    "quality_validation_status": "not_completed_for_vulkan_attempt",
+    "cpu_rows_remaining_in_short_integration": [
+      "embedding_bf16_row_read / file I/O",
+      "CPU control around Vulkan dispatches"
+    ],
+    "quality_validation_status": "passed_deterministic_sanity_gate_not_token_equivalent",
+    "quality_exact_match_prompt_count": 1,
+    "quality_prompt_count": 5,
+    "quality_comparison_gate_prompt_count": 5,
+    "full_benchmark_status": "stopped_before_measured_iterations",
+    "bench_result_json_emitted_for_full_benchmark": false,
+    "full_benchmark_partial_warmup": {
+      "prompt_tokens": 512,
+      "generated_tokens": 256,
+      "prefill_ms": 2840779.534,
+      "decode_ms": 1599572.239,
+      "decode_tps": 0.16004278753927537,
+      "decode_tpot_ms": 6248.32905859375
+    },
     "ten_tps_claimed": false,
     "speedup_claimed": false,
+    "full_vulkan_claimed": false,
     "report": "results/reports/final_vulkan_blocker_report.md",
-    "iteration_log": "results/reports/vulkan_iteration_log.md"
+    "iteration_log": "results/reports/vulkan_iteration_log.md",
+    "quality_report": "results/reports/quality_validation_vulkan_linear_state_report.md",
+    "stopped_benchmark_evidence": "results/reports/evidence/customlib_vulkan_full_benchmark_stopped.json"
   },
   "model": {
     "hf_repo": "Qwen/Qwen3.5-9B",
