@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MNN="$ROOT/third_party/MNN"
-BUILD="$MNN/build_android_arm64_llm"
+BUILD="$MNN/build_android_arm64_llm_sep"
 
 if [[ ! -d "$MNN" ]]; then
   git clone --depth 1 https://github.com/alibaba/MNN.git "$MNN"

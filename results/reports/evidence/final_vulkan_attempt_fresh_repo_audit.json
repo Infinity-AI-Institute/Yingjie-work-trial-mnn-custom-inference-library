@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "attempt": "fresh_repo_full_custom_vulkan_final",
+  "timestamp_local": "2026-07-08",
+  "fresh_clone": {
+    "source_repo": "https://github.com/Infinity-AI-Institute/Yingjie-work-trial-mnn-custom-inference-library",
+    "working_copy": "C:\\xqvk",
+    "head_commit": "b22698cca0a5d7c1ce2120917b8af229630392df"
+  },
+  "aws_devicefarm": {
+    "aws_profile": "qpnpu-devicefarm",
+    "aws_cli_shim": "C:\\Users\\Yingjie Huang\\bin\\aws.cmd",
+    "account": "884244642857",
+    "iam_user": "arn:aws:iam::884244642857:user/qpnpu-devicefarm",
+    "project_arn": "arn:aws:devicefarm:us-west-2:884244642857:project:64d2cc31-abd6-49f8-97da-162f82410bc0",
+    "device_pool_arn": "arn:aws:devicefarm:us-west-2:884244642857:devicepool:64d2cc31-abd6-49f8-97da-162f82410bc0/14d31c96-b8fc-4930-99c7-1a8948124213",
+    "device": "Samsung Galaxy S26 Ultra / Android 16",
+    "can_schedule": true
+  },
+  "reconstructed_build": {
+    "mnn_commit": "0bff03cbef43c783f44e41484b9f8a0b28bd758d",
+    "mnn_android_build": "passed",
+    "android_apk_build": "passed",
+    "host_tests": {
+      "command": "ctest --test-dir build-host-vulkan-attempt --output-on-failure",
+      "passed": 2,
+      "failed": 0
+    },
+    "apks": [
+      {
+        "path": "android/app/build/outputs/apk/debug/stock_mnn_benchmark-debug.apk",
+        "bytes": 9098102
+      },
+      {
+        "path": "android/app/build/outputs/apk/androidTest/debug/stock_mnn_benchmark-debug-androidTest.apk",
+        "bytes": 4479729
+      },
+      {
+        "path": "android/benchmark_app/build/outputs/apk/debug/customlib_benchmark-debug.apk",
+        "bytes": 9229166
+      },
+      {
+        "path": "android/benchmark_app/build/outputs/apk/androidTest/debug/customlib_benchmark-debug-androidTest.apk",
+        "bytes": 4481349
+      }
+    ]
+  },
+  "current_custom_backend_evidence": {
+    "custom_vulkan_implementation_present": false,
+    "only_custom_vulkan_path_file": "customlib/kernels/generated/vulkan/.gitkeep",
+    "benchmark_actual_backend_hardcoded_cpu_line": "android/benchmark_app/src/main/cpp/benchmark_jni.cpp:1224",
+    "quality_actual_backend_hardcoded_cpu_line": "android/benchmark_app/src/main/cpp/benchmark_jni.cpp:1347",
+    "existing_v27_backend_actual": "cpu",
+    "existing_v27_vulkan_generation_kernels_used": false,
+    "existing_v27_op_family_backends": "cpu for q_proj/k_proj/v_proj/o_proj/gate_proj/up_proj/down_proj/rmsnorm/rope/attention/linear_attention_state/lm_head/sampling/prefill_kv_build"
+  },
+  "acceptance_criteria": {
+    "custom_backend_requested_vulkan": false,
+    "custom_backend_actual_vulkan": false,
+    "vulkan_generation_kernels_used": false,
+    "op_family_backends_all_vulkan": false,
+    "bench_result_json_from_custom_vulkan_devicefarm": false,
+    "bench_quality_json_from_custom_vulkan_devicefarm": false,
+    "accepted_final_vulkan_result": false
+  },
+  "decision": {
+    "outcome": "Vulkan blocked",
+    "reason": "No real custom Vulkan backend is checked in. Device Farm can be scheduled, but scheduling the current APK as custom_vulkan would knowingly produce actual_backend=cpu, not an accepted Vulkan result.",
+    "previous_final_preserved": true,
+    "blocker_report": "results/reports/final_vulkan_blocker_report.md"
+  }
+}
